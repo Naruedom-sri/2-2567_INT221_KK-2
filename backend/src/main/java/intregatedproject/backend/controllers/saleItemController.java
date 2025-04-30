@@ -18,7 +18,7 @@ public class saleItemController {
     private saleItemService service;
 
     @GetMapping("")
-    public ResponseEntity<List<SaleItem>> getAllsaleItems(){
+    public ResponseEntity<List<SaleItem>> getAllSaleItems(){
         List<SaleItem> items = service.getAllSaleItems();
         return ResponseEntity.ok(items);
     }
