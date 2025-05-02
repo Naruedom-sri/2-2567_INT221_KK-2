@@ -3,6 +3,7 @@ package intregatedproject.backend.services;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class saleItemService {
     }
 
     public SaleItem getSaleItemById(int id) {
-        return saleItemRepository.findById(id).orElse(null);
+        return saleItemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sale item with id " + id + " not found"));
     }
 
 
