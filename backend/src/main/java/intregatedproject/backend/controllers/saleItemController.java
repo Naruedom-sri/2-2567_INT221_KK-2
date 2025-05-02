@@ -28,4 +28,5 @@ public class saleItemController {
         SaleItem item = service.getSaleItemById(id);
         return ResponseEntity.ok(item);
     }
+
 }
