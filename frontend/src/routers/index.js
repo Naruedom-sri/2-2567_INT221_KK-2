@@ -1,11 +1,12 @@
 import LandingPage from "@/views/LandingPage.vue";
+import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
 import { createRouter, createWebHistory } from "vue-router";
 const history = createWebHistory();
 const routes = [
   {
     path: "/sale-items",
-    name: "SaleItemGallery",
+    name: "SaleItemsGallery",
     component: SaleItemsGallery,
   },
   {
@@ -13,6 +14,11 @@ const routes = [
     name: "LandingPage",
     component:LandingPage,
   },
+  {
+    path:"/sale-items/:id",
+    name:"SaleItemsDetail",
+    component:SaleItemsDetail
+  }
 ];
 
 const router = createRouter({

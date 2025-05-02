@@ -15,7 +15,7 @@
         <div
           class="Itbms-shopnow w-fit mx-auto my-9 px-4 py-2.5 border border-blue-400 rounded-4xl text-2xl text-blue-400 hover:bg-blue-400 hover:text-white duration-300"
         >
-          <RouterLink :to="{ name: 'SaleItemGallery' }">Shop Now</RouterLink>
+          <RouterLink :to="{ name: 'SalesItemGallery' }">Shop Now</RouterLink>
         </div>
       </div>
       <img
