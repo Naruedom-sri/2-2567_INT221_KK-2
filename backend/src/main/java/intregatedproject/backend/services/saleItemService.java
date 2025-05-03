@@ -14,11 +14,23 @@ public class saleItemService {
     private SaleItemRepository saleItemRepository;
 
     public List<SaleItem> getAllSaleItems() {
-        return saleItemRepository.findAll();
+        try {
+            return saleItemRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve sale items from database.", e);
+        }
     }
 
     public SaleItem getSaleItemById(int id) {
-        return saleItemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sale item with id " + id + " not found"));
+        try {
+            return saleItemRepository.findById(id)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Sale item with id " + id + " not found"));
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error occurred while fetching SaleItem with id " + id, e);
+        }
     }
 
 
