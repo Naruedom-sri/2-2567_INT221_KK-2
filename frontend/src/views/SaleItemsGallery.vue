@@ -47,7 +47,7 @@ onMounted(() => {
           class="w-60 mx-auto rounded-4xl"
         />
         <div class="item-detail mx-6 space-y-1 text-white">
-          <p class="itbms-brand font-black">{{ item.brand.name }}</p>
+          <p class="itbms-brand font-black">{{ item.brandName }}</p>
           <RouterLink
             :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
             class="itbms-model"

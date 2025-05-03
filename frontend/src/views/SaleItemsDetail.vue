@@ -34,12 +34,19 @@ onMounted(() => getItem());
         <div class="capacity flex w-fit rounded-lg px-3 bg-blue-500 text-lg">
           <p class="itbms-ramGb">
             {{ item.ramGb === null ? "-" : item.ramGb
-            }}<span class="itbms-ramGb-unit"> GB</span>
+            }}<span v-show="item.ramGb !== null" class="itbms-ramGb-unit">
+              GB</span
+            >
           </p>
           <p class="mx-2">+</p>
           <p class="itbms-storageGb">
             {{ item.storageGb === null ? "-" : item.storageGb
-            }}<span class="itbms-storageGb-unit"> GB</span>
+            }}<span
+              v-show="item.storageGb !== null"
+              class="itbms-storageGb-unit"
+            >
+              GB</span
+            >
           </p>
         </div>
         <h1>
@@ -101,22 +108,33 @@ onMounted(() => getItem());
             <p class="itbms-model px-24 py-3 bg-black">
               {{ item.model }}
             </p>
-            <p class="itbms-brand px-24">{{ item.brand?.name }}</p>
+            <p class="itbms-brand px-24">{{ item.brandName }}</p>
             <p class="itbms-screenSizeInch px-24 py-3 bg-black">
-              {{ item.screenSizeInch }}
-              <span class="itbms-screenSizeInch-unit">Inch</span>
+              {{ item.screenSizeInch === null ? "-" : item.screenSizeInch }}
+              <span
+                v-show="item.screenSizeInch !== null"
+                class="itbms-screenSizeInch-unit"
+                >Inch</span
+              >
             </p>
             <div class="memory flex px-24">
               <p class="itbms-ramGb">
                 Ram
                 {{ item.ramGb === null ? "-" : item.ramGb
-                }}<span class="itbms-ramGb-unit"> GB</span>
+                }}<span v-show="item.ramGb !== null" class="itbms-ramGb-unit">
+                  GB</span
+                >
               </p>
               <p class="mx-1">/</p>
               <p class="itbms-storageGb">
                 Rom
                 {{ item.storageGb === null ? "-" : item.storageGb
-                }}<span class="itbms-storageGb-unit"> GB</span>
+                }}<span
+                  v-show="item.storageGb !== null"
+                  class="itbms-storageGb-unit"
+                >
+                  GB</span
+                >
               </p>
             </div>
 
