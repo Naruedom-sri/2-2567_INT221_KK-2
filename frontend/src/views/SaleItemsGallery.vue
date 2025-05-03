@@ -16,7 +16,7 @@ onMounted(() => {
 <template>
   <div class="container-gellery">
     <Header />
-    <div class="search-container border-b border-white mx-7 py-5">
+    <div class="search-container border-b border-white mx-7 py-7">
       <div
         class="search-bar flex items-center w-fit mx-auto px-3 border border-white rounded-2xl"
       >
@@ -28,15 +28,18 @@ onMounted(() => {
         <img
           src="/src/assets/imgs/search-symbol.png"
           alt="search-symbol"
-          class="w-6 object-cover rounded-r-2xl hover:cursor-pointer "
+          class="w-6 object-cover rounded-r-2xl hover:cursor-pointer"
         />
       </div>
     </div>
-    <div class="Itbms-row grid grid-cols-5 gap-5 p-7">
+    <div v-if="items.length === 0" class="itbms-* h-screen p-7">
+      <h1 class="text-white text-5xl text-center">no sale item</h1>
+    </div>
+    <div v-else class="itbms-row grid grid-cols-5 gap-5 p-7">
       <div
         v-for="(item, index) in items"
         :key="index"
-        class="item w-full h-[375px] rounded-4xl  shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="item w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
         <img
           src="/src/assets/imgs/iphone-item.png"
@@ -44,16 +47,22 @@ onMounted(() => {
           class="w-60 mx-auto rounded-4xl"
         />
         <div class="item-detail mx-6 space-y-1 text-white">
-          <p class="Itbms-brand font-bold">{{ item.brand }}</p>
-          <p class="Itbms-model">{{ item.model }}</p>
-          <p class="Itbms-ramGb">
-            {{ item.ramGb }} /<span class="Itbms-storageGb">{{
+          <p class="itbms-brand font-black">{{ item.brand.name }}</p>
+          <RouterLink
+            :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
+            class="itbms-model"
+          >
+            {{ item.model }}
+          </RouterLink>
+
+          <p class="itbms-ramGb">
+            {{ item.ramGb }} /<span class="itbms-storageGb">{{
               item.storageGb
             }}</span
-            ><span class="Itbms-storageGb-unit"> GB</span>
+            ><span class="itbms-storageGb-unit"> GB</span>
           </p>
-          <p class="Itbms-price-unit mt-5 text-xl">
-            Baht <span class="Itbms-price text-blue-400">{{ item.price }}</span>
+          <p class="itbms-price-unit mt-5 text-xl">
+            Baht <span class="itbms-price text-red-500">{{ item.price }}</span>
           </p>
         </div>
       </div>

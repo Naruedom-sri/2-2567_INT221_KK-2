@@ -13,9 +13,9 @@
           0% Installments for Up to 10 Months + Tons of Freebies!
         </p>
         <div
-          class="Itbms-shopnow w-fit mx-auto my-9 px-4 py-2.5 border border-blue-400 rounded-4xl text-2xl text-blue-400 hover:bg-blue-400 hover:text-white duration-300"
+          class="itbms-shopnow w-fit mx-auto my-9 px-4 py-2.5 border border-blue-500 rounded-4xl text-2xl text-blue-500 hover:bg-blue-500 hover:text-white duration-300"
         >
-          <RouterLink :to="{ name: 'SalesItemGallery' }">Shop Now</RouterLink>
+          <RouterLink :to="{ name: 'SaleItemsGallery' }">Shop Now</RouterLink>
         </div>
       </div>
       <img

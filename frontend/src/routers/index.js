@@ -12,13 +12,13 @@ const routes = [
   {
     path: "/",
     name: "LandingPage",
-    component:LandingPage,
+    component: LandingPage,
   },
   {
-    path:"/sale-items/:id",
-    name:"SaleItemsDetail",
-    component:SaleItemsDetail
-  }
+    path: "/sale-items/:itemId",
+    name: "SaleItemsDetail",
+    component: SaleItemsDetail,
+  },
 ];
 
 const router = createRouter({
