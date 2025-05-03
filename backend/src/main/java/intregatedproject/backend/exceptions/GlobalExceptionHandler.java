@@ -13,30 +13,27 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        return new ResponseEntity<>(
-                Map.of(
-                        "timestamp", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                        "status", 404,
-                        "error", "Not Found",
-                        "message", ex.getMessage(),
-                        "path", request.getRequestURI()
-                ),
-                HttpStatus.NOT_FOUND
-        );
-    }
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+                return new ResponseEntity<>(
+                                Map.of(
+                                                "timestamp",
+                                                LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                                                "status", 404,
+                                                "error", "Not Found",
+                                                "message", ex.getMessage(),
+                                                "path", request.getRequestURI()),
+                                HttpStatus.NOT_FOUND);
+        }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex) {
-        return new ResponseEntity<>(
-                Map.of(
-                        "status", 500,
-                        "error", "Internal Server Error",
-                        "message", "Something went wrong: " + ex.getMessage()
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<Object> handleGenericException(Exception ex) {
+                return new ResponseEntity<>(
+                                Map.of(
+                                                "status", 500,
+                                                "error", "Internal Server Error",
+                                                "message", "Something went wrong: " + ex.getMessage()),
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
 }
