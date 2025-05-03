@@ -21,4 +21,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND
         );
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGenericException(Exception ex) {
+        return new ResponseEntity<>(
+                Map.of(
+                        "status", 500,
+                        "error", "Internal Server Error",
+                        "message", "Something went wrong: " + ex.getMessage()
+                ),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
 }
