@@ -7,14 +7,13 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const getAllSaleItems = async () => {
   items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
 };
-
 onMounted(() => {
   getAllSaleItems();
 });
 </script>
 
 <template>
-  <div class="container-gellery">
+  <div class="gallery-container">
     <Header />
     <div class="search-container border-b border-white mx-7 py-7">
       <div
@@ -32,14 +31,14 @@ onMounted(() => {
         />
       </div>
     </div>
-    <div v-if="items.length === 0" class="itbms-* h-screen p-7">
+    <div v-if="items.length === 0" class="itbms-row h-screen p-7">
       <h1 class="text-white text-5xl text-center">no sale item</h1>
     </div>
-    <div v-else class="itbms-row grid grid-cols-5 gap-5 p-7">
+    <div v-else class="item-container grid grid-cols-5 gap-5 p-7">
       <div
         v-for="(item, index) in items"
         :key="index"
-        class="item w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="itbms-row w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
         <img
           src="/src/assets/imgs/iphone-item.png"
@@ -69,8 +68,9 @@ onMounted(() => {
               GB</span
             >
           </p>
-          <p class="itbms-price-unit mt-5 text-xl">
-            Baht <span class="itbms-price text-red-500">{{ item.price }}</span>
+          <p class="itbms-price mt-5 text-xl">
+            Baht
+            <span class="itbms-price-unit text-red-500">{{ item.price.toLocaleString() }}</span>
           </p>
         </div>
       </div>

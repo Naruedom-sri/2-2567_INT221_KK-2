@@ -58,6 +58,10 @@ onMounted(() => getItem());
             >
           </p>
         </div>
+        <p class="itbms-price text-3xl text-red-500">
+          {{ item.price?.toLocaleString()
+          }}<span class="itbms-price-unit text-white"> Baht</span>
+        </p>
         <h1>
           Color:
           <span class="itbms-color w-fit text-lg">{{
@@ -86,9 +90,7 @@ onMounted(() => getItem());
             +
           </button>
         </div>
-        <p class="itbms-price text-3xl text-red-500">
-          <span class="itbms-price-unit text-white">Baht</span> {{ item.price }}
-        </p>
+
         <div class="btn-add-buy space-x-32 mt-7">
           <button
             class="w-56 py-3 rounded-2xl bg-blue-500 text-3xl hover:cursor-pointer hover:bg-blue-500/80"
@@ -129,7 +131,7 @@ onMounted(() => getItem());
                   item.screenSizeInch !== null && item.screenSizeInch !== ''
                 "
                 class="itbms-screenSizeInch-unit"
-                >Inch</span
+                >Inches</span
               >
             </p>
             <div class="memory flex px-24">
