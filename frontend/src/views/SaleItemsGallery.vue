@@ -56,10 +56,18 @@ onMounted(() => {
           </RouterLink>
 
           <p class="itbms-ramGb">
-            {{ item.ramGb }} /<span class="itbms-storageGb">{{
-              item.storageGb
+            {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
+            /<span class="itbms-storageGb">{{
+              item.storageGb === null || item.storageGb === ""
+                ? "-"
+                : item.storageGb
             }}</span
-            ><span class="itbms-storageGb-unit"> GB</span>
+            ><span
+              v-show="item.storageGb !== null && item.storageGb !== ''"
+              class="itbms-storageGb-unit"
+            >
+              GB</span
+            >
           </p>
           <p class="itbms-price-unit mt-5 text-xl">
             Baht <span class="itbms-price text-red-500">{{ item.price }}</span>

@@ -3,13 +3,15 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { getDataById } from "@/libs/api";
 import Header from "@/components/Header.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 const {
   params: { itemId },
 } = useRoute();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const item = ref({});
 const getItem = async () => {
-  item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+  const itemApi = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+  item.value = itemApi.status === 404 ? null : itemApi.data;
 };
 onMounted(() => getItem());
 </script>
@@ -17,7 +19,8 @@ onMounted(() => getItem());
 <template>
   <div class="detail-container h-screen bg-black">
     <Header />
-    <div class="itbms-row grid grid-cols-2 text-xl mt-6 text-white">
+    <ErrorMessage v-if="item === null" />
+    <div v-else class="itbms-row grid grid-cols-2 text-xl mt-6 text-white">
       <div class="detail-content-left">
         <img
           src="/src/assets/imgs/iphone-item-detail.png"
@@ -33,16 +36,22 @@ onMounted(() => getItem());
         <h1>Capacity</h1>
         <div class="capacity flex w-fit rounded-lg px-3 bg-blue-500 text-lg">
           <p class="itbms-ramGb">
-            {{ item.ramGb === null ? "-" : item.ramGb
-            }}<span v-show="item.ramGb !== null" class="itbms-ramGb-unit">
+            {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb
+            }}<span
+              v-show="item.ramGb !== null && item.ramGb !== ''"
+              class="itbms-ramGb-unit"
+            >
               GB</span
             >
           </p>
           <p class="mx-2">+</p>
           <p class="itbms-storageGb">
-            {{ item.storageGb === null ? "-" : item.storageGb
+            {{
+              item.storageGb === null || item.storageGb === ""
+                ? "-"
+                : item.storageGb
             }}<span
-              v-show="item.storageGb !== null"
+              v-show="item.storageGb !== null && item.storageGb !== ''"
               class="itbms-storageGb-unit"
             >
               GB</span
@@ -52,7 +61,7 @@ onMounted(() => getItem());
         <h1>
           Color:
           <span class="itbms-color w-fit text-lg">{{
-            item.color === null ? "-" : item.color
+            item.color === null || item.color === "" ? "-" : item.color
           }}</span>
         </h1>
         <p class="w-8 h-8 border bg-orange-500 rounded-full"></p>
@@ -110,9 +119,15 @@ onMounted(() => getItem());
             </p>
             <p class="itbms-brand px-24">{{ item.brandName }}</p>
             <p class="itbms-screenSizeInch px-24 py-3 bg-black">
-              {{ item.screenSizeInch === null ? "-" : item.screenSizeInch }}
+              {{
+                item.screenSizeInch === null || item.screenSizeInch === ""
+                  ? "-"
+                  : item.screenSizeInch
+              }}
               <span
-                v-show="item.screenSizeInch !== null"
+                v-show="
+                  item.screenSizeInch !== null && item.screenSizeInch !== ''
+                "
                 class="itbms-screenSizeInch-unit"
                 >Inch</span
               >
@@ -120,17 +135,23 @@ onMounted(() => getItem());
             <div class="memory flex px-24">
               <p class="itbms-ramGb">
                 Ram
-                {{ item.ramGb === null ? "-" : item.ramGb
-                }}<span v-show="item.ramGb !== null" class="itbms-ramGb-unit">
+                {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb
+                }}<span
+                  v-show="item.ramGb !== null && item.ramGb !== ''"
+                  class="itbms-ramGb-unit"
+                >
                   GB</span
                 >
               </p>
               <p class="mx-1">/</p>
               <p class="itbms-storageGb">
                 Rom
-                {{ item.storageGb === null ? "-" : item.storageGb
+                {{
+                  item.storageGb === null || item.storageGb === ""
+                    ? "-"
+                    : item.storageGb
                 }}<span
-                  v-show="item.storageGb !== null"
+                  v-show="item.storageGb !== null && item.storageGb !== ''"
                   class="itbms-storageGb-unit"
                 >
                   GB</span
@@ -139,7 +160,7 @@ onMounted(() => getItem());
             </div>
 
             <p class="itbms-color px-24 py-3 bg-black">
-              {{ item.color === null ? "-" : item.color }}
+              {{ item.color === null || item.color === "" ? "-" : item.color }}
             </p>
             <p class="itbms-quantity px-24">
               {{ item.quantity }}
