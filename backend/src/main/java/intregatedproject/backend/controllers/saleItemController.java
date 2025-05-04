@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/v1/sale-items")
+@RequestMapping("/itb-mshop")
 @CrossOrigin(origins = "http://localhost:5173")
 public class saleItemController {
     @Autowired
@@ -21,7 +21,7 @@ public class saleItemController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("")
+    @GetMapping("/v1/sale-items")
     public ResponseEntity<List<SaleItemDto>> getAllSaleItems() {
         List<SaleItem> items = service.getAllSaleItems();
         List<SaleItemDto> dtoList = items.stream()
@@ -30,7 +30,7 @@ public class saleItemController {
         return ResponseEntity.ok(dtoList);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/v1/sale-items/{id}")
     public ResponseEntity<SaleItemDetailDto> getSaleItemById(@PathVariable int id) {
         SaleItem item = service.getSaleItemById(id);
         SaleItemDetailDto dto = modelMapper.map(item, SaleItemDetailDto.class);
