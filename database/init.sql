@@ -19,7 +19,7 @@ CREATE TABLE sale_items (
     description VARCHAR(500) CHARACTER SET utf8mb4 NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     price INT NOT NULL,
-    screenSizeInch DECIMAL(3,1),
+    screenSizeInch DECIMAL(4,2),
     ramGb INT,
     storageGb INT,
     color VARCHAR(50) CHARACTER SET utf8mb4,

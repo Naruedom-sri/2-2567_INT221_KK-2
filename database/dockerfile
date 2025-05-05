@@ -1,3 +1,9 @@
 FROM mysql:8.0
-ENV  MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_CHARSET=utf8mb4
+ENV MYSQL_COLLATION=utf8mb4_general_ci
+ENV LANG=C.UTF-8
+ENV TZ=Asia/Bangkok
 COPY init.sql /docker-entrypoint-initdb.d/
+
+
