@@ -31,12 +31,17 @@ onMounted(() => {
         />
       </div>
     </div>
-    <div v-if="items.length === 0" class="itbms-row h-screen p-7">
-      <h1 class="text-white text-5xl text-center">no sale item</h1>
-    </div>
-    <div v-else class="item-container grid grid-cols-5 gap-5 p-7">
-      <div
+    <div class="item-container h-full grid grid-cols-5 gap-5 p-7">
+      <h1
+        v-show="items?.length === 0"
+        class="itmbs-row h-screen col-span-5 text-white text-5xl text-center"
+      >
+        no sale item
+      </h1>
+      <RouterLink
         v-for="(item, index) in items"
+        v-show="items?.length !== 0"
+        :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
         :key="index"
         class="itbms-row w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
@@ -47,13 +52,7 @@ onMounted(() => {
         />
         <div class="item-detail mx-6 space-y-1 text-white">
           <p class="itbms-brand font-black">{{ item.brandName }}</p>
-          <RouterLink
-            :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
-            class="itbms-model"
-          >
-            {{ item.model }}
-          </RouterLink>
-
+          <p class="itbms-model">{{ item.model }}</p>
           <p class="itbms-ramGb">
             {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
             /<span class="itbms-storageGb">{{
@@ -70,10 +69,12 @@ onMounted(() => {
           </p>
           <p class="itbms-price mt-5 text-xl">
             Baht
-            <span class="itbms-price-unit text-red-500">{{ item.price.toLocaleString() }}</span>
+            <span class="itbms-price-unit text-red-500">{{
+              item.price.toLocaleString()
+            }}</span>
           </p>
         </div>
-      </div>
+      </RouterLink>
     </div>
   </div>
 </template>

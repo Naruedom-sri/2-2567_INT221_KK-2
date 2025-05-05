@@ -28,7 +28,7 @@ onMounted(() => getItem());
           class="mx-auto"
         />
       </div>
-      <div class="detail-content-right self-center mr-5 space-y-4">
+      <div class=" detail-content-right self-center mr-5 space-y-4">
         <h1 class="itbms-model text-4xl text-shadow-xs text-shadow-white">
           {{ item.model }}
         </h1>
