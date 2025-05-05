@@ -1,0 +1,48 @@
+services:
+  fe:
+    container_name: frontend_container
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - my_network
+    depends_on:
+      - be
+
+  be:
+    container_name: backend_container
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: db_container
+    build:
+      context: ./database
+      dockerfile: dockerfile
+    networks:
+      - my_network
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  my_network:
+
+volumes:
+  db_data:
