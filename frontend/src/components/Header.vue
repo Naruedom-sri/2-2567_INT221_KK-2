@@ -2,12 +2,12 @@
 
 <template>
   <div
-    class="container-header flex justify-between items-center w-full h-20 px-6 bg-[rgba(22,22,23,255)]"
+    class="container-header flex justify-between items-center w-full h-20 pr-6 bg-[rgba(22,22,23,255)]"
   >
     <div class="logo">
       <RouterLink :to="{name:'LandingPage'}">
       <img
-        src="/src/assets/imgs/itbms-logo.png"
+        src="/src/assets/imgs/itbms-logo1.png"
         alt="logo"
         class="w-48 h-20 object-cover"
       />
