@@ -1,5 +1,6 @@
 package intregatedproject.backend.controllers;
 
+import intregatedproject.backend.dtos.RequestSaleItemDto;
 import intregatedproject.backend.dtos.SaleItemDetailDto;
 import intregatedproject.backend.dtos.SaleItemDto;
 import intregatedproject.backend.entities.SaleItem;
@@ -37,4 +38,15 @@ public class saleItemController {
         return ResponseEntity.ok(dto);
     }
 
+    @PostMapping("/v1/sale-items")
+    public ResponseEntity<SaleItem> createSaleItem(@RequestBody SaleItem SaleItem) {
+        SaleItem newSaleItem = service.createSaleItem(SaleItem);
+        return ResponseEntity.ok(newSaleItem);
+    }
+    @PutMapping("/v1/sale-items/{id}")
+    public ResponseEntity<RequestSaleItemDto> updateSaleItem(@PathVariable int id, @RequestBody RequestSaleItemDto requestSaleItemDto) {
+        SaleItem updatedSaleItem = service.updateSaleItem(id, requestSaleItemDto);
+        RequestSaleItemDto updateSaleItemDto = modelMapper.map(updatedSaleItem,RequestSaleItemDto.class);
+        return ResponseEntity.ok(updateSaleItemDto);
+    }
 }
