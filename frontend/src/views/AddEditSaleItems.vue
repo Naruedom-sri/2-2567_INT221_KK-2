@@ -1,11 +1,21 @@
 <script setup>
 import NavBar from "@/components/์NavBar.vue";
 import { ref, onMounted } from "vue";
-import { getAllData } from "@/libs/api";
+import { getAllData, createData, updateSomeData } from "@/libs/api";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const brands = ref([]);
-const getAllBrand = () => {
-  brands.value = getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+const brandItem = ref();
+const model = ref();
+const color = ref();
+const description = ref();
+const price = ref();
+const ramGb = ref();
+const storageGb = ref();
+const quantity = ref();
+const screenSizeInch = ref();
+
+const getAllBrand = async () => {
+  brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   try {
   } catch (error) {
     console.log(error);
@@ -13,7 +23,22 @@ const getAllBrand = () => {
   }
 };
 const checkIsEditing = () => {};
-const addNewSaleItem = () => {};
+const addNewSaleItem = async () => {
+  const newItem = {
+    model,
+    brand: brandItem,
+    description,
+    price,
+    ramGb,
+    screenSizeInch,
+    quantity,
+    storageGb,
+    color,
+  };
+  const item = await createData(`${BASE_API_DOMAIN}/v1/sale-items`, newItem);
+  console.log(item);
+};
+onMounted(() => getAllBrand());
 </script>
 
 <template>
@@ -29,28 +54,43 @@ const addNewSaleItem = () => {};
       <h1 class="mx-1">></h1>
       <h1 class="text-blue-500">New Sale Item</h1>
     </div>
-    <form @submit.prevent="addNewSaleItem" class="py-9 text-xl">
+    <form @submit.prevent="addNewSaleItem" class="py-[35px] text-xl">
       <div class="flex mx-20">
         <div class="qualitative flex-1 flex flex-col space-y-4">
           <label>Brand<span>*</span></label>
-          <select required class="itbms-brand border border-white bg-blck">
+          <select
+            v-model.trim="brandItem"
+            required
+            class="itbms-brand px-5 py-1 rounded-2xl bg-[rgba(22,22,23,255)]"
+          >
             <option
               v-for="(brand, index) in brands"
               :key="index"
               :value="brand"
-              class="bg-black"
+              class="bg-[rgba(22,22,23,255)]"
             >
               {{ brand.name }}
             </option>
           </select>
           <label>Model<span>*</span> </label>
-          <input required type="text" class="itbms-model" />
+          <input
+            v-model.trim="model"
+            required
+            type="text"
+            class="itbms-model"
+          />
           <label>Color</label>
-          <input required type="text" class="itbms-color" />
+          <input
+            v-model.trim="color"
+            required
+            type="text"
+            class="itbms-color"
+          />
           <label>Description<span>*</span></label>
           <textarea
+            v-model.trim="description"
             required
-            class="itbms-description h-40 bg-[rgba(22,22,23,255)]"
+            class="itbms-description h-32 bg-[rgba(22,22,23,255)]"
           ></textarea>
         </div>
         <div>
@@ -58,17 +98,43 @@ const addNewSaleItem = () => {};
         </div>
         <div class="quantitative flex-1 flex flex-col space-y-4">
           <label>Price ( ฿ )<span>*</span></label>
-          <input required type="number" class="itbms-price" />
+          <input
+            v-model.trim="price"
+            required
+            type="number"
+            class="itbms-price"
+          />
 
           <label>Ram ( GB )</label>
-          <input type="number" class="itbms-ramGb" min="0" />
+          <input
+            v-model.trim="ramGb"
+            type="number"
+            class="itbms-ramGb"
+            min="0"
+          />
           <label>Screen Size ( Inches )</label>
-          <input type="number" class="itbms-screenSizeInch" min="0" />
+          <input
+            v-model.trim="screenSizeInch"
+            type="number"
+            class="itbms-screenSizeInch"
+            min="0"
+          />
           <label>Stroage ( GB )</label>
-          <input type="bumber" class="itbms-storageGb" min="0" />
+          <input
+            v-model.trim="storageGb"
+            type="number"
+            class="itbms-storageGb"
+            min="0"
+          />
 
           <label>Quantity<span>*</span></label>
-          <input required type="number" class="itbms-quantity" min="0" />
+          <input
+            v-model.trim="quantity"
+            required
+            type="number"
+            class="itbms-quantity"
+            min="0"
+          />
         </div>
       </div>
       <div class="btn-form w-fit mx-auto space-x-4 text-2xl">
@@ -96,13 +162,13 @@ const addNewSaleItem = () => {};
 input {
   background-color: rgba(22, 22, 23, 255);
   border-radius: 40px;
-  padding: 0 20px;
+  padding: 2px 20px;
 }
 label {
   font-weight: bold;
 }
 span {
   color: red;
-  margin: 0 2px;
+  margin: 0 4px;
 }
 </style>

@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BrandDto {
+public class ResponseBrandDto {
+    private Integer id;
     private String name;
 }

@@ -7,9 +7,11 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class SaleItemDetailDto extends SaleItemDto {
+public class ResponseSaleItemDetailDto extends ResponseSaleItemDto {
     private String description;
     private BigDecimal screenSizeInch;
     private String color;
     private Integer quantity;
+    private String createdOn;
+    private String updatedOn;
 }

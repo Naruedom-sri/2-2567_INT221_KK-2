@@ -35,5 +35,4 @@ public class GlobalExceptionHandler {
                                                 "message", "Something went wrong: " + ex.getMessage()),
                                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
 }
