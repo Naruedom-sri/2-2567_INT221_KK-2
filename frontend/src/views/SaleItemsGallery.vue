@@ -1,46 +1,65 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { getAllData } from "@/libs/api";
-import Header from "@/components/Header.vue";
+import NavBar from "@/components/์NavBar.vue";
 const items = ref([]);
+const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const updateTime = () => {
+  const date = new Date();
+  time.value = date.toLocaleString();
+  setInterval(updateTime, 1000);
+};
 const getAllSaleItems = async () => {
-  items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
+  try {
+    items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
+  } catch (error) {
+    console.log("Failed to fetch sale items:", error);
+    items.value = [];
+  }
 };
 onMounted(() => {
+  updateTime();
   getAllSaleItems();
 });
 </script>
 
 <template>
+  <NavBar />
   <div class="gallery-container">
-    <Header />
-    <div class="search-container border-b border-white mx-7 py-7">
-      <div
-        class="search-bar flex items-center w-fit mx-auto px-3 border border-white rounded-2xl"
+    <video
+      src="/src/assets/videos/mobile-preview.mp4"
+      autoplay
+      loop
+      muted
+      class="w-full h-[650px] object-cover"
+    ></video>
+    <div
+      class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
+    >
+      <button
+        class="filter w-36 h-full hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
       >
-        <input
-          type="text"
-          placeholder="Search...."
-          class="w-xs h-8 outline-0 text-white focus:w-xl transition-all ease-in"
-        />
-        <img
-          src="/src/assets/imgs/search-symbol.png"
-          alt="search-symbol"
-          class="w-6 object-cover rounded-r-2xl hover:cursor-pointer"
-        />
-      </div>
+        Filter
+      </button>
+      <p class="text-lg">{{ time }}</p>
+      <RouterLink
+        :to="{ name: 'AddEditSaleItems' }"
+        class="itbms-sale-item-add w-36 h-full flex justify-center items-center hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
+      >
+        Add Sale Item
+      </RouterLink>
     </div>
-    <div class="item-container h-full grid grid-cols-5 gap-5 p-7">
+    <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
-        v-show="items?.length === 0"
+        v-show="items.length === 0"
         class="itmbs-row h-screen col-span-5 text-white text-5xl text-center"
       >
         no sale item
       </h1>
       <RouterLink
         v-for="(item, index) in items"
-        v-show="items?.length !== 0"
+        v-show="items.length !== 0"
         :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
         :key="index"
         class="itbms-row w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
@@ -51,7 +70,7 @@ onMounted(() => {
           class="w-60 mx-auto rounded-4xl"
         />
         <div class="item-detail mx-6 space-y-1 text-white">
-          <p class="itbms-brand font-black">{{ item.brandName }}</p>
+          <p class="itbms-brand font-extrabold">{{ item.brandName }}</p>
           <p class="itbms-model">{{ item.model }}</p>
           <p class="itbms-ramGb">
             {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
@@ -67,9 +86,9 @@ onMounted(() => {
               GB</span
             >
           </p>
-          <p class="itbms-price mt-5 text-xl">
-            Baht
-            <span class="itbms-price-unit text-red-500">{{
+          <p class="itbms-price mt-3 text-xl text-red-400">
+            ฿
+            <span class="itbms-price-unit">{{
               item.price.toLocaleString()
             }}</span>
           </p>

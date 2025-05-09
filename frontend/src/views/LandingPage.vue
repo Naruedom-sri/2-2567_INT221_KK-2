@@ -1,11 +1,10 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
   <div class="landing-container h-screen bg-black overflow-hidden">
     <div class="grid grid-cols-2 h-full text-white">
       <div class="landing-content self-center w-xl mx-auto space-y-6">
-        <h1 class="text-5xl text-shadow-md/50 text-shadow-white">
+        <h1 class="text-5xl/normal text-shadow-md/50 text-shadow-white">
           Transform Your Life with iPhone
         </h1>
         <p class="text-2xl">Fast. Powerful. Pro-level Camera.</p>

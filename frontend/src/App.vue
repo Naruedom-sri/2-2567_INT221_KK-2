@@ -1,10 +1,13 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
-  <div class="container-system h-full bg-black font-mono">
+  <div class="container-system h-full bg-black">
     <RouterView />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.container-system {
+  font-family: "Inter", sans-serif;
+}
+</style>

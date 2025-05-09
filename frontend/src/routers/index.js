@@ -1,3 +1,4 @@
+import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
@@ -18,6 +19,11 @@ const routes = [
     path: "/sale-items/:itemId",
     name: "SaleItemsDetail",
     component: SaleItemsDetail,
+  },
+  {
+    path: "/sale-items/add",
+    name: "AddEditSaleItems",
+    component: AddEditSaleItems,
   },
 ];
 

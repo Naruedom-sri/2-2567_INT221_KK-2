@@ -31,13 +31,10 @@ const updateAllData = async (url, id, newData) => {
 };
 
 const getDataById = async (url, id) => {
-  try {
-    const response = await fetch(`${url}/${id}`);
-    const data = await response.json();
-    return { data, status: response.status };
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await fetch(`${url}/${id}`);
+  if (!response.ok) throw new Error(`API Error: ${response.status}`);
+  const data = await response.json();
+  return data;
 };
 
 const deleteData = async (url, id) => {
@@ -53,13 +50,10 @@ const deleteData = async (url, id) => {
 };
 
 const getAllData = async (url) => {
-  try {
-    const response = await fetch(`${url}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await fetch(`${url}`);
+  if (!response.ok) throw new Error(`API Error: ${response.status}`);
+  const data = await response.json();
+  return data;
 };
 
 const createData = async (url, newData) => {
