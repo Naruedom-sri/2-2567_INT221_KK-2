@@ -4,6 +4,7 @@ import intregatedproject.backend.dtos.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ public class SaleItemService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private BrandService brandService;
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     public List<SaleItem> getAllSaleItems() {
         try {
@@ -38,11 +41,11 @@ public class SaleItemService {
     }
 
     public SaleItem createSaleItem(SaleItem saleItem) {
-        if (saleItemRepository.existsById(saleItem.getId())) {
+        if (saleItem.getId() != null && saleItemRepository.existsById(saleItem.getId())) {
             throw new RuntimeException("Sale item with id " + saleItem.getId() + " already exists");
-        } else {
-            return saleItemRepository.save(saleItem);
         }
+        return saleItemRepository.save(saleItem);
+
     }
 
     public SaleItem updateSaleItem(int id, RequestSaleItemDto saleItemDto) {

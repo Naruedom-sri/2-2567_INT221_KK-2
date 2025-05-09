@@ -39,11 +39,12 @@ public class SaleItemController {
     }
 
     @PostMapping("/v1/sale-items")
-    public ResponseEntity<ResponseSaleItemDetailDto> createSaleItem(@RequestBody SaleItem SaleItem) {
-        SaleItem newSaleItem = service.createSaleItem(SaleItem);
+    public ResponseEntity<ResponseSaleItemDetailDto> createSaleItem(@RequestBody SaleItem saleItem) {
+        SaleItem newSaleItem = service.createSaleItem(saleItem);
         ResponseSaleItemDetailDto newSaleItemDto = modelMapper.map(newSaleItem, ResponseSaleItemDetailDto.class);
         return ResponseEntity.status(201).body(newSaleItemDto);
     }
+
     @PutMapping("/v1/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemDetailDto> updateSaleItem(@PathVariable int id, @RequestBody RequestSaleItemDto requestSaleItemDto) {
         SaleItem updatedSaleItem = service.updateSaleItem(id, requestSaleItemDto);
