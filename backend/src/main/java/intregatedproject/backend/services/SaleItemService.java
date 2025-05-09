@@ -4,7 +4,6 @@ import intregatedproject.backend.dtos.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
-import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,6 @@ public class SaleItemService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private BrandService brandService;
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
 
     public List<SaleItem> getAllSaleItems() {
         try {
