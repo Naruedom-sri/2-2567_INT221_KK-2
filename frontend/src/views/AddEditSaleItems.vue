@@ -188,7 +188,7 @@ watch(
             max="99"
             step="0.1"
           />
-          <label>Stroage ( GB )</label>
+          <label>Storage ( GB )</label>
           <input
             v-model="storageGb"
             type="number"

@@ -57,4 +57,10 @@ public class SaleItemController {
         ResponseSaleItemDetailDto updateSaleItemDto = modelMapper.map(updatedSaleItem, ResponseSaleItemDetailDto.class);
         return ResponseEntity.ok(updateSaleItemDto);
     }
+
+    @DeleteMapping("/v1/sale-items/{id}")
+    public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
+        service.deleteSaleItemById(id);
+        return ResponseEntity.status(204).body(null);
+    }
 }

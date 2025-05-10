@@ -2,24 +2,44 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { getDataById } from "@/libs/api";
+import { deleteData } from "@/libs/api";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import NavBar from "@/components/์NavBar.vue";
+
 const {
   params: { itemId },
 } = useRoute();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const item = ref({});
+const errorMessage = ref("");
+const router = useRoute()
+const showDialog = ref(false);
+
 const getSaleItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
   } catch (error) {
-    console.log(error);
+    errorMessage.value = "The requested sale item does not exist.";
     item.value = null;
   }
 };
 
-// Thanarat
-const deleteSaleItem = () => {};
+const deleteSaleItem = async () => {
+  showDialog.value = false
+  try {
+    const result = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+    if (result?.status === 204) {
+      router.push({ name: "SaleItemsGallery" });
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      router.push({ name: "SaleItemsGallery" });
+    } else {
+      router.push({ name: "SaleItemsGallery" });
+    }
+  }
+};
 onMounted(() => getSaleItem());
 </script>
 
@@ -114,7 +134,7 @@ onMounted(() => getSaleItem());
         </p>
         <div class="btn-add-buy mt-7">
           <div class="flex justify-between gap-4 space-y-5">
-            <button
+            <button  @click="showDialog = true"
               class="itbms-delete-button flex-1 py-3 border rounded-2xl border-red-500 text-3xl text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
             >
               Delete
@@ -207,6 +227,13 @@ onMounted(() => getSaleItem());
         </div>
       </div>
     </div>
+    <ConfirmDialog
+        :visible="showDialog"
+        title="Delete Confirmation"
+        message="Do you want to delete this sale item?"
+        @confirm="deleteSaleItem"
+        @cancel="showDialog = false"
+    />
   </div>
 </template>
 

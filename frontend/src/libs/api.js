@@ -43,10 +43,20 @@ const deleteData = async (url, id) => {
     const response = await fetch(`${url}/${id}`, {
       method: "DELETE",
     });
-    const data = await response.json();
-    return data;
+
+    if (response.status === 204) {
+      return { status: 204 };
+    } else if (response.status === 404) {
+      const data = await response.json();
+      const error = new Error("Not found");
+      error.response = { status: 404, data };
+      throw error;
+    } else {
+      const data = await response.json();
+      throw new Error(data?.message || "Unknown error");
+    }
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 

@@ -59,4 +59,11 @@ public class SaleItemService {
         updateSaleItem.setBrand(brand);
         return saleItemRepository.save(updateSaleItem);
     }
+
+    public SaleItem deleteSaleItemById(int id) {
+        SaleItem existingItem = saleItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale item with id " + id + " not found"));
+        saleItemRepository.delete(existingItem);
+        return existingItem;
+    }
 }
