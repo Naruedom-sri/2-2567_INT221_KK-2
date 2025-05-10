@@ -13,10 +13,15 @@ const getItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
   } catch (error) {
-    console.log("Failed to fetch sale items:", error);
+    console.log(error);
     item.value = null;
   }
 };
+
+// Thanarat 
+const deleteSaleItem = () =>{
+
+}
 onMounted(() => getItem());
 </script>
 
@@ -24,15 +29,30 @@ onMounted(() => getItem());
   <div class="detail-container">
     <NavBar />
     <ErrorMessage v-if="item === null" />
-    <div v-else class="itbms-row grid grid-cols-2 text-xl mt-6 text-white">
-      <div class="detail-content-left">
+    <div v-else class="itbms-row grid grid-cols-2 text-xl text-white">
+      <div
+        class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white text-base"
+      >
+        <RouterLink
+          :to="{ name: 'SaleItemsGallery' }"
+          class="itbms-home-button hover:text-blue-500 hover:cursor-pointer duration-100"
+        >
+          Home
+        </RouterLink>
+        <h1 class="mx-1">></h1>
+        <h1 class="text-blue-500">
+          {{ item.model }} {{ item.ramGb }} / {{ item.storageGb }} GB
+          {{ item.color }}
+        </h1>
+      </div>
+      <div class="detail-content-left self-center">
         <img
           src="/src/assets/imgs/iphone-item.png"
           alt="iphone-item"
           class="mx-auto"
         />
       </div>
-      <div class="detail-content-right self-center mr-5 space-y-5">
+      <div class="detail-content-right self-center mr-20 space-y-5">
         <h1 class="itbms-model text-4xl text-shadow-white font-extrabold">
           {{ item.model }}
         </h1>
@@ -94,17 +114,30 @@ onMounted(() => getItem());
           <span class="itbms-price-unit">฿ </span>
           {{ item.price?.toLocaleString() }}
         </p>
-        <div class="btn-add-buy space-x-32 mt-7">
+        <div class="btn-add-buy mt-7">
+          <div class="flex justify-between gap-4 space-y-5">
+            <button
+              class="itbms-delete-button flex-1 py-3 border rounded-2xl border-red-500 text-3xl text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
+            >
+              Delete
+            </button>
+            <RouterLink
+              :to="{
+                name: 'EditSaleItems',
+                params: { itemId: item.id }
+              }"
+              class="itbms-edit-button flex-1"
+              ><button
+                class="w-full py-3 border rounded-2xl border-blue-500 text-3xl text-blue-500 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+              >
+                Edit
+              </button></RouterLink
+            >
+          </div>
           <button
-            class="w-56 py-3 rounded-2xl bg-blue-500 text-3xl hover:cursor-pointer hover:bg-blue-500/80"
+            class="w-full py-3 rounded-2xl bg-blue-500 text-3xl hover:cursor-pointer hover:bg-blue-500/80"
           >
             Add to cart
-          </button>
-
-          <button
-            class="w-56 py-3 rounded-2xl border border-blue-500 text-3xl text-blue-500 hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-300"
-          >
-            Buy
           </button>
         </div>
       </div>

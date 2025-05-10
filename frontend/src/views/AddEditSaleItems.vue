@@ -1,8 +1,23 @@
 <script setup>
 import NavBar from "@/components/์NavBar.vue";
 import { ref, onMounted } from "vue";
-import { getAllData, createData, updateSomeData } from "@/libs/api";
+import {
+  getAllData,
+  createData,
+  updateSomeData,
+  getDataById,
+} from "@/libs/api";
+import { useRouter, useRoute } from "vue-router";
+import router from "@/routers";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const props = defineProps({
+  isEditing: Boolean,
+});
+const {
+  params: { itemId },
+} = useRoute();
+const route = useRouter();
+const item = ref({});
 const brands = ref([]);
 const brandItem = ref();
 const model = ref();
@@ -13,7 +28,6 @@ const ramGb = ref();
 const storageGb = ref();
 const quantity = ref();
 const screenSizeInch = ref();
-
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   try {
@@ -22,23 +36,56 @@ const getAllBrand = async () => {
     brands.value = [];
   }
 };
-const checkIsEditing = () => {};
-const addNewSaleItem = async () => {
-  const newItem = {
-    model,
-    brand: brandItem,
-    description,
-    price,
-    ramGb,
-    screenSizeInch,
-    quantity,
-    storageGb,
-    color,
-  };
-  const item = await createData(`${BASE_API_DOMAIN}/v1/sale-items`, newItem);
-  console.log(item);
+const goToSaleItemDetail = () => {
+  router.back();
 };
-onMounted(() => getAllBrand());
+const checkIsEditing = async () => {
+  try {
+    if (props.isEditing) {
+      item.value = await getDataById(
+        `${BASE_API_DOMAIN}/v1/sale-items`,
+        itemId
+      );
+      model.value = item.value.model;
+      brandItem.value = item.value.brand;
+      description.value = item.value.description;
+      price.value = item.value.price;
+      ramGb.value = item.value.ramGb;
+      screenSizeInch.value = item.value.screenSizeInch;
+      quantity.value = item.value.quantity;
+      storageGb.value = item.value.storageGb;
+      color.value = item.value.color;
+      console.log(item.value.brand  );
+    }
+  } catch (error) {
+    console.log(error);
+    item.value = {};
+  }
+};
+const addNewSaleItem = async () => {
+  try {
+    const newItem = {
+      model: model.value,
+      brand: brandItem.value,
+      description: description.value,
+      price: price.value,
+      ramGb: ramGb.value,
+      screenSizeInch: screenSizeInch.value,
+      quantity: quantity.value,
+      storageGb: storageGb.value,
+      color: color.value,
+    };
+    const data = await createData(`${BASE_API_DOMAIN}/v1/sale-items`, newItem);
+    console.log(data);
+    // route.push({ name: "SaleItemsGallery" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+onMounted(() => {
+  checkIsEditing();
+  getAllBrand();
+});
 </script>
 
 <template>
@@ -52,7 +99,15 @@ onMounted(() => getAllBrand());
         Home
       </RouterLink>
       <h1 class="mx-1">></h1>
-      <h1 class="text-blue-500">New Sale Item</h1>
+      <h1 v-if="!isEditing" class="text-blue-500">New Sale Item</h1>
+      <button
+        v-else
+        @click="goToSaleItemDetail"
+        class="itbms-back-button text-blue-500 hover:cursor-pointer"
+      >
+        {{ item.model }} {{ item.ramGb }} / {{ item.storageGb }} GB
+        {{ item.color }}
+      </button>
     </div>
     <form @submit.prevent="addNewSaleItem" class="py-[35px] text-xl">
       <div class="flex mx-20">
@@ -90,7 +145,7 @@ onMounted(() => getAllBrand());
           <textarea
             v-model.trim="description"
             required
-            class="itbms-description h-32 bg-[rgba(22,22,23,255)]"
+            class="itbms-description px-4 py-2 h-32 bg-[rgba(22,22,23,255)]"
           ></textarea>
         </div>
         <div>
@@ -151,7 +206,7 @@ onMounted(() => getAllBrand());
           type="submit"
           class="itbms-save-button w-48 py-2 rounded-4xl border border-blue-500 text-blue-500 hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-150"
         >
-          Add New Item
+          {{ !isEditing ? "Add New Item" : "Confirm" }}
         </button>
       </div>
     </form>

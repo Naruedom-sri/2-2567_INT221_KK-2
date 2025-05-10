@@ -53,7 +53,9 @@ const deleteData = async (url, id) => {
 const getAllData = async (url) => {
   const response = await fetch(`${url}`);
   if (!response.ok)
-    throw new Error(`Can't fetch data with status : ${response.status}`);
+    throw new Error(
+      `Can't fetch data with status : ${response.status} and ${response.error}`
+    );
   const data = await response.json();
   return data;
 };

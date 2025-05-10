@@ -47,7 +47,6 @@ public class SaleItemService {
 
     public SaleItem updateSaleItem(int id, RequestSaleItemDto saleItemDto) {
         SaleItem updateSaleItem = getSaleItemById(id);
-
         updateSaleItem.setModel(saleItemDto.getModel());
         updateSaleItem.setRamGb(saleItemDto.getRamGb());
         updateSaleItem.setStorageGb(saleItemDto.getStorageGb());

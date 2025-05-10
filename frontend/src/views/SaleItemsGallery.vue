@@ -14,7 +14,7 @@ const getAllSaleItems = async () => {
   try {
     items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
   } catch (error) {
-    console.log("Failed to fetch sale items:", error);
+    console.log(error);
     items.value = [];
   }
 };
@@ -44,7 +44,7 @@ onMounted(() => {
       </button>
       <p class="text-lg">{{ time }}</p>
       <RouterLink
-        :to="{ name: 'AddEditSaleItems' }"
+        :to="{ name: 'AddSaleItems' }"
         class="itbms-sale-item-add w-36 h-full flex justify-center items-center hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
       >
         Add Sale Item
