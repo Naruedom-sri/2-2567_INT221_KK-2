@@ -16,7 +16,7 @@ public class RequestSaleItemDto {
     }
     private Integer ramGb;
     private Integer storageGb;
-    private int price;
+    private Integer price;
     private ResponseBrandDto brand;
     private String description;
     public void setDescription(){

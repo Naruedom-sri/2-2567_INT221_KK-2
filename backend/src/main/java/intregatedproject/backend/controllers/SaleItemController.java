@@ -3,6 +3,7 @@ package intregatedproject.backend.controllers;
 import intregatedproject.backend.dtos.RequestSaleItemDto;
 import intregatedproject.backend.dtos.ResponseSaleItemDetailDto;
 import intregatedproject.backend.dtos.ResponseSaleItemDto;
+import intregatedproject.backend.dtos.ResponseSaleItemDtoEdit;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.services.SaleItemService;
 import org.modelmapper.ModelMapper;
@@ -37,7 +38,12 @@ public class SaleItemController {
         ResponseSaleItemDetailDto dto = modelMapper.map(item, ResponseSaleItemDetailDto.class);
         return ResponseEntity.ok(dto);
     }
-
+    @GetMapping("/v1/sale-items/edit/{id}")
+    public ResponseEntity<ResponseSaleItemDtoEdit> getSaleItemByIdEdit(@PathVariable int id) {
+        SaleItem item = service.getSaleItemById(id);
+        ResponseSaleItemDtoEdit dto = modelMapper.map(item, ResponseSaleItemDtoEdit.class);
+        return ResponseEntity.ok(dto);
+    }
     @PostMapping("/v1/sale-items")
     public ResponseEntity<ResponseSaleItemDetailDto> createSaleItem(@RequestBody SaleItem saleItem) {
         SaleItem newSaleItem = service.createSaleItem(saleItem);

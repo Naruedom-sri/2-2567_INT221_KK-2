@@ -1,21 +1,18 @@
 package intregatedproject.backend.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ResponseSaleItemDto {
+public class ResponseSaleItemDtoEdit {
     private Integer id;
     private String model;
     private Integer ramGb;
     private Integer storageGb;
     private Integer price;
-    @JsonIgnore
+    private String description;
+    private String color;
+    private Integer quantity;
     private ResponseBrandDto brand;
-    public String getBrandName() {
-        return brand.getName();
-    };
-
 }

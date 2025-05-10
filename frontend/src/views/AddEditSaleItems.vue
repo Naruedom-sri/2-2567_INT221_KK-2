@@ -1,6 +1,6 @@
 <script setup>
 import NavBar from "@/components/์NavBar.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import {
   getAllData,
   createData,
@@ -28,6 +28,7 @@ const ramGb = ref();
 const storageGb = ref();
 const quantity = ref();
 const screenSizeInch = ref();
+const isContainAllNonOtionalFiled = ref(false);
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   try {
@@ -43,7 +44,7 @@ const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
       item.value = await getDataById(
-        `${BASE_API_DOMAIN}/v1/sale-items`,
+        `${BASE_API_DOMAIN}/v1/sale-items/edit`,
         itemId
       );
       model.value = item.value.model;
@@ -55,11 +56,24 @@ const checkIsEditing = async () => {
       quantity.value = item.value.quantity;
       storageGb.value = item.value.storageGb;
       color.value = item.value.color;
-      console.log(item.value.brand  );
+      console.log(item.value.brand);
     }
   } catch (error) {
     console.log(error);
     item.value = {};
+  }
+};
+const checkAllNonOptionalFiled = () => {
+  if (
+    brandItem.value !== undefined &&
+    model.value !== undefined &&
+    price.value !== undefined &&
+    description.value !== undefined &&
+    quantity.value !== undefined
+  ) {
+    isContainAllNonOtionalFiled.value = true;
+  } else {
+    isContainAllNonOtionalFiled.value = false;
   }
 };
 const addNewSaleItem = async () => {
@@ -86,6 +100,13 @@ onMounted(() => {
   checkIsEditing();
   getAllBrand();
 });
+watch(
+  [brandItem, model, price, description, quantity],
+  () => {
+    checkAllNonOptionalFiled();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -135,12 +156,7 @@ onMounted(() => {
             class="itbms-model"
           />
           <label>Color</label>
-          <input
-            v-model.trim="color"
-            required
-            type="text"
-            class="itbms-color"
-          />
+          <input v-model.trim="color" type="text" class="itbms-color" />
           <label>Description<span>*</span></label>
           <textarea
             v-model.trim="description"
@@ -154,29 +170,27 @@ onMounted(() => {
         <div class="quantitative flex-1 flex flex-col space-y-4">
           <label>Price ( ฿ )<span>*</span></label>
           <input
-            v-model.trim="price"
+            v-model="price"
             required
             type="number"
             class="itbms-price"
+            step="1000"
           />
 
           <label>Ram ( GB )</label>
-          <input
-            v-model.trim="ramGb"
-            type="number"
-            class="itbms-ramGb"
-            min="0"
-          />
+          <input v-model="ramGb" type="number" class="itbms-ramGb" min="0" />
           <label>Screen Size ( Inches )</label>
           <input
-            v-model.trim="screenSizeInch"
+            v-model="screenSizeInch"
             type="number"
             class="itbms-screenSizeInch"
             min="0"
+            max="99"
+            step="0.1"
           />
           <label>Stroage ( GB )</label>
           <input
-            v-model.trim="storageGb"
+            v-model="storageGb"
             type="number"
             class="itbms-storageGb"
             min="0"
@@ -184,7 +198,7 @@ onMounted(() => {
 
           <label>Quantity<span>*</span></label>
           <input
-            v-model.trim="quantity"
+            v-model="quantity"
             required
             type="number"
             class="itbms-quantity"
@@ -203,8 +217,14 @@ onMounted(() => {
           </button>
         </RouterLink>
         <button
+          :disabled="!isContainAllNonOtionalFiled"
           type="submit"
-          class="itbms-save-button w-48 py-2 rounded-4xl border border-blue-500 text-blue-500 hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-150"
+          class="itbms-save-button w-48 py-2 rounded-4xl border hover:cursor-pointer duration-150"
+          :class="
+            !isContainAllNonOtionalFiled
+              ? 'border-gray-400 text-gray-400'
+              : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white'
+          "
         >
           {{ !isEditing ? "Add New Item" : "Confirm" }}
         </button>

@@ -9,7 +9,7 @@ const {
 } = useRoute();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const item = ref({});
-const getItem = async () => {
+const getSaleItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
   } catch (error) {
@@ -18,11 +18,9 @@ const getItem = async () => {
   }
 };
 
-// Thanarat 
-const deleteSaleItem = () =>{
-
-}
-onMounted(() => getItem());
+// Thanarat
+const deleteSaleItem = () => {};
+onMounted(() => getSaleItem());
 </script>
 
 <template>
@@ -124,7 +122,7 @@ onMounted(() => getItem());
             <RouterLink
               :to="{
                 name: 'EditSaleItems',
-                params: { itemId: item.id }
+                params: { itemId: item.id },
               }"
               class="itbms-edit-button flex-1"
               ><button
