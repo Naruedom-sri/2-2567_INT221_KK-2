@@ -1,33 +1,17 @@
-const updateSomeData = async (url, id, newData) => {
-  try {
-    const response = await fetch(`${url}/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ ...newData }),
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const updateAllData = async (url, id, newData) => {
-  try {
-    const response = await fetch(`${url}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ ...newData }),
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+const updateData = async (url, id, newData) => {
+  const response = await fetch(`${url}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify({ ...newData }),
+  });
+  if (!response.ok)
+    throw new Error(
+      `Can't update data with status : ${response.status}`
+    );
+  const data = await response.json();
+  return data;
 };
 
 const getDataById = async (url, id) => {
@@ -39,24 +23,16 @@ const getDataById = async (url, id) => {
 };
 
 const deleteData = async (url, id) => {
-  try {
-    const response = await fetch(`${url}/${id}`, {
-      method: "DELETE",
-    });
+  const response = await fetch(`${url}/${id}`, {
+    method: "DELETE",
+  });
 
-    if (response.status === 204) {
-      return { status: 204 };
-    } else if (response.status === 404) {
-      const data = await response.json();
-      const error = new Error("Not found");
-      error.response = { status: 404, data };
-      throw error;
-    } else {
-      const data = await response.json();
-      throw new Error(data?.message || "Unknown error");
-    }
-  } catch (error) {
-    throw error;
+  if (response.status !== 204) {
+    throw new Error(
+      `Can't delete data with status : ${response.status}`
+    );
+  } else {
+    return response.status;
   }
 };
 
@@ -64,7 +40,7 @@ const getAllData = async (url) => {
   const response = await fetch(`${url}`);
   if (!response.ok)
     throw new Error(
-      `Can't fetch data with status : ${response.status} and ${response.error}`
+      `Can't fetch data with status : ${response.status}`
     );
   const data = await response.json();
   return data;
@@ -84,8 +60,7 @@ const createData = async (url, newData) => {
   return data;
 };
 export {
-  updateSomeData,
-  updateAllData,
+  updateData,
   getDataById,
   deleteData,
   getAllData,

@@ -1,19 +1,22 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { getDataById } from "@/libs/api";
 import { deleteData } from "@/libs/api";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import NavBar from "@/components/์NavBar.vue";
+import SuccessMessage from "@/components/SuccessMessage.vue";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 
 const {
   params: { itemId },
 } = useRoute();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const statusStore = useSaleItemStatusStore();
 const item = ref({});
 const errorMessage = ref("");
-const router = useRoute()
+const route = useRouter();
 const showDialog = ref(false);
 
 const getSaleItem = async () => {
@@ -26,28 +29,29 @@ const getSaleItem = async () => {
 };
 
 const deleteSaleItem = async () => {
-  showDialog.value = false
+  showDialog.value = false;
   try {
-    const result = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
-    if (result?.status === 204) {
-      router.push({ name: "SaleItemsGallery" });
+    const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+    if (status === 204) {
+      statusStore.setStatus(status);
+      route.push({ name: "SaleItemsGallery" });
     }
   } catch (error) {
-    if (error.response?.status === 404) {
-      router.push({ name: "SaleItemsGallery" });
-    } else {
-      router.push({ name: "SaleItemsGallery" });
-    }
+    console.log(error);
   }
 };
 onMounted(() => getSaleItem());
 </script>
 
 <template>
-  <div class="detail-container">
-    <NavBar />
-    <ErrorMessage v-if="item === null" />
-    <div v-else class="itbms-row grid grid-cols-2 text-xl text-white">
+  <NavBar />
+  <SuccessMessage
+    v-show="statusStore.getStatus() !== null"
+    :status="statusStore.getStatus()"
+  />
+  <ErrorMessage v-if="item === null" />
+  <div v-else class="detail-container">
+    <div class="itbms-row grid grid-cols-2 text-xl text-white">
       <div
         class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white text-base"
       >
@@ -134,7 +138,8 @@ onMounted(() => getSaleItem());
         </p>
         <div class="btn-add-buy mt-7">
           <div class="flex justify-between gap-4 space-y-5">
-            <button  @click="showDialog = true"
+            <button
+              @click="showDialog = true"
               class="itbms-delete-button flex-1 py-3 border rounded-2xl border-red-500 text-3xl text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
             >
               Delete
@@ -228,11 +233,11 @@ onMounted(() => getSaleItem());
       </div>
     </div>
     <ConfirmDialog
-        :visible="showDialog"
-        title="Delete Confirmation"
-        message="Do you want to delete this sale item?"
-        @confirm="deleteSaleItem"
-        @cancel="showDialog = false"
+      :visible="showDialog"
+      title="Delete Confirmation"
+      message="Do you want to delete this sale item?"
+      @confirm="deleteSaleItem"
+      @cancel="showDialog = false"
     />
   </div>
 </template>

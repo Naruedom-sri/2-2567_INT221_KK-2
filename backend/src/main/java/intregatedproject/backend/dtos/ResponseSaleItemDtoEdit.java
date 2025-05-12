@@ -3,6 +3,8 @@ package intregatedproject.backend.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class ResponseSaleItemDtoEdit {
@@ -11,6 +13,7 @@ public class ResponseSaleItemDtoEdit {
     private Integer ramGb;
     private Integer storageGb;
     private Integer price;
+    private BigDecimal screenSizeInch;
     private String description;
     private String color;
     private Integer quantity;

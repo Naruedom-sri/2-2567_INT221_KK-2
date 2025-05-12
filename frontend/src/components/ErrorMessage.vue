@@ -2,7 +2,7 @@
 
 <template>
   <div
-    class="err-message-container my-10 flex flex-col justify-center items-center gap-10 text-4xl text-white"
+    class="err-message-container h-screen flex flex-col justify-center items-center gap-10 text-4xl text-white"
   >
     <img
       src="/src/assets/imgs/err-item-notfound.png"

@@ -2,6 +2,9 @@
 import { onMounted, ref } from "vue";
 import { getAllData } from "@/libs/api";
 import NavBar from "@/components/์NavBar.vue";
+import SuccessMessage from "@/components/SuccessMessage.vue";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
@@ -50,6 +53,7 @@ onMounted(() => {
         Add Sale Item
       </RouterLink>
     </div>
+    <SuccessMessage v-show="statusStore.getStatus() !== null" :status="statusStore.getStatus()" />
     <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"

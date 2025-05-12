@@ -11,26 +11,33 @@ import java.math.BigDecimal;
 public class RequestSaleItemDto {
     private Integer id;
     private String model;
-    public void setModel(){
-        this.model = model.trim();
-    }
     private Integer ramGb;
     private Integer storageGb;
     private Integer price;
     private ResponseBrandDto brand;
     private String description;
-    public void setDescription(){
-        this.description = description.trim();
-    }
     private BigDecimal screenSizeInch;
     private String color;
-    public void setColor(){
-        this.color = color.trim();
-    }
     private Integer quantity;
-    public void setQuantity(){
-        if(this.quantity == null || this.quantity < 0){
+
+    public void setQuantity(Integer quantity) {
+        if (quantity == null || quantity < 0) {
             this.quantity = 1;
+        } else {
+            this.quantity = quantity;
         }
     }
+
+    public void setModel(String model) {
+        this.model = model != null ? model.trim() : null;
+    }
+
+    public void setDescription(String description) {
+        this.description = description != null ? description.trim() : null;
+    }
+
+    public void setColor(String color) {
+        this.color = color != null ? color.trim() : null;
+    }
+
 }

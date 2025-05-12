@@ -32,6 +32,7 @@ public class SaleItemController {
         return ResponseEntity.ok(dtoList);
     }
 
+
     @GetMapping("/v1/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemDetailDto> getSaleItemById(@PathVariable int id) {
         SaleItem item = service.getSaleItemById(id);
@@ -44,8 +45,9 @@ public class SaleItemController {
         ResponseSaleItemDtoEdit dto = modelMapper.map(item, ResponseSaleItemDtoEdit.class);
         return ResponseEntity.ok(dto);
     }
+
     @PostMapping("/v1/sale-items")
-    public ResponseEntity<ResponseSaleItemDetailDto> createSaleItem(@RequestBody SaleItem saleItem) {
+    public ResponseEntity<ResponseSaleItemDetailDto> createSaleItem(@RequestBody RequestSaleItemDto saleItem) {
         SaleItem newSaleItem = service.createSaleItem(saleItem);
         ResponseSaleItemDetailDto newSaleItemDto = modelMapper.map(newSaleItem, ResponseSaleItemDetailDto.class);
         return ResponseEntity.status(201).body(newSaleItemDto);
