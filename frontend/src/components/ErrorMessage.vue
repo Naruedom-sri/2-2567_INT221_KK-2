@@ -1,7 +1,10 @@
 <script setup>
 import { useRouter } from "vue-router";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+const statusStore = useSaleItemStatusStore();
 const route = useRouter();
 const goBackToPreviousPage = () => {
+  statusStore.clearStatus();
   route.back();
 };
 </script>

@@ -35,6 +35,8 @@ const deleteSaleItem = async () => {
     if (status === 204) {
       statusStore.setStatus(status);
       route.push({ name: "SaleItemsGallery" });
+    } else {
+      statusStore.setStatus(status);
     }
   } catch (error) {
     console.log(error);
@@ -46,10 +48,10 @@ onMounted(() => getSaleItem());
 <template>
   <NavBar />
   <SuccessMessage
-    v-show="statusStore.getStatus() !== null"
+    v-show="statusStore.getStatus() !== null && statusStore.getStatus() !== 404"
     :status="statusStore.getStatus()"
   />
-  <ErrorMessage v-if="item === null" />
+  <ErrorMessage v-if="item === null || statusStore.getStatus() === 404" />
   <div v-else class="detail-container">
     <div class="itbms-row grid grid-cols-2 text-xl text-white">
       <div

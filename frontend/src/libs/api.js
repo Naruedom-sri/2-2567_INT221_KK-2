@@ -7,9 +7,7 @@ const updateData = async (url, id, newData) => {
     body: JSON.stringify({ ...newData }),
   });
   if (!response.ok)
-    throw new Error(
-      `Can't update data with status : ${response.status}`
-    );
+    throw new Error(`Can't update data with status : ${response.status}`);
   const data = await response.json();
   return data;
 };
@@ -28,9 +26,7 @@ const deleteData = async (url, id) => {
   });
 
   if (response.status !== 204) {
-    throw new Error(
-      `Can't delete data with status : ${response.status}`
-    );
+    return response.status;
   } else {
     return response.status;
   }
@@ -39,9 +35,7 @@ const deleteData = async (url, id) => {
 const getAllData = async (url) => {
   const response = await fetch(`${url}`);
   if (!response.ok)
-    throw new Error(
-      `Can't fetch data with status : ${response.status}`
-    );
+    throw new Error(`Can't fetch data with status : ${response.status}`);
   const data = await response.json();
   return data;
 };
@@ -59,10 +53,4 @@ const createData = async (url, newData) => {
   const data = await response.json();
   return data;
 };
-export {
-  updateData,
-  getDataById,
-  deleteData,
-  getAllData,
-  createData,
-};
+export { updateData, getDataById, deleteData, getAllData, createData };
