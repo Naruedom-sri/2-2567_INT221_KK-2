@@ -66,14 +66,14 @@ onMounted(() => {
         v-show="items.length !== 0"
         :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
         :key="index"
-        class="itbms-row w-full h-[375px] rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="itbms-row w-full  rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
         <img
           src="/src/assets/imgs/iphone-item.png"
           alt="sale-item"
           class="w-60 mx-auto rounded-4xl"
         />
-        <div class="item-detail mx-6 space-y-1 text-white">
+        <div class="item-detail mx-6 mb-3 space-y-1 text-white">
           <p class="itbms-brand font-extrabold">{{ item.brandName }}</p>
           <p class="itbms-model">{{ item.model }}</p>
           <p class="itbms-ramGb">

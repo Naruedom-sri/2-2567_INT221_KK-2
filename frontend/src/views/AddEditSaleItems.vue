@@ -1,9 +1,11 @@
 <script setup>
 import NavBar from "@/components/์NavBar.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 import { ref, onMounted, watch } from "vue";
 import { getAllData, createData, updateData, getDataById } from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
   isEditing: Boolean,
@@ -27,6 +29,16 @@ const screenSizeInch = ref();
 const isContainAllNonOtionalFiled = ref(false);
 const isUpdatedFiled = ref(false);
 const isDisabled = ref(true);
+
+const modelInput = ref();
+const colorInput = ref();
+const descriptionInput = ref();
+const priceInput = ref();
+const ramInput = ref();
+const storageInput = ref();
+const screenSizeInput = ref();
+const quantityInput = ref();
+
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   try {
@@ -57,7 +69,7 @@ const checkIsEditing = async () => {
     }
   } catch (error) {
     console.log(error);
-    item.value = {};
+    item.value = null;
   }
 };
 const checkAllNonOptionalFiled = () => {
@@ -69,9 +81,7 @@ const checkAllNonOptionalFiled = () => {
     price.value !== undefined &&
     price.value !== "" &&
     description.value !== undefined &&
-    description.value !== "" &&
-    quantity.value !== undefined &&
-    quantity.value !== ""
+    description.value !== ""
   ) {
     isContainAllNonOtionalFiled.value = true;
   } else {
@@ -106,7 +116,7 @@ const addUpdateNewSaleItem = async () => {
       price: price.value,
       ramGb: ramGb.value,
       screenSizeInch: screenSizeInch.value,
-      quantity: quantity.value,
+      quantity: quantity.value === undefined ? null : quantity.value,
       storageGb: storageGb.value,
       color: color.value,
     };
@@ -144,6 +154,35 @@ const checkDisabled = () => {
     isDisabled.value = false;
   }
 };
+
+function focusNext(refName) {
+  switch (refName) {
+    case "modelInput":
+      modelInput.value?.focus();
+      break;
+    case "colorInput":
+      colorInput.value?.focus();
+      break;
+    case "descriptionInput":
+      descriptionInput.value?.focus();
+      break;
+    case "priceInput":
+      priceInput.value?.focus();
+      break;
+    case "ramInput":
+      ramInput.value?.focus();
+      break;
+    case "storageInput":
+      storageInput.value?.focus();
+      break;
+    case "screenSizeInput":
+      screenSizeInput.value?.focus();
+      break;
+    case "quantityInput":
+      quantityInput.value?.focus();
+      break;
+  }
+}
 onMounted(() => {
   checkIsEditing();
   getAllBrand();
@@ -172,7 +211,8 @@ watch(
 
 <template>
   <NavBar />
-  <div class="add-edit-container text-white">
+  <ErrorMessage v-if="item === null" />
+  <div v-else class="add-edit-container text-white">
     <div class="flex py-7 mx-20 border-b border-white">
       <RouterLink
         :to="{ name: 'SaleItemsGallery' }"
@@ -196,6 +236,7 @@ watch(
         <div class="qualitative flex-1 flex flex-col space-y-4">
           <label>Brand<span>*</span></label>
           <select
+            autofocus
             v-model.trim="brandItem"
             required
             class="itbms-brand px-5 py-1 rounded-2xl bg-[rgba(22,22,23,255)]"
@@ -211,15 +252,26 @@ watch(
           </select>
           <label>Model<span>*</span> </label>
           <input
+            @keydown.enter.prevent="focusNext('colorInput')"
+            ref="modelInput"
             v-model.trim="model"
             required
             type="text"
             class="itbms-model"
+            maxlength="60"
           />
           <label>Color</label>
-          <input v-model.trim="color" type="text" class="itbms-color" />
+          <input
+            @keydown.enter.prevent="focusNext('descriptionInput')"
+            ref="colorInput"
+            v-model.trim="color"
+            type="text"
+            class="itbms-color"
+          />
           <label>Description<span>*</span></label>
           <textarea
+            @keydown.enter.prevent="focusNext('priceInput')"
+            ref="descriptionInput"
             v-model.trim="description"
             required
             class="itbms-description px-4 py-2 h-32 bg-[rgba(22,22,23,255)]"
@@ -231,6 +283,8 @@ watch(
         <div class="quantitative flex-1 flex flex-col space-y-4">
           <label>Price ( ฿ )<span>*</span></label>
           <input
+            @keydown.enter.prevent="focusNext('ramInput')"
+            ref="priceInput"
             v-model="price"
             required
             type="number"
@@ -239,9 +293,18 @@ watch(
           />
 
           <label>Ram ( GB )</label>
-          <input v-model="ramGb" type="number" class="itbms-ramGb" min="0" />
+          <input
+            @keydown.enter.prevent="focusNext('screenSizeInput')"
+            ref="ramInput"
+            v-model="ramGb"
+            type="number"
+            class="itbms-ramGb"
+            min="0"
+          />
           <label>Screen Size ( Inches )</label>
           <input
+            @keydown.enter.prevent="focusNext('storageInput')"
+            ref="screenSizeInput"
             v-model="screenSizeInch"
             type="number"
             class="itbms-screenSizeInch"
@@ -251,16 +314,19 @@ watch(
           />
           <label>Storage ( GB )</label>
           <input
+            @keydown.enter.prevent="focusNext('quantityInput')"
+            ref="storageInput"
             v-model="storageGb"
             type="number"
             class="itbms-storageGb"
             min="0"
           />
 
-          <label>Quantity<span>*</span></label>
+          <label>Quantity</label>
           <input
+            @keydown.enter.prevent
+            ref="quantityInput"
             v-model="quantity"
-            required
             type="number"
             class="itbms-quantity"
             min="0"

@@ -21,7 +21,7 @@ public class RequestSaleItemDto {
     private Integer quantity;
 
     public void setQuantity(Integer quantity) {
-        if (quantity == null || quantity < 0) {
+        if (quantity == null  || quantity < 0) {
             this.quantity = 1;
         } else {
             this.quantity = quantity;
@@ -29,15 +29,20 @@ public class RequestSaleItemDto {
     }
 
     public void setModel(String model) {
-        this.model = model != null ? model.trim() : null;
+        if (model != null && !model.trim().isEmpty()) {
+            this.model = model.trim().length() > 60 ? model.trim().substring(0, 60) : model.trim();
+        } else {
+            this.model = null;
+        }
+
     }
 
     public void setDescription(String description) {
-        this.description = description != null ? description.trim() : null;
+        this.description = description != null && !description.trim().isEmpty() ? description.trim() : null;
     }
 
     public void setColor(String color) {
-        this.color = color != null ? color.trim() : null;
+        this.color = color != null && !color.trim().isEmpty() ? color.trim() : null;
     }
 
 }

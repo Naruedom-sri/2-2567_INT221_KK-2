@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+import { useRouter } from "vue-router";
+const route = useRouter();
+const goBackToPreviousPage = () => {
+  route.back();
+};
+</script>
 
 <template>
   <div
@@ -10,12 +16,12 @@
       class="w-72 object-cover"
     />
     <p class="itbms-message">The requested sale item does not exist.</p>
-    <RouterLink
-      :to="{ name: 'SaleItemsGallery' }"
+    <button
+      @click="goBackToPreviousPage"
       class="itbms-button py-4 px-10 border border-blue-500 rounded-3xl text-blue-500 text-2xl hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-150"
     >
       Ok
-    </RouterLink>
+    </button>
   </div>
 </template>
 

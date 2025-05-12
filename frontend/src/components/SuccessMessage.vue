@@ -10,7 +10,7 @@ const setIntervalShowMessage = () => {
   setTimeout(() => {
     showMessage.value = false;
     statusStore.clearStatus();
-  }, 4000);
+  }, 1500);
 };
 onMounted(() => setIntervalShowMessage());
 </script>
