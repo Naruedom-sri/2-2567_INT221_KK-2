@@ -20,8 +20,12 @@ public class RequestSaleItemDto {
     private String color;
     private Integer quantity;
 
+    public void setId(Integer id) {
+        this.id = null;
+    }
+
     public void setQuantity(Integer quantity) {
-        if (quantity == null  || quantity < 0) {
+        if (quantity == null || quantity < 0) {
             this.quantity = 1;
         } else {
             this.quantity = quantity;
