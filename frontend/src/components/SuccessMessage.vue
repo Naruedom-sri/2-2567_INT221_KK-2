@@ -1,12 +1,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 const props = defineProps({
   status: Number,
 });
+const statusStore = useSaleItemStatusStore();
 const showMessage = ref(true);
 const setIntervalShowMessage = () => {
   setTimeout(() => {
     showMessage.value = false;
+    statusStore.clearStatus();
   }, 4000);
 };
 onMounted(() => setIntervalShowMessage());
