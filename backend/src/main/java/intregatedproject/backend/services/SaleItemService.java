@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public class SaleItemService {
         item.setBrand(brand);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SaleItem createSaleItem(RequestSaleItemDto saleItemDto) {
         if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
             throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
