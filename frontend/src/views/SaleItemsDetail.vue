@@ -15,7 +15,6 @@ const {
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const statusStore = useSaleItemStatusStore();
 const item = ref({});
-const errorMessage = ref("");
 const route = useRouter();
 const showDialog = ref(false);
 
@@ -23,7 +22,7 @@ const getSaleItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
   } catch (error) {
-    errorMessage.value = "The requested sale item does not exist.";
+    console.log(error);
     item.value = null;
   }
 };
