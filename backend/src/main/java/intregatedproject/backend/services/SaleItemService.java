@@ -10,6 +10,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -18,7 +19,6 @@ public class SaleItemService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private BrandService brandService;
-
     @Autowired
     private EntityManager entityManager;
 
@@ -70,7 +70,7 @@ public class SaleItemService {
 
     public SaleItem updateSaleItem(int id, RequestSaleItemDto saleItemDto) {
         SaleItem updateSaleItem = getSaleItemById(id);
-        covertDtoToEntity(saleItemDto, updateSaleItem);
+        covertDtoToEntity(saleItemDto,updateSaleItem);
         return saleItemRepository.save(updateSaleItem);
     }
 

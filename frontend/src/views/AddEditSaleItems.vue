@@ -1,6 +1,6 @@
 <script setup>
 import NavBar from "@/components/์NavBar.vue";
-import ErrorMessage from "@/components/ErrorMessage.vue";
+import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import { ref, onMounted, watch } from "vue";
 import { getAllData, createData, updateData, getDataById } from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
@@ -48,7 +48,11 @@ const getAllBrand = async () => {
   }
 };
 const goBackToPreviousPage = () => {
-  route.back();
+  if (!props.isEditing) {
+    route.push({ name: "SaleItemsGallery" });
+  } else {
+    route.back();
+  }
 };
 const checkIsEditing = async () => {
   try {
@@ -211,7 +215,7 @@ watch(
 
 <template>
   <NavBar />
-  <ErrorMessage v-if="item === null" />
+  <SaleItemNotFound v-if="item === null" />
   <div v-else class="add-edit-container text-white">
     <div class="flex py-7 mx-20 border-b border-white">
       <RouterLink

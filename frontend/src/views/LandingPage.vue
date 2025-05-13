@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="landing-container h-screen bg-black overflow-hidden">
+  <div class="landing-container h-screen bg-black">
     <div class="grid grid-cols-2 h-full text-white">
       <div class="landing-content self-center w-xl mx-auto space-y-6">
         <h1 class="text-5xl/normal text-shadow-md/50 text-shadow-white">
@@ -26,4 +26,39 @@
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.landing-container {
+  animation-name: slide-fade;
+  animation-timing-function: ease-in;
+  animation-duration: 0.7s;
+}
+.itbms-shopnow {
+  animation-name: btn-slide;
+  animation-timing-function: ease-in;
+  animation-duration: 1.2s;
+}
+@keyframes slide-fade {
+  from {
+    transform: translateY(500px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+@keyframes btn-slide {
+  0%{
+    transform: translateY(-500px);
+    opacity: 0;
+  }
+  80% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+</style>

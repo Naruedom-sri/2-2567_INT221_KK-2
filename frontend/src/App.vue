@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="container-system h-full bg-black">
+  <div class="container-system h-full bg-black overflow-hidden ">
     <RouterView />
   </div>
 </template>
@@ -10,4 +10,5 @@
 .container-system {
   font-family: "Inter", sans-serif;
 }
+
 </style>

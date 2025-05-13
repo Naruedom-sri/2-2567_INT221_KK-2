@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { getAllData } from "@/libs/api";
 import NavBar from "@/components/์NavBar.vue";
-import SuccessMessage from "@/components/SuccessMessage.vue";
+import AlertMessage from "@/components/AlertMessage.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
@@ -53,7 +53,7 @@ onMounted(() => {
         Add Sale Item
       </RouterLink>
     </div>
-    <SuccessMessage v-show="statusStore.getStatus() !== null" :status="statusStore.getStatus()" />
+    <AlertMessage v-show="statusStore.getStatus() !== null" />
     <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"
@@ -62,11 +62,12 @@ onMounted(() => {
         no sale item
       </h1>
       <RouterLink
+        @click="statusStore.clearStatus()"
         v-for="(item, index) in items"
         v-show="items.length !== 0"
         :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
         :key="index"
-        class="itbms-row w-full  rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="itbms-row w-full rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
         <img
           src="/src/assets/imgs/iphone-item.png"

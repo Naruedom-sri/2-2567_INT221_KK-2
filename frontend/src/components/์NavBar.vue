@@ -5,18 +5,34 @@ const isSearch = ref(false);
 
 <template>
   <div
-    class="container-header flex justify-between items-center w-full h-[75px] pl-10 pr-20 bg-[rgba(22,22,23,255)]"
+    class="container-header flex justify-between items-center w-full h-[60px] pl-10 pr-20 bg-[rgba(22,22,23,255)] text-white"
   >
     <div class="logo">
       <RouterLink :to="{ name: 'LandingPage' }">
         <img
           src="/src/assets/imgs/itbms-logo.png"
           alt="logo"
-          class="w-44 h-20 object-cover"
+          class="w-40 h-20 object-cover"
         />
       </RouterLink>
     </div>
-
+    <div class="link flex h-full text-center gap-3">
+      <RouterLink
+        :to="{ name: 'Home' }"
+        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+        >Home</RouterLink
+      >
+      <RouterLink
+        :to="{ name: 'SaleItemsGallery' }"
+        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+        >Product</RouterLink
+      >
+      <button
+        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+      >
+        Brand
+      </button>
+    </div>
     <div class="symbol flex gap-3.5">
       <div
         class="search-bar flex"
@@ -32,7 +48,7 @@ const isSearch = ref(false);
           class="w-0"
           :class="
             isSearch
-              ? 'w-xl outline-0 text-white duration-200 ease-in'
+              ? 'w-sm outline-0 text-white duration-200 ease-in'
               : 'duration-100 ease-in'
           "
         />

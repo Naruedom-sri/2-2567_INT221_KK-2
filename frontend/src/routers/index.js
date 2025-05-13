@@ -1,4 +1,5 @@
 import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
+import Home from "@/views/Home.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
@@ -14,6 +15,11 @@ const routes = [
     path: "/",
     name: "LandingPage",
     component: LandingPage,
+  },
+  {
+    path: "/",
+    name: "Home",
+    component: Home,
   },
   {
     path: "/sale-items/:itemId",
@@ -40,6 +46,7 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 };
   },
+  linkExactActiveClass: "border-b-blue-500",
 });
 
 export default router;

@@ -4,10 +4,10 @@ import { useRouter, useRoute } from "vue-router";
 import { getDataById } from "@/libs/api";
 import { deleteData } from "@/libs/api";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
-import ErrorMessage from "@/components/ErrorMessage.vue";
+import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import NavBar from "@/components/์NavBar.vue";
-import SuccessMessage from "@/components/SuccessMessage.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import AlertMessage from "@/components/AlertMessage.vue";
 
 const {
   params: { itemId },
@@ -31,12 +31,8 @@ const deleteSaleItem = async () => {
   showDialog.value = false;
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
-    if (status === 204) {
-      statusStore.setStatus(status);
-      route.push({ name: "SaleItemsGallery" });
-    } else {
-      statusStore.setStatus(status);
-    }
+    statusStore.setStatus(status);
+    route.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
   }
@@ -46,11 +42,8 @@ onMounted(() => getSaleItem());
 
 <template>
   <NavBar />
-  <SuccessMessage
-    v-show="statusStore.getStatus() !== null && statusStore.getStatus() !== 404"
-    :status="statusStore.getStatus()"
-  />
-  <ErrorMessage v-if="item === null || statusStore.getStatus() === 404" />
+  <AlertMessage v-show="statusStore.getStatus() !== null" />
+  <SaleItemNotFound v-if="item === null" />
   <div v-else class="detail-container">
     <div class="itbms-row grid grid-cols-2 text-xl text-white">
       <div
