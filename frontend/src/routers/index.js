@@ -17,7 +17,7 @@ const routes = [
     component: LandingPage,
   },
   {
-    path: "/",
+    path: "/home",
     name: "Home",
     component: Home,
   },

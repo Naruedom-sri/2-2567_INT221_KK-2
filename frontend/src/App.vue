@@ -8,7 +8,9 @@
 
 <style scoped>
 .container-system {
-  font-family: "Inter", sans-serif;
+  /* font-family: "Inter", sans-serif; */
+  /* font-family: 'IBM Plex Sans Thai', sans-serif; */
+   font-family: 'Prompt', sans-serif;
 }
 
 </style>

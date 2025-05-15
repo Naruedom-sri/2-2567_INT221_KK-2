@@ -4,7 +4,7 @@
   <div class="landing-container h-screen bg-black">
     <div class="grid grid-cols-2 h-full text-white">
       <div class="landing-content self-center w-xl mx-auto space-y-6">
-        <h1 class="text-5xl/normal text-shadow-md/50 text-shadow-white">
+        <h1 class="text-5xl/normal glow-text">
           Transform Your Life with iPhone
         </h1>
         <p class="text-2xl">Fast. Powerful. Pro-level Camera.</p>
@@ -37,6 +37,9 @@
   animation-timing-function: ease-in;
   animation-duration: 1.2s;
 }
+.glow-text {
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 10px #fff;
+}
 @keyframes slide-fade {
   from {
     transform: translateY(500px);
@@ -48,7 +51,7 @@
   }
 }
 @keyframes btn-slide {
-  0%{
+  0% {
     transform: translateY(-500px);
     opacity: 0;
   }
