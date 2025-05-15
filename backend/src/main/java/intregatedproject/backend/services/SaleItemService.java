@@ -65,7 +65,6 @@ public class SaleItemService {
         var saved = saleItemRepository.save(newSaleItem);
         entityManager.refresh(saved);
         return saved;
-
     }
 
     public SaleItem updateSaleItem(int id, RequestSaleItemDto saleItemDto) {

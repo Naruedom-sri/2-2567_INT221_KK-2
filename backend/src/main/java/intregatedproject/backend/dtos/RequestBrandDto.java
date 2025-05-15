@@ -5,8 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResponseBrandDto {
-    private Integer id;
+public class RequestBrandDto {
     private String name;
     private String websiteUrl;
     private String countryOfOrigin;
