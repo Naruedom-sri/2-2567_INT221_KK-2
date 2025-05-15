@@ -30,4 +30,11 @@ public class BrandService {
             throw e;
         }
     }
+
+
+
+    public void deleteBrand(int id) {
+        Brand brand = getBrandById(id);
+        brandRepository.delete(brand);
+    }
 }
