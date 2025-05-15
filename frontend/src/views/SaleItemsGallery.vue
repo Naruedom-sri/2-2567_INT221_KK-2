@@ -4,6 +4,7 @@ import { getAllData } from "@/libs/api";
 import NavBar from "@/components/์NavBar.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import Footer from "@/components/Footer.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const time = ref();
@@ -29,14 +30,16 @@ onMounted(() => {
 
 <template>
   <NavBar />
-  <div class="gallery-container">
-    <video
-      src="/src/assets/videos/mobile-preview.mp4"
-      autoplay
-      loop
-      muted
-      class="w-full h-[650px] object-cover"
-    ></video>
+  <div class="gallery-container text-white">
+    <div class="promote h-96 flex flex-col justify-center items-center gap-8">
+      <h1 class="text-6xl">it's your lifestyle</h1>
+      <p class="text-white">Portable, fast to use, new model</p>
+      <RouterLink
+        :to="{ name: 'AddSaleItems' }"
+        class="w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
+        >Add New</RouterLink
+      >
+    </div>
     <div
       class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
     >
@@ -67,19 +70,16 @@ onMounted(() => {
         v-show="items.length !== 0"
         :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
         :key="index"
-        class="itbms-row w-full rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="itbms-row w-full pt-4 rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >
-        <img
-          src="/src/assets/imgs/iphone-item.png"
-          alt="sale-item"
-          class="w-60 mx-auto rounded-4xl"
-        />
-        <div class="item-detail mx-6 mb-3 space-y-1 text-white">
-          <p class="itbms-brand font-extrabold">{{ item.brandName }}</p>
-          <p class="itbms-model">{{ item.model }}</p>
-          <p class="itbms-ramGb">
+        <div
+          class="item-detail flex flex-col items-center space-y-1 text-white text-lg"
+        >
+          <p class="itbms-brand font-semibold text-2xl">{{ item.brandName }}</p>
+          <p class="itbms-model font-bold">{{ item.model }}</p>
+          <p class="itbms-ramGb text-sm">
             {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-            /<span class="itbms-storageGb">{{
+            / <span class="itbms-storageGb">{{
               item.storageGb === null || item.storageGb === ""
                 ? "-"
                 : item.storageGb
@@ -91,16 +91,28 @@ onMounted(() => {
               GB</span
             >
           </p>
-          <p class="itbms-price mt-3 text-xl text-red-400">
-            ฿
-            <span class="itbms-price-unit">{{
+          <p class="itbms-price text-sm text-white/80">
+            From ฿<span class="itbms-price-unit mx-0.5">{{
               item.price.toLocaleString()
             }}</span>
           </p>
+          <button class="py-2 px-4 mt-4 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90">Add to Cart</button>
         </div>
+        <img
+          src="/src/assets/imgs/iphone-item.png"
+          alt="sale-item"
+          class="w-60 mx-auto rounded-4xl"
+        />
       </RouterLink>
     </div>
   </div>
+  <Footer />
 </template>
 
-<style scoped></style>
+<style scoped>
+.promote {
+  background-image: url("/src/assets/imgs/bg-gif.gif");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+</style>

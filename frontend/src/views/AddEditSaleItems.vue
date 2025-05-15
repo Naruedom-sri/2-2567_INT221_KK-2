@@ -270,6 +270,7 @@ watch(
             ref="colorInput"
             v-model.trim="color"
             type="text"
+            maxlength="50"
             class="itbms-color"
           />
           <label>Description<span>*</span></label>
@@ -339,6 +340,7 @@ watch(
       </div>
       <div class="btn-form w-fit mx-auto space-x-4 text-2xl">
         <button
+          type="button"
           @click="goBackToPreviousPage"
           class="itbms-cancel-button w-48 py-2 rounded-4xl border border-red-500 text-red-500 hover:cursor-pointer hover:bg-red-500 hover:text-white duration-150"
         >
