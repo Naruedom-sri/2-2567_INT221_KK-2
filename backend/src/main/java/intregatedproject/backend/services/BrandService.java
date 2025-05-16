@@ -2,6 +2,7 @@ package intregatedproject.backend.services;
 
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.repositories.BrandRepository;
+import intregatedproject.backend.repositories.SaleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.List;
 public class BrandService {
     @Autowired
     private BrandRepository brandRepository;
+    private SaleItemRepository saleItemRepository;
 
     public List<Brand> getAllBrands() {
         try {
@@ -30,11 +32,12 @@ public class BrandService {
             throw e;
         }
     }
-
-
-
     public void deleteBrand(int id) {
         Brand brand = getBrandById(id);
+        long count = saleItemRepository.countByBrandId(id);
+        if (count > 0) {
+            throw new IllegalStateException("Cannot delete brand: " + count + " phones are using this brand.");
+        }
         brandRepository.delete(brand);
     }
 }

@@ -65,4 +65,14 @@ public class SaleItemController {
         service.deleteSaleItemById(id);
         return ResponseEntity.status(204).body(null);
     }
+
+    //dont touch my pbi10,11
+    @GetMapping("/v1/sale-items/sort")
+    public ResponseEntity<List<ResponseSaleItemDto>> getAllSortedByBrandName() {
+        List<SaleItem> items = service.getAllSortedByBrandName();
+        List<ResponseSaleItemDto> dtoList = items.stream()
+                .map(item -> modelMapper.map(item, ResponseSaleItemDto.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
+    }
 }

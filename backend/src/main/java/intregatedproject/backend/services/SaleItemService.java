@@ -6,6 +6,7 @@ import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -78,4 +79,13 @@ public class SaleItemService {
         SaleItem existingItem = getSaleItemById(id);
         saleItemRepository.delete(existingItem);
     }
+
+    //dont touch my pbi10,11
+    public List<SaleItem> getAllSortedByBrandName(){
+        return saleItemRepository.findAll(
+                Sort.by(Sort.Direction.ASC, "brand.name")
+        );
+    }
+
+
 }
