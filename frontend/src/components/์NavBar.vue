@@ -30,7 +30,7 @@ const isSearch = ref(false);
       <button
         class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
       >
-        Brand
+        About
       </button>
     </div>
     <div class="symbol flex gap-3.5">

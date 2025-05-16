@@ -12,6 +12,7 @@ public class ResponseSaleItemDto {
     private Integer ramGb;
     private Integer storageGb;
     private Integer price;
+    private String color;
     @JsonIgnore
     private ResponseBrandDto brand;
     public String getBrandName() {

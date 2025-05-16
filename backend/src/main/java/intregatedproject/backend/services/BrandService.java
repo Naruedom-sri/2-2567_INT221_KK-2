@@ -4,6 +4,8 @@ import intregatedproject.backend.dtos.RequestBrandDto;
 import intregatedproject.backend.dtos.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.exceptions.BrandAlreadyExistsException;
+import intregatedproject.backend.exceptions.BrandHasSaleItemException;
 import intregatedproject.backend.repositories.BrandRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
@@ -58,8 +60,8 @@ public class BrandService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Brand createBrand(RequestBrandDto brandDto) {
         var checkDup = getAllBrands().stream().filter(brand -> brand.getName().equalsIgnoreCase(brandDto.getName())).toList();
-        if(!checkDup.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate brand found");
+        if (!checkDup.isEmpty()) {
+            throw new BrandAlreadyExistsException("Brand with name " + brandDto.getName() + " already exists.");
         }
         var newBrand = new Brand();
         convertDtoToEntity(brandDto, newBrand);
@@ -70,21 +72,18 @@ public class BrandService {
 
     public Brand updateBrand(int id, RequestBrandDto brandDto) {
         Brand updateBrand = getBrandById(id);
-        if (!brandDto.getName().equalsIgnoreCase(updateBrand.getName())) {
-            boolean nameExists = brandRepository.existsById(updateBrand.getId());
-            if (nameExists) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Brand name already exists");
-            }
+        var checkDup = getAllBrands().stream().filter(brand -> brand.getName().equalsIgnoreCase(brandDto.getName())).toList();
+        if (!checkDup.isEmpty() && !checkDup.get(0).getId().equals(id)) {
+            throw new BrandAlreadyExistsException("Duplicate brand found");
         }
-        convertDtoToEntity(brandDto,updateBrand);
+        convertDtoToEntity(brandDto, updateBrand);
         return brandRepository.save(updateBrand);
     }
 
     public void deleteBrand(int id) {
         Brand brand = getBrandById(id);
-        long count = saleItemRepository.countByBrandId(id);
-        if (count > 0) {
-            throw new IllegalStateException("Cannot delete brand: " + count + " phones are using this brand.");
+        if (!brand.getSaleItems().isEmpty()) {
+            throw new BrandHasSaleItemException("Can't delete brand: " + brand.getId() + " because it has sale items associated with it.");
         }
         brandRepository.delete(brand);
     }

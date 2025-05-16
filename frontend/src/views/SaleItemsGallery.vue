@@ -11,7 +11,7 @@ const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const updateTime = () => {
   const date = new Date();
-  time.value = date.toLocaleString();
+  time.value = date.toLocaleTimeString();
   setInterval(updateTime, 1000);
 };
 const getAllSaleItems = async () => {
@@ -36,7 +36,7 @@ onMounted(() => {
       <p class="text-white">Portable, fast to use, new model</p>
       <RouterLink
         :to="{ name: 'AddSaleItems' }"
-        class="w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
+        class=" w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
         >Add New</RouterLink
       >
     </div>

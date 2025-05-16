@@ -3,6 +3,7 @@ import Home from "@/views/Home.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
+import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
 const history = createWebHistory();
 const routes = [
@@ -37,6 +38,11 @@ const routes = [
     name: "EditSaleItems",
     component: AddEditSaleItems,
     props: { isEditing: true },
+  },
+  {
+    path: "/sale-items/list",
+    name: "SaleItemsList",
+    component: SaleItemsList,
   },
 ];
 
