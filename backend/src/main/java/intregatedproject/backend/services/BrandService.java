@@ -79,6 +79,18 @@ public class BrandService {
         convertDtoToEntity(brandDto, updateBrand);
         return brandRepository.save(updateBrand);
     }
+//    public Brand updateBrand(int id, RequestBrandDto brandDto) {
+//        Brand updateBrand = getBrandById(id);
+//        if (!brandDto.getName().equalsIgnoreCase(updateBrand.getName())) {
+//            boolean isDuplicate = brandRepository.existsByName(updateBrand.getId());
+//            if (isDuplicate) {
+//                throw new BrandAlreadyExistsException("Duplicate brand found");
+//            }
+//        }
+//        convertDtoToEntity(brandDto,updateBrand);
+//        return brandRepository.save(updateBrand);
+//    }
+
 
     public void deleteBrand(int id) {
         Brand brand = getBrandById(id);
