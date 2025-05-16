@@ -39,12 +39,10 @@ public class Brand {
     @Column(name = "countryOfOrigin", length = 80)
     private String countryOfOrigin;
 
-    @NotNull
-    @Column(name = "createdOn", nullable = false)
+    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @NotNull
-    @Column(name = "updatedOn", nullable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false, updatable = false)
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "brand")
