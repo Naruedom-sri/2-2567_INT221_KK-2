@@ -71,6 +71,14 @@ onMounted(() => getSaleItem());
           <span class="itbms-price-unit">฿</span>
           {{ item.price?.toLocaleString() }}
         </p>
+        <div class="flex h-4 items-center gap-2">
+          <p class="w-3 h-3 rounded-full bg-green-500"></p>
+          <h1 class="my-4 text-green-500">Instock</h1>
+          <p class="itbms-quantity text-white/80">
+            / available {{ item.quantity }}
+            <span class="itbms-quantity-unit">units</span>
+          </p>
+        </div>
       </div>
       <div class="truck-bag flex justify-end gap-6 h-7 mx-20">
         <div class="flex gap-2">
@@ -118,7 +126,7 @@ onMounted(() => getSaleItem());
       <div class="detail-content-right self-center mr-20 space-y-5">
         <h1 class="text-3xl">Overview</h1>
         <p class="itbms-description">{{ item.description }}</p>
-        <h1 class="text-3xl">
+        <h1 class="text-3xl mt-10">
           Model. <span class="text-white/80">Which is best for you?</span>
         </h1>
         <div
@@ -148,7 +156,7 @@ onMounted(() => getSaleItem());
             From ฿ {{ item.price?.toLocaleString() }}
           </p>
         </div>
-        <h1 class="text-3xl">
+        <h1 class="text-3xl mt-10">
           Finish. <span class="text-white/80">Pick your favorite.</span>
         </h1>
         <h1>
@@ -164,7 +172,7 @@ onMounted(() => getSaleItem());
           <p class="w-8 h-8 border-4 bg-blue-300 rounded-full"></p>
         </div>
 
-        <h1 class="text-3xl">
+        <h1 class="text-3xl mt-10">
           Storage.
           <span class="text-white/80">How much space do you need?</span>
         </h1>
@@ -201,17 +209,9 @@ onMounted(() => getSaleItem());
           </p>
         </div>
         <div class="quantity">
-          <h1 class="text-3xl">
+          <h1 class="text-3xl mt-10 mb-5">
             Quantity. <span class="text-white/80">How many do you want?</span>
           </h1>
-          <div class="flex items-center gap-2">
-            <p class="w-3 h-3 rounded-full bg-green-500"></p>
-            <h1 class="my-4 text-green-500">Instock</h1>
-            <p class="itbms-quantity">
-              / available {{ item.quantity }}
-              <span class="itbms-quantity-unit">units</span>
-            </p>
-          </div>
           <button
             class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
           >
@@ -230,7 +230,7 @@ onMounted(() => getSaleItem());
             +
           </button>
         </div>
-        <div class="btn-add-buy mt-7">
+        <div class="btn-add-buy mt-10">
           <div class="flex justify-between gap-4 space-y-5">
             <button
               @click="showDialog = true"

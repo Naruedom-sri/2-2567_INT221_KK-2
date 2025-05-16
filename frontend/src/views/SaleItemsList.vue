@@ -7,6 +7,7 @@ import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/์NavBar.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
+const brands = ref([]);
 const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const updateTime = () => {
@@ -22,9 +23,19 @@ const getAllSaleItems = async () => {
     items.value = [];
   }
 };
+
+const getAllBrands = async () => {
+  try {
+    brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+  } catch (error) {
+    console.log(error);
+    brands.value = [];
+  }
+};
 onMounted(() => {
   updateTime();
   getAllSaleItems();
+  getAllBrands();
 });
 </script>
 
@@ -57,6 +68,34 @@ onMounted(() => {
       </RouterLink>
     </div>
     <div class="table w-full px-10 my-10">
+      <div class="flex justify-around mb-10">
+        <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
+          <img
+            src="/src/assets/imgs/symbol-phone.png"
+            alt="phone"
+            class="w-36 object-cover"
+          />
+          <div class="self-center space-y-2">
+            <h1 class="text-2xl">Available model</h1>
+            <p class="w-fit mx-auto p-1 rounded-full text-xl bg-blue-500">
+              {{ items.length }}
+            </p>
+          </div>
+        </div>
+        <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
+          <img
+            src="/src/assets/imgs/symbol-brand.png"
+            alt="brand"
+            class="w-36 object-cover"
+          />
+          <div class="self-center space-y-2">
+            <h1 class="text-2xl">Available Brand</h1>
+            <p class="w-fit mx-auto p-1 rounded-full text-xl bg-blue-500">
+              {{ brands.length }}
+            </p>
+          </div>
+        </div>
+      </div>
       <h1 class="text-4xl mb-10">My Product</h1>
       <table class="w-full">
         <tr class="bg-[rgba(22,22,23,255)]">
@@ -70,23 +109,34 @@ onMounted(() => {
           <th>Action</th>
         </tr>
         <tr v-for="(item, index) in items" :key="index" class="itbms-row">
-          <td>{{ item.id }}</td>
-          <td>{{ item.brandName }}</td>
-          <td>{{ item.model }}</td>
-          <td>
+          <td class="itbms-id">{{ item.id }}</td>
+          <td class="itbms-brand">{{ item.brandName }}</td>
+          <td class="itbms-model">{{ item.model }}</td>
+          <td class="itbms-ramGb">
             {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
           </td>
-          <td>
+          <td class="itbms-storageGb">
             {{
               item.storageGb === null || item.storageGb === ""
                 ? "-"
                 : item.storageGb
             }}
           </td>
-          <td>
+          <td class="itbms-color">
             {{ item.color === null || item.color === "" ? "-" : item.color }}
           </td>
-          <td>฿ {{ item.price.toLocaleString() }}</td>
+          <td class="itbms-price">฿ {{ item.price.toLocaleString() }}</td>
+          <td class="flex justify-center gap-5">
+            <RouterLink
+              :to="{ name: 'EditSaleItems', params: { itemId: item.id } }"
+              class="itbms-edit-button w-10 border rounded border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+              >E</RouterLink
+            >
+            <span
+              class="itbms-delete-button w-10 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
+              >D</span
+            >
+          </td>
         </tr>
       </table>
     </div>

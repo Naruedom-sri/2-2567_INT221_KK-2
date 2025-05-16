@@ -11,7 +11,7 @@ const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const updateTime = () => {
   const date = new Date();
-  time.value = date.toLocaleString();
+  time.value = date.toLocaleTimeString();
   setInterval(updateTime, 1000);
 };
 const getAllSaleItems = async () => {
