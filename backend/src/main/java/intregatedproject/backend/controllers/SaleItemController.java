@@ -32,7 +32,6 @@ public class SaleItemController {
         return ResponseEntity.ok(dtoList);
     }
 
-
     @GetMapping("/v1/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemDetailDto> getSaleItemById(@PathVariable int id) {
         SaleItem item = service.getSaleItemById(id);

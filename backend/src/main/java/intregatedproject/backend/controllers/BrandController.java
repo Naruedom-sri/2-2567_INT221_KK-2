@@ -30,11 +30,29 @@ public class BrandController {
         return ResponseEntity.ok(brandDtos);
     }
 
-    @DeleteMapping("/v1/brands/{id}")
-    public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
-        service.deleteBrand(id);
-        return ResponseEntity.status(204).body(null);
+    private ResponseBrandDto convertToDto(Brand brand) {
+        ResponseBrandDto dto = new ResponseBrandDto();
+        dto.setId(brand.getId());
+        dto.setName(brand.getName());
+        dto.setWebsiteUrl(brand.getWebsiteUrl());
+        dto.setCountryOfOrigin(brand.getCountryOfOrigin());
+        dto.setIsActive(brand.getIsActive());
+        dto.setNoOfSaleItems(brand.getSaleItems() != null ? brand.getSaleItems().size() : 0);
+        return dto;
     }
+
+    @GetMapping("/v1/brands/{id}")
+    public ResponseEntity<ResponseBrandDto> getBrandById(@PathVariable int id) {
+        Brand brand = service.getBrandById(id);
+        return ResponseEntity.ok(convertToDto(brand));
+    }
+
+//    @GetMapping("/v1/brands/{id}")
+//    public ResponseEntity<ResponseBrandDto> getBrandById(@PathVariable int id) {
+//        Brand brand = service.getBrandById(id);
+//        ResponseBrandDto responseBrandDto = modelMapper.map(brand, ResponseBrandDto.class);
+//        return ResponseEntity.ok(responseBrandDto);
+//    }
 
     @PostMapping("/v1/brands")
     public ResponseEntity<ResponseBrandDto> createBrand(@RequestBody RequestBrandDto brand) {
@@ -48,6 +66,12 @@ public class BrandController {
         Brand updatedBrand = service.updateBrand(id, requestBrandDto);
         ResponseBrandDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDto.class);
         return ResponseEntity.ok(updatedBrandDto);
+    }
+
+    @DeleteMapping("/v1/brands/{id}")
+    public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
+        service.deleteBrand(id);
+        return ResponseEntity.status(204).body(null);
     }
 
 }
