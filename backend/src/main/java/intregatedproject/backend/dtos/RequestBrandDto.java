@@ -9,5 +9,5 @@ public class RequestBrandDto {
     private String name;
     private String websiteUrl;
     private String countryOfOrigin;
-    private Boolean isActive = false;
+    private Boolean isActive;
 }

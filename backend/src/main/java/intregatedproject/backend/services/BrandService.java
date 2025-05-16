@@ -52,7 +52,7 @@ public class BrandService {
         brand.setName(brandDto.getName());
         brand.setWebsiteUrl(brandDto.getWebsiteUrl());
         brand.setCountryOfOrigin(brandDto.getCountryOfOrigin());
-        brand.setIsActive(brandDto.getIsActive() != null ? brandDto.getIsActive() : false);
+        brand.setIsActive(brandDto.getIsActive() != null ? brandDto.getIsActive() : true);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -69,18 +69,19 @@ public class BrandService {
     }
 
     public Brand updateBrand(int id, RequestBrandDto brandDto) {
-        var checkDup = getAllBrands().stream().filter(brand -> brand.getName().equalsIgnoreCase(brandDto.getName())).toList();
-        if(!checkDup.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate brand found");
-        }
         Brand updateBrand = getBrandById(id);
+        if (!brandDto.getName().equalsIgnoreCase(updateBrand.getName())) {
+            boolean nameExists = brandRepository.existsById(updateBrand.getId());
+            if (nameExists) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Brand name already exists");
+            }
+        }
         convertDtoToEntity(brandDto,updateBrand);
         return brandRepository.save(updateBrand);
     }
 
     public void deleteBrand(int id) {
         Brand brand = getBrandById(id);
-
         long count = saleItemRepository.countByBrandId(id);
         if (count > 0) {
             throw new IllegalStateException("Cannot delete brand: " + count + " phones are using this brand.");

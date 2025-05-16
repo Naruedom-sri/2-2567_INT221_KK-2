@@ -5,10 +5,12 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,4 +37,17 @@ public class GlobalExceptionHandler {
                                                 "message", "Something went wrong: " + ex.getMessage()),
                                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
+                return new ResponseEntity<>(
+                        Map.of(
+                                "status", ex.getStatusCode().value(),
+                                "error", ex.getStatusCode()+"Duplicate name",
+                                "message", Objects.requireNonNull(ex.getReason())
+                        ),
+                        ex.getStatusCode()
+                );
+        }
+
 }
