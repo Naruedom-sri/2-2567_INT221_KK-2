@@ -1,5 +1,6 @@
 package intregatedproject.backend.controllers;
 
+import intregatedproject.backend.dtos.RequestBrandDto;
 import intregatedproject.backend.dtos.ResponseBrandDto;
 import intregatedproject.backend.dtos.ResponseSaleItemDto;
 import intregatedproject.backend.entities.Brand;
@@ -34,4 +35,19 @@ public class BrandController {
         service.deleteBrand(id);
         return ResponseEntity.status(204).body(null);
     }
+
+    @PostMapping("/v1/brands")
+    public ResponseEntity<ResponseBrandDto> createBrand(@RequestBody RequestBrandDto brand) {
+        Brand newBrand = service.createBrand(brand);
+        ResponseBrandDto newBrandDto = modelMapper.map(newBrand, ResponseBrandDto.class);
+        return ResponseEntity.status(201).body(newBrandDto);
+    }
+
+    @PutMapping("/v1/brands/{id}")
+    public ResponseEntity<ResponseBrandDto> updateBrand(@PathVariable int id, @RequestBody RequestBrandDto requestBrandDto) {
+        Brand updatedBrand = service.updateBrand(id, requestBrandDto);
+        ResponseBrandDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDto.class);
+        return ResponseEntity.ok(updatedBrandDto);
+    }
+
 }
