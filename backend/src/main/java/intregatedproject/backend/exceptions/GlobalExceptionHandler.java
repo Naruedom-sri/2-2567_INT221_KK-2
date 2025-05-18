@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BrandHasSaleItemException.class)
-    public ResponseEntity<Object> handleBrandAlreadyExists(BrandHasSaleItemException ex, HttpServletRequest request) {
+    public ResponseEntity<Object> handleBrandHasSaleItem(BrandHasSaleItemException ex, HttpServletRequest request) {
         return new ResponseEntity<>(
                 Map.of("timestamp",
                         LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),

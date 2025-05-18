@@ -12,7 +12,6 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -31,10 +30,10 @@ public class BrandService {
     }
 
     public Brand getBrandById(Integer id) {
-        try {
+        try{
             return brandRepository.findById(id).orElseThrow(() ->
                     new ResourceNotFoundException("Brand with id " + id + " not found"));
-        } catch (ResourceNotFoundException e) {
+        }catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Unexpected error occurred while fetching Brand with id " + id, e);
@@ -45,7 +44,7 @@ public class BrandService {
         brand.setName(brandDto.getName());
         brand.setWebsiteUrl(brandDto.getWebsiteUrl());
         brand.setCountryOfOrigin(brandDto.getCountryOfOrigin());
-        brand.setIsActive(brandDto.getIsActive() != null ? brandDto.getIsActive() : false);
+        brand.setIsActive(brandDto.getIsActive() != null ? brandDto.getIsActive() : true);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
