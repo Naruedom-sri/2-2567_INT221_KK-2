@@ -65,7 +65,7 @@ onMounted(() => getSaleItem());
       </div>
       <div class="model-price mx-20 space-y-4">
         <h1 class="itbms-model text-5xl font-semibold">
-          {{ item.model }}
+          <span class="itbms-brand">{{ item.brandName }}</span> {{ item.model }}
         </h1>
         <p class="itbms-price text-white/80 text-lg">
           From
@@ -137,7 +137,7 @@ onMounted(() => getSaleItem());
             <p class="itbms-model">
               {{ item.model }}
             </p>
-            <p class="itbms-screenSizeInc text-white/80 text-base">
+            <p class="itbms-screenSizeInch text-white/80 text-base">
               {{
                 item.screenSizeInch === null || item.screenSizeInch === ""
                   ? "-"

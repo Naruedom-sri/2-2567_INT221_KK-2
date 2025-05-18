@@ -51,7 +51,11 @@ const getAllBrand = async () => {
 };
 
 const goBackToPreviousPage = () => {
-  route.back();
+  if (!props.isEditing) {
+    route.push({ name: "SaleItemsGallery" });
+  } else {
+    route.back();
+  }
 };
 
 const checkIsEditing = async () => {
