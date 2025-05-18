@@ -24,7 +24,7 @@ public class BrandService {
 
     public List<Brand> getAllBrands() {
         try {
-            return brandRepository.findAll(Sort.by("name").ascending());
+            return brandRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve brands from database.", e);
         }
@@ -74,7 +74,7 @@ public class BrandService {
     public void deleteBrand(int id) {
         Brand brand = getBrandById(id);
         if (!brand.getSaleItems().isEmpty()) {
-            throw new BrandHasSaleItemException("Can't delete brand: " + brand.getId() + " because it has sale items associated with it.");
+            throw new BrandHasSaleItemException("Can't delete brand " + brand.getId() + " because it has sale items associated with it.");
         }
         brandRepository.delete(brand);
     }

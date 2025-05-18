@@ -42,19 +42,18 @@ const quantityInput = ref();
 
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+  brands.value.sort((a, b) => a.name.localeCompare(b.name));
   try {
   } catch (error) {
     console.log(error);
     brands.value = [];
   }
 };
+
 const goBackToPreviousPage = () => {
-  if (!props.isEditing) {
-    route.push({ name: "SaleItemsGallery" });
-  } else {
-    route.back();
-  }
+  route.back();
 };
+
 const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
@@ -77,6 +76,7 @@ const checkIsEditing = async () => {
     item.value = null;
   }
 };
+
 const checkAllNonOptionalFiled = () => {
   if (
     brandItem.value !== undefined &&
@@ -131,7 +131,7 @@ const addUpdateNewSaleItem = async () => {
         newItem
       );
       if (data) {
-        statusStore.setStatus(201);
+        statusStore.setStatusAndMethod("add", 201);
       }
     } else {
       const data = await updateData(
@@ -140,7 +140,7 @@ const addUpdateNewSaleItem = async () => {
         newItem
       );
       if (data) {
-        statusStore.setStatus(200);
+        statusStore.setStatusAndMethod("update", 200);
       }
     }
     goBackToPreviousPage();
@@ -160,7 +160,7 @@ const checkDisabled = () => {
   }
 };
 
-function focusNext(refName) {
+const focusNext = (refName) => {
   switch (refName) {
     case "modelInput":
       modelInput.value?.focus();
@@ -187,7 +187,7 @@ function focusNext(refName) {
       quantityInput.value?.focus();
       break;
   }
-}
+};
 onMounted(() => {
   checkIsEditing();
   getAllBrand();
@@ -225,7 +225,7 @@ watch(
       >
         Home
       </RouterLink>
-      <h1 class="mx-1">-</h1>
+      <h1 class="mx-3">/</h1>
       <h1
         v-if="!isEditing"
         class="px-3 rounded-2xl bg-gradient-to-r from-purple-800 to-blue-400"
@@ -246,7 +246,7 @@ watch(
     >
       {{ isEditing ? `Edit ${item.model} ${item.color}` : "Add New Sale Item" }}
     </h1>
-    <p class="text-white/80 mx-20 mt-3">
+    <p class="mx-20 mt-3 text-white/80">
       {{
         isEditing
           ? `It's the little details that make a product truly complete.`
@@ -401,11 +401,11 @@ watch(
               v-if="!isEditing"
               :disabled="!isContainAllNonOtionalFiled"
               type="submit"
-              class="itbms-save-button w-full py-2 rounded-4xl border hover:cursor-pointer duration-150"
+              class="itbms-save-button w-full py-2 rounded-4xl duration-150"
               :class="
                 !isContainAllNonOtionalFiled
-                  ? 'border-gray-400 text-gray-400'
-                  : 'bg-blue-500 hover:text-white'
+                  ? 'border border-gray-400 text-gray-400'
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
               "
             >
               Add
@@ -414,11 +414,11 @@ watch(
               v-else
               :disabled="isDisabled"
               type="submit"
-              class="itbms-save-button w-full py-2 rounded-4xl border hover:cursor-pointer duration-150"
+              class="itbms-save-button w-full py-2 rounded-4xl hover:cursor-pointer duration-150"
               :class="
                 isDisabled
-                  ? 'border-gray-400 text-gray-400'
-                  : 'bg-blue-500 hover:text-white'
+                  ? 'border border-gray-400 text-gray-400'
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
               "
             >
               Save

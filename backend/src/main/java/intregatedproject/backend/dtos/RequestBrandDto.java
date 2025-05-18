@@ -8,6 +8,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class RequestBrandDto {
+    private Integer id;
     private String name;
     private String websiteUrl;
     private String countryOfOrigin;
@@ -30,7 +31,7 @@ public class RequestBrandDto {
     }
 
     public void setIsActive(Boolean isActive){
-        this.isActive = Objects.requireNonNullElse(isActive, false);
+        this.isActive = Objects.requireNonNullElse(isActive, true);
     }
 
     public void setCountryOfOrigin(String countryOfOrigin){

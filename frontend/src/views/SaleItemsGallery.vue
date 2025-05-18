@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { getAllData } from "@/libs/api";
 import NavBar from "@/components/์NavBar.vue";
-import AlertMessage from "@/components/AlertMessage.vue";
+import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 const statusStore = useSaleItemStatusStore();
@@ -36,7 +36,7 @@ onMounted(() => {
       <p class="text-white">Portable, fast to use, new model</p>
       <RouterLink
         :to="{ name: 'AddSaleItems' }"
-        class=" w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
+        class="w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
         >Add New</RouterLink
       >
     </div>
@@ -56,7 +56,7 @@ onMounted(() => {
         Add Sale Item
       </RouterLink>
     </div>
-    <AlertMessage v-show="statusStore.getStatus() !== null" />
+    <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
     <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"
@@ -65,7 +65,7 @@ onMounted(() => {
         no sale item
       </h1>
       <RouterLink
-        @click="statusStore.clearStatus()"
+        @click="statusStore.clearStatusAndMethod()"
         v-for="(item, index) in items"
         v-show="items.length !== 0"
         :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
@@ -79,7 +79,8 @@ onMounted(() => {
           <p class="itbms-model font-bold">{{ item.model }}</p>
           <p class="itbms-ramGb text-sm">
             {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-            / <span class="itbms-storageGb">{{
+            /
+            <span class="itbms-storageGb">{{
               item.storageGb === null || item.storageGb === ""
                 ? "-"
                 : item.storageGb
@@ -96,7 +97,11 @@ onMounted(() => {
               item.price.toLocaleString()
             }}</span>
           </p>
-          <button class="py-2 px-4 mt-4 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90">Add to Cart</button>
+          <button
+            class="py-2 px-4 mt-4 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90"
+          >
+            Add to Cart
+          </button>
         </div>
         <img
           src="/src/assets/imgs/iphone-item.png"

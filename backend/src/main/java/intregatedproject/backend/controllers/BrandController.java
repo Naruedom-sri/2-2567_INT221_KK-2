@@ -1,6 +1,7 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.RequestBrandDto;
+import intregatedproject.backend.dtos.ResponseBrandDetailDto;
 import intregatedproject.backend.dtos.ResponseBrandDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.services.BrandService;
@@ -29,24 +30,25 @@ public class BrandController {
     }
 
     @GetMapping("/v1/brands/{id}")
-    public ResponseEntity<ResponseBrandDto> getBrandById(@PathVariable int id) {
+    public ResponseEntity<ResponseBrandDetailDto> getBrandById(@PathVariable int id) {
         Brand brand = service.getBrandById(id);
-        ResponseBrandDto responseBrandDto = modelMapper.map(brand, ResponseBrandDto.class);
+        ResponseBrandDetailDto responseBrandDto = modelMapper.map(brand, ResponseBrandDetailDto.class);
         responseBrandDto.setNoOfSaleItems(brand.getSaleItems().size());
         return ResponseEntity.ok(responseBrandDto);
     }
 
     @PostMapping("/v1/brands")
-    public ResponseEntity<ResponseBrandDto> createBrand(@RequestBody RequestBrandDto brand) {
+    public ResponseEntity<ResponseBrandDetailDto> createBrand(@RequestBody RequestBrandDto brand) {
         Brand newBrand = service.createBrand(brand);
-        ResponseBrandDto newBrandDto = modelMapper.map(newBrand, ResponseBrandDto.class);
+        ResponseBrandDetailDto newBrandDto = modelMapper.map(newBrand, ResponseBrandDetailDto.class);
         return ResponseEntity.status(201).body(newBrandDto);
     }
 
     @PutMapping("/v1/brands/{id}")
-    public ResponseEntity<ResponseBrandDto> updateBrand(@PathVariable int id, @RequestBody RequestBrandDto requestBrandDto) {
+    public ResponseEntity<ResponseBrandDetailDto> updateBrand(@PathVariable int id, @RequestBody RequestBrandDto requestBrandDto) {
         Brand updatedBrand = service.updateBrand(id, requestBrandDto);
-        ResponseBrandDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDto.class);
+        ResponseBrandDetailDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDetailDto.class);
+        updatedBrandDto.setNoOfSaleItems(updatedBrand.getSaleItems().size());
         return ResponseEntity.ok(updatedBrandDto);
     }
 

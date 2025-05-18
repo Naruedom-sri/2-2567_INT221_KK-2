@@ -1,24 +1,33 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useSaleItemStatusStore = defineStore('saleItemStatus', () => {
+export const useSaleItemStatusStore = defineStore("saleItemStatus", () => {
   const statusCode = ref(null);
+  const method = ref(null);
 
-  const setStatus = (code) => {
+  const setStatusAndMethod = (str, code) => {
     statusCode.value = code;
+    method.value = str;
   };
 
-  const clearStatus = () => {
+  const clearStatusAndMethod = () => {
     statusCode.value = null;
+    method.value = null;
   };
-  const getStatus = ()=>{
-    return statusCode.value
-  }
+  const getStatus = () => {
+    return statusCode.value;
+  };
+  
+  const getMethod = () => {
+    return method.value;
+  };
 
   return {
     statusCode,
-    setStatus,
-    clearStatus,
+    method,
+    getMethod,
+    setStatusAndMethod,
+    clearStatusAndMethod,
     getStatus,
   };
 });

@@ -1,0 +1,331 @@
+DeletCan<script setup>
+import NavBar from "@/components/์NavBar.vue";
+import { ref, onMounted, watch } from "vue";
+import { createData, updateData, getDataById } from "@/libs/api";
+import { useRouter, useRoute } from "vue-router";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import Footer from "@/components/Footer.vue";
+import BrandNotFound from "@/components/BrandNotFound.vue";
+
+const {
+  params: { brandId },
+} = useRoute();
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const props = defineProps({
+  isEditing: Boolean,
+});
+const statusStore = useSaleItemStatusStore();
+const route = useRouter();
+const brand = ref({});
+const name = ref();
+const websiteUrl = ref();
+const country = ref();
+const isActive = ref(true);
+const isContainAllNonOtionalFiled = ref(false);
+const isUpdatedFiled = ref(false);
+const isDisabled = ref(true);
+
+const nameInput = ref();
+const websiteUrlInput = ref();
+const countryInput = ref();
+
+const checkIsEditing = async () => {
+  try {
+    if (props.isEditing) {
+      brand.value = await getDataById(`${BASE_API_DOMAIN}/v1/brands`, brandId);
+      name.value = brand.value.name;
+      websiteUrl.value = brand.value.websiteUrl;
+      country.value = brand.value.countryOfOrigin;
+      isActive.value = brand.value.isActive;
+    }
+  } catch (error) {
+    console.log(error);
+    brand.value = null;
+  }
+};
+
+const checkAllNonOptionalFiled = () => {
+  if (name.value !== undefined && name.value !== "") {
+    isContainAllNonOtionalFiled.value = true;
+  } else {
+    isContainAllNonOtionalFiled.value = false;
+  }
+};
+
+const checkUpdatedFiled = () => {
+  if (
+    name.value !== brand.value.name ||
+    websiteUrl.value !== brand.value.websiteUrl ||
+    country.value !== brand.value.countryOfOrigin ||
+    (isActive.value !== brand.value.isActive &&
+      isActive.value !== JSON.stringify(brand.value.isActive))
+  ) {
+    isUpdatedFiled.value = true;
+  } else {
+    console.log("not update");
+    isUpdatedFiled.value = false;
+  }
+};
+
+const checkDisabled = () => {
+  if (!isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+    isDisabled.value = true;
+  } else if (isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+    isDisabled.value = true;
+  } else if (!isContainAllNonOtionalFiled.value && isUpdatedFiled.value) {
+    isDisabled.value = true;
+  } else {
+    isDisabled.value = false;
+  }
+};
+
+const addUpdateNewBrand = async () => {
+  try {
+    const newBrand = {
+      name: name.value,
+      websiteUrl: websiteUrl.value,
+      countryOfOrigin: country.value,
+      isActive: isActive.value,
+    };
+    if (!props.isEditing) {
+      const data = await createData(`${BASE_API_DOMAIN}/v1/brands`, newBrand);
+      if (data) {
+        statusStore.setStatusAndMethod("add", 201);
+      }
+    } else {
+      const data = await updateData(
+        `${BASE_API_DOMAIN}/v1/brands`,
+        brandId,
+        newBrand
+      );
+      if (data) {
+        statusStore.setStatusAndMethod("update", 200);
+      }
+    }
+    goBackToPreviousPage();
+  } catch (error) {
+    console.log(error);
+    goBackToPreviousPage();
+  }
+};
+
+const focusNext = (refName) => {
+  switch (refName) {
+    case "nameInput":
+      nameInput.value?.focus();
+      break;
+    case "websiteUrlInput":
+      websiteUrlInput.value?.focus();
+      break;
+    case "countryInput":
+      countryInput.value?.focus();
+      break;
+  }
+};
+
+const goBackToPreviousPage = () => {
+  if (!props.isEditing) {
+    route.push({ name: "BrandList" });
+  } else {
+    route.back();
+  }
+};
+watch(
+  [name, websiteUrl, country, isActive],
+  () => {
+    checkAllNonOptionalFiled();
+    checkUpdatedFiled();
+    checkDisabled();
+  },
+  { immediate: true }
+);
+onMounted(() => {
+  checkIsEditing();
+});
+</script>
+
+<template>
+  <NavBar />
+  <BrandNotFound v-if="brand === null" />
+  <div v-else class="add-edit-brand text-white">
+    <div class="flex py-7 mx-20 border-b border-white">
+      <RouterLink
+        :to="{ name: 'SaleItemsList' }"
+        class="itbms-home-button hover:text-blue-500 hover:cursor-pointer duration-100"
+      >
+        Sale Item List
+      </RouterLink>
+      <h1 class="mx-3">/</h1>
+      <RouterLink
+        :to="{ name: 'BrandList' }"
+        class="itbms-manage-brand hover:text-blue-500 hover:cursor-pointer duration-100"
+      >
+        Brand List
+      </RouterLink>
+      <h1 class="mx-3">/</h1>
+      <h1
+        v-if="!isEditing"
+        class="px-3 rounded-2xl bg-gradient-to-r from-pink-400 to-purple-500"
+      >
+        New Brand
+      </h1>
+      <button
+        v-else
+        @click="goBackToPreviousPage"
+        class="itbms-back-button px-3 rounded-2xl bg-gradient-to-r from-pink-400 to-purple-500"
+      >
+        {{ brand.name }}
+      </button>
+    </div>
+    <h1
+      class="w-fit mx-20 mt-5 text-5xl font-semibold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent"
+    >
+      {{ isEditing ? `Edit ${brand.name}` : "Add New Brand" }}
+    </h1>
+    <p class="mx-20 mt-3 text-white/80">
+      {{
+        isEditing
+          ? `A strong brand starts with a clear core.`
+          : "A brand is not just a logo, it's the feeling people have about you."
+      }}
+    </p>
+    <form @submit.prevent="addUpdateNewBrand" class="py-[35px] text-lg">
+      <div class="grid grid-cols-2 gap-10 mx-20">
+        <div class="w-full">
+          <img
+            src="/src/assets/imgs/symbol-brand.png"
+            alt="symbol-brand"
+            class="w-72 mx-auto"
+          />
+          <div class="w-52 flex gap-2">
+            <img
+              src="/src/assets/imgs/symbol-brand.png"
+              alt="symbol-brand"
+              class="object-cover border rounded-xl"
+            />
+            <img
+              src="/src/assets/imgs/symbol-brand.png"
+              alt="symbol-brand"
+              class="object-cover border rounded-xl"
+            />
+            <img
+              src="/src/assets/imgs/symbol-brand.png"
+              alt="symbol-brand"
+              class="object-cover border rounded-xl"
+            />
+          </div>
+          <div class="w-fit mx-auto my-4">
+            <button
+              class="py-1 px-2 text-xl border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+            >
+              Upload file image
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col space-y-4">
+          <h1 class="pb-1 text-3xl border-b">Overview</h1>
+          <label>Name<span>*</span></label>
+          <input
+            @keydown.enter.prevent="focusNext('websiteUrlInput')"
+            placeholder="e.g. Apple"
+            ref="nameInput"
+            v-model.trim="name"
+            required
+            type="text"
+            maxlength="30"
+            class="itbms-name"
+          />
+          <label>Website Url</label>
+          <input
+            @keydown.enter.prevent="focusNext('countryInput')"
+            placeholder="e.g. https://www.apple.com"
+            ref="websiteUrlInput"
+            v-model.trim="websiteUrl"
+            type="text"
+            maxlength="40"
+            class="itbms-websiteUrl"
+          />
+          <h1>isActive</h1>
+          <div class="space-x-2">
+            <input
+              v-model="isActive"
+              type="radio"
+              value="true"
+              name="isActive"
+              class="itbms-isActive"
+            />
+            <label class="text-base">True</label>
+            <input
+              v-model="isActive"
+              type="radio"
+              value="false"
+              name="isActive"
+              class="itbms-isActive"
+            />
+            <label class="text-base">False</label>
+          </div>
+
+          <label>Country of Origin</label>
+          <input
+            @keydown.enter.prevent="focusNext('nameInput')"
+            placeholder="e.g. America"
+            ref="countryInput"
+            v-model.trim="country"
+            type="text"
+            max="80"
+            class="itbms-countryOfOrigin"
+          />
+          <div class="btn-form mt-5 flex space-x-4 text-2xl">
+            <button
+              type="button"
+              @click="goBackToPreviousPage"
+              class="itbms-cancel-button w-full py-2 rounded-4xl border border-red-500 text-red-500 hover:cursor-pointer hover:bg-red-500 hover:text-white duration-150"
+            >
+              Cancel
+            </button>
+            <button
+              v-if="!isEditing"
+              :disabled="!isContainAllNonOtionalFiled"
+              type="submit"
+              class="itbms-save-button w-full py-2 rounded-4xl duration-150"
+              :class="
+                !isContainAllNonOtionalFiled
+                  ? 'border border-gray-400 text-gray-400 '
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
+              "
+            >
+              Add
+            </button>
+            <button
+              v-else
+              :disabled="isDisabled"
+              type="submit"
+              class="itbms-save-button w-full py-2 rounded-4xl duration-150"
+              :class="
+                isDisabled
+                  ? 'border border-gray-400 text-gray-400'
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
+              "
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <Footer />
+</template>
+
+<style scoped>
+input {
+  background-color: rgba(22, 22, 23, 255);
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+
+span {
+  color: red;
+  margin: 0 4px;
+}
+</style>

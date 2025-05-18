@@ -8,7 +8,7 @@ import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import NavBar from "@/components/์NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-import AlertMessage from "@/components/AlertMessage.vue";
+import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 
 const {
   params: { itemId },
@@ -32,7 +32,7 @@ const deleteSaleItem = async () => {
   showDialog.value = false;
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
-    statusStore.setStatus(status);
+    statusStore.setStatusAndMethod("delete", status);
     route.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
@@ -43,7 +43,7 @@ onMounted(() => getSaleItem());
 
 <template>
   <NavBar />
-  <AlertMessage v-show="statusStore.getStatus() !== null" />
+  <AlertMessageSaleItem v-show="statusStore.getStatus() !== null" />
   <SaleItemNotFound v-if="item === null" />
   <div v-else class="detail-container">
     <div class="itbms-row grid grid-cols-2 mb-10 text-white text-lg">
@@ -51,6 +51,7 @@ onMounted(() => getSaleItem());
         class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white text-base"
       >
         <RouterLink
+          @click="statusStore.clearStatusAndMethod()"
           :to="{ name: 'SaleItemsGallery' }"
           class="itbms-home-button hover:text-blue-500 hover:cursor-pointer duration-100"
         >

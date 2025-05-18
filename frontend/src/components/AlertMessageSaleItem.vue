@@ -5,19 +5,21 @@ const statusStore = useSaleItemStatusStore();
 const status = statusStore.getStatus();
 const showMessage = ref(true);
 const setIntervalShowMessage = () => {
-  console.log(status)
+  console.log(status);
   setTimeout(() => {
     showMessage.value = false;
-    statusStore.clearStatus();
-  }, 3000);
+    statusStore.clearStatusAndMethod();
+  }, 8000);
 };
-onMounted(() => setIntervalShowMessage());
+onMounted(() => {
+  setIntervalShowMessage();
+});
 </script>
 
 <template>
   <div
     v-show="showMessage"
-    class="message-container rounded space-y-3 py-5 px-10 mx-7 mt-7"
+    class="message-container fixed bottom-10 w-96 rounded-l space-y-1 py-2 px-10 z-50"
     :class="
       status !== 201 && status !== 200 && status !== 204
         ? 'text-red-800 bg-red-200'
@@ -25,7 +27,7 @@ onMounted(() => setIntervalShowMessage());
     "
   >
     <h1 class="text-2xl font-bold">
-      {{ status === 404 ? "Fail!" : "Success!" }}
+      {{ status === 404 ? "Fail !!!" : "Success !!!" }}
     </h1>
     <h1 v-if="status === 201" class="itbms-message text-lg">
       The sale item has been successfully added.
@@ -43,4 +45,20 @@ onMounted(() => setIntervalShowMessage());
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.message-container {
+  animation-name: slide;
+  animation-duration: 4s;
+  animation-direction: alternate;
+  animation-iteration-count: 2;
+  right: -400px;
+}
+@keyframes slide {
+  from {
+    right: -400px;
+  }
+  to {
+    right: 0;
+  }
+}
+</style>

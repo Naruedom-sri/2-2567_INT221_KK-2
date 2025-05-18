@@ -1,4 +1,6 @@
+import AddEditBrand from "@/views/AddEditBrand.vue";
 import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
+import BrandList from "@/views/BrandList.vue";
 import Home from "@/views/Home.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
@@ -43,6 +45,23 @@ const routes = [
     path: "/sale-items/list",
     name: "SaleItemsList",
     component: SaleItemsList,
+  },
+  {
+    path: "/brands",
+    name: "BrandList",
+    component: BrandList,
+  },
+  {
+    path: "/brands/add",
+    name: "AddBrand",
+    component: AddEditBrand,
+    props: { isEditing: false },
+  },
+  {
+    path: "/brands/:brandId/edit",
+    name: "EditBrand",
+    component: AddEditBrand,
+    props: { isEditing: true },
   },
 ];
 
