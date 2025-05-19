@@ -1,0 +1,6 @@
+v.1    2025-05-19 initial release tc pbi-pre-6, pbi-6 and pbi-7
+v.1.2  2025-05-19 add body: [] in tc-pbi-pre6-1.cy.js
+                  add tc pbi8,1-4 
+
+
+                  

@@ -1,4 +1,5 @@
-DeletCan<script setup>
+DeletCan
+<script setup>
 import NavBar from "@/components/์NavBar.vue";
 import { ref, onMounted, watch } from "vue";
 import { createData, updateData, getDataById } from "@/libs/api";
@@ -248,18 +249,18 @@ onMounted(() => {
           <h1>isActive</h1>
           <div class="space-x-2">
             <input
-              v-model="isActive"
-              type="radio"
-              value="true"
-              name="isActive"
+              type="checkbox"
+              :checked="isActive === true"
+              @click="isActive === true ? (isActive = null) : (isActive = true)"
               class="itbms-isActive"
             />
             <label class="text-base">True</label>
             <input
-              v-model="isActive"
-              type="radio"
-              value="false"
-              name="isActive"
+              type="checkbox"
+              :checked="isActive === false"
+              @click="
+                isActive === false ? (isActive = null) : (isActive = false)
+              "
               class="itbms-isActive"
             />
             <label class="text-base">False</label>

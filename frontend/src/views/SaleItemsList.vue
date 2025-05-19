@@ -36,6 +36,7 @@ const getAllBrands = async () => {
   }
 };
 const deleteSaleItem = async (itemId) => {
+  statusStore.clearStatusAndMethod();
   showDialog.value = false;
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
@@ -61,7 +62,7 @@ onMounted(() => {
       <RouterLink
         :to="{ name: 'AddSaleItems' }"
         class="itbms-sale-item-add w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
-        >Add New</RouterLink
+        >Add Model</RouterLink
       >
     </div>
     <div

@@ -1,5 +1,6 @@
 <script setup>
 defineProps({
+  haveSaleItem: Boolean,
   visible: Boolean,
   title: { type: String, default: "Delete Confirmation" },
   message: { type: String, default: "Do you want to delete this sale item?" },
@@ -27,6 +28,7 @@ const cancel = () => emit("cancel");
           Cancel
         </button>
         <button
+          v-if="!haveSaleItem"
           class="itbms-confirm-button bg-red-600 text-white px-4 py-2 rounded hover:cursor-pointer hover:bg-red-600/80"
           @click="confirm"
         >

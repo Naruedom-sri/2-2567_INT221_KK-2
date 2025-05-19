@@ -2,7 +2,7 @@
 import NavBar from "@/components/์NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, onMounted } from "vue";
-import { getAllData, deleteData } from "@/libs/api";
+import { getAllData, deleteData, getDataById } from "@/libs/api";
 import AlertMessageBrand from "@/components/AlertMessageBrand.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
@@ -12,6 +12,22 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const showDialog = ref(false);
 const brandName = ref();
 const brandId = ref();
+const haveSaleItem = ref(false);
+
+const checkHaveSaleItem = async () => {
+  try {
+    const brand = await getDataById(
+      `${BASE_API_DOMAIN}/v1/brands`,
+      brandId.value
+    );
+    if (brand) {
+      haveSaleItem.value = brand.noOfSaleItems !== 0 ? true : false;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const getAllBrands = async () => {
   try {
     brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
@@ -22,6 +38,7 @@ const getAllBrands = async () => {
 };
 
 const deleteBrand = async (brandId) => {
+  statusStore.clearStatusAndMethod();
   showDialog.value = false;
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v1/brands`, brandId);
@@ -46,8 +63,8 @@ onMounted(() => {
       <p class="text-white">Designed with heart, felt in every touch.</p>
       <RouterLink
         :to="{ name: 'AddBrand' }"
-        class="itbms-sale-item-add w-40 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
-        >Create Your Style</RouterLink
+        class="itbms-add-button w-40 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
+        >Create Brand</RouterLink
       >
     </div>
     <div class="flex py-7 px-10 border-y border-white">
@@ -92,7 +109,7 @@ onMounted(() => {
         </tr>
         <tr v-for="(brand, index) in brands" :key="index" class="itbms-row">
           <td class="itbms-id">{{ brand.id }}</td>
-          <td class="itbms-brand">{{ brand.name }}</td>
+          <td class="itbms-name">{{ brand.name }}</td>
           <td class="flex justify-center gap-5">
             <RouterLink
               :to="{ name: 'EditBrand', params: { brandId: brand.id } }"
@@ -104,7 +121,8 @@ onMounted(() => {
               @click="
                 (showDialog = true),
                   (brandName = brand.name),
-                  (brandId = brand.id)
+                  (brandId = brand.id),
+                  checkHaveSaleItem()
               "
               class="itbms-delete-button w-10 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
             >
@@ -124,7 +142,12 @@ onMounted(() => {
   <ConfirmDialog
     :visible="showDialog"
     title="Delete Confirmation"
-    :message="`Do you want to delete ${brandName} brand?`"
+    :message="
+      haveSaleItem
+        ? `Delete ${brandName} is not allowed. There are sale items with ${brandName} brand.`
+        : `Do you want to delete ${brandName} brand?`
+    "
+    :haveSaleItem="haveSaleItem"
     @confirm="deleteBrand(brandId)"
     @cancel="showDialog = false"
   />
