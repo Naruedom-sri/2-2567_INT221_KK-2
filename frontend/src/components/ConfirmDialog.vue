@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  haveSaleItem: Boolean,
+  haveSaleItem: { type: Boolean, default: false },
   visible: Boolean,
   title: { type: String, default: "Delete Confirmation" },
   message: { type: String, default: "Do you want to delete this sale item?" },
