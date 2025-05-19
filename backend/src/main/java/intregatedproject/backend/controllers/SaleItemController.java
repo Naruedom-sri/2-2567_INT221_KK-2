@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin(origins = "http://localhost:5173")
 public class SaleItemController {
     @Autowired
     private SaleItemService service;
