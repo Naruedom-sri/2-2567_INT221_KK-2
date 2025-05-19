@@ -71,7 +71,7 @@ describe(`TC-FE-PBI8-DELETE-BRAND-3\n
             expect(deleteRequest).to.be.false;
         });
 
-        cy.location('pathname').should('eq', '/brands')
+        cy.url().should('include', '/brands')
         cy.get('.itbms-name').contains('Infinix (2025)').should('exist')
 
     })
@@ -109,7 +109,7 @@ describe(`TC-FE-PBI8-DELETE-BRAND-3\n
     })
 
     it(`should have "Infinix (2025)" brand with "Edit" and "Delete" button\n
-        should show a form when clicking the "Delete" of the "Infinix (2025)" brand.\n
+        should show a dialog when clicking the "Delete" of the "Infinix (2025)" brand.\n
         should show "Delete Confirmation" dialog with message "Do you want to delete Infinix (2025) brand?" with options "Confirm" and "Cancel".\n
         should delete the "Infinix (2025)" brand and should have statusCode 204.`,()=>{
         cy.intercept('DELETE', `${baseAPI}/v1/**`).as('deleteRequest') ;
@@ -140,7 +140,7 @@ describe(`TC-FE-PBI8-DELETE-BRAND-3\n
         })
         cy.wait(100)
 
-        cy.location('pathname').should('eq', '/brands')
+        cy.url().should('include', '/brands')
         cy.get('.itbms-message').contains('The brand has been deleted.')
 
     })

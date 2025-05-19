@@ -12,14 +12,5 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
-  },
-  server: {
-    proxy: {
-      "/itb-mshop": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-        secure: false
-      },
-    },
-  },
+  }
 });
