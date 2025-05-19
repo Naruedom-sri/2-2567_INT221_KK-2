@@ -249,21 +249,13 @@ onMounted(() => {
           <h1>isActive</h1>
           <div class="space-x-2">
             <input
+              v-model="isActive"
               type="checkbox"
-              :checked="isActive === true"
-              @click="isActive === true ? (isActive = null) : (isActive = true)"
-              class="itbms-isActive"
-            />
-            <label class="text-base">True</label>
-            <input
-              type="checkbox"
-              :checked="isActive === false"
               @click="
-                isActive === false ? (isActive = null) : (isActive = false)
+                isActive === true ? (isActive = false) : (isActive = true)
               "
               class="itbms-isActive"
             />
-            <label class="text-base">False</label>
           </div>
 
           <label>Country of Origin</label>
