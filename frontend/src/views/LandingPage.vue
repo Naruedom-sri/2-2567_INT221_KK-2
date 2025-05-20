@@ -39,16 +39,7 @@
   animation-timing-function: ease-in;
   animation-duration: 0.7s;
 }
-.itbms-shopnow {
-  animation-name: btn-slide1;
-  animation-timing-function: ease-in;
-  animation-duration: 1.2s;
-}
-.itbms-seller {
-  animation-name: btn-slide2;
-  animation-timing-function: ease-in;
-  animation-duration: 1.2s;
-}
+
 .glow-text {
   text-shadow: 0 0 5px #fff, 0 0 3px #fff;
 }
@@ -59,31 +50,6 @@
   }
   to {
     transform: translateY(0px);
-    opacity: 1;
-  }
-}
-@keyframes btn-slide1 {
-  0% {
-    transform: translateY(-500px);
-    opacity: 0;
-  }
-  80% {
-    transform: translateY(-100px);
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0px);
-  }
-}
-
-@keyframes btn-slide2 {
-  from {
-    transform: translateX(-500px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0px);
     opacity: 1;
   }
 }

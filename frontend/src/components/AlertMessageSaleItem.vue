@@ -50,21 +50,21 @@ onMounted(() => {
           X
         </button>
       </div>
-    </div>
-    <div class="message w-64">
-      <h1 v-if="status === 201" class="itbms-message text-lg">
-        The sale item has been successfully added.
-      </h1>
-      <h1 v-else-if="status === 200" class="itbms-message">
-        The sale item has been updated.
-      </h1>
-      <h1 v-else-if="status === 204" class="itbms-message">
-        The sale item has been deleted.
-      </h1>
-      <h1 v-else-if="status === 404" class="itbms-message">
-        The requested sale item does not exist.
-      </h1>
-      <h1 v-else>Something wrong.</h1>
+      <div class="message w-64">
+        <h1 v-if="status === 201" class="itbms-message text-lg">
+          The sale item has been successfully added.
+        </h1>
+        <h1 v-else-if="status === 200" class="itbms-message">
+          The sale item has been updated.
+        </h1>
+        <h1 v-else-if="status === 204" class="itbms-message">
+          The sale item has been deleted.
+        </h1>
+        <h1 v-else-if="status === 404" class="itbms-message">
+          The requested sale item does not exist.
+        </h1>
+        <h1 v-else>Something wrong.</h1>
+      </div>
     </div>
   </div>
 </template>
