@@ -32,13 +32,6 @@ onMounted(() => {
   <NavBar />
   <div class="gallery-container text-white">
     <div class="promote h-96 flex flex-col justify-center items-center gap-8">
-      <h1 class="text-6xl">it's your lifestyle</h1>
-      <p class="text-white">Portable, fast to use, new model</p>
-      <RouterLink
-        :to="{ name: 'AddSaleItems' }"
-        class="w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
-        >Add New</RouterLink
-      >
     </div>
     <div
       class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
@@ -116,7 +109,7 @@ onMounted(() => {
 
 <style scoped>
 .promote {
-  background-image: url("/src/assets/imgs/bg-gif.gif");
+  background-image: url("/src/assets/imgs/promote-item.png");
   background-size: contain;
   background-repeat: no-repeat;
 }

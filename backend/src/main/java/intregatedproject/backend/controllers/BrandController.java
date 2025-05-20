@@ -48,6 +48,7 @@ public class BrandController {
     public ResponseEntity<ResponseBrandDetailDto> updateBrand(@PathVariable int id, @RequestBody RequestBrandDto requestBrandDto) {
         Brand updatedBrand = service.updateBrand(id, requestBrandDto);
         ResponseBrandDetailDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDetailDto.class);
+        updatedBrandDto.setNoOfSaleItems(updatedBrand.getSaleItems().size());
         return ResponseEntity.ok(updatedBrandDto);
     }
 

@@ -25,7 +25,7 @@ public class SaleItemService {
 
     public List<SaleItem> getAllSaleItems() {
         try {
-            return saleItemRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
+            return saleItemRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve sale items from database.", e);
         }
