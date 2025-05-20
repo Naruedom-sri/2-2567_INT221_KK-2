@@ -23,7 +23,7 @@ public class BrandService {
 
     public List<Brand> getAllBrands() {
         try {
-            return brandRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
+            return brandRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve brands from database.", e);
         }
