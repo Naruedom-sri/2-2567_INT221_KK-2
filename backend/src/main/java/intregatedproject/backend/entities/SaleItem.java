@@ -30,9 +30,9 @@ public class    SaleItem {
     @Column(name = "model", nullable = false, length = 60)
     private String model;
 
-    @Size(max = 500)
+    @Lob
     @NotNull
-    @Column(name = "description", nullable = false, length = 500)
+    @Column(name = "description", nullable = false)
     private String description;
 
     @NotNull
@@ -48,7 +48,7 @@ public class    SaleItem {
     @Column(name = "storageGb")
     private Integer storageGb;
 
-    @Size(max = 50)
+    @Size(max = 40)
     @Column(name = "color", length = 50)
     private String color;
 
@@ -62,6 +62,5 @@ public class    SaleItem {
 
     @Column(name = "updatedOn", nullable = false, insertable = false, updatable = false)
     private Instant updatedOn;
-
 
 }
