@@ -31,8 +31,8 @@ const websiteUrlInput = ref();
 const countryInput = ref();
 
 const namePass = ref(null);
-const websitePass = ref(null);
-const countryPass = ref(null);
+const websitePass = ref(true);
+const countryPass = ref(true);
 const validInput = ref(false);
 
 function isValidUrl() {
@@ -61,8 +61,6 @@ const checkIsEditing = async () => {
       country.value = brand.value.countryOfOrigin;
       isActive.value = brand.value.isActive;
       namePass.value = true;
-      websitePass.value = true;
-      countryPass.value = true;
     }
   } catch (error) {
     console.log(error);
@@ -330,10 +328,7 @@ onMounted(() => {
             maxlength="40"
             class="itbms-websiteUrl"
           />
-          <h1
-            v-if="!websitePass && websitePass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!websitePass" class="text-red-400 text-sm">
             X Brand URL must be valid URL or not specified.
           </h1>
           <h1>isActive</h1>
@@ -367,10 +362,7 @@ onMounted(() => {
             max="80"
             class="itbms-countryOfOrigin"
           />
-          <h1
-            v-if="!countryPass && countryPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!countryPass" class="text-red-400 text-sm">
             X Brand country of origin must be 1-80 characters long or not
             specified.
           </h1>

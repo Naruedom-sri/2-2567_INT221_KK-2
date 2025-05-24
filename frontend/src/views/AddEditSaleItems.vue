@@ -99,13 +99,8 @@ const checkIsEditing = async () => {
       color.value = item.value.color;
       brandPass.value = true;
       modelPass.value = true;
-      colorPass.value = true;
       descriptionPass.value = true;
       pricePass.value = true;
-      ramGbPass.value = true;
-      storageGbPass.value = true;
-      screenSizeInchPass.value = true;
-      quantityPass.value = true;
     }
   } catch (error) {
     console.log(error);
@@ -479,10 +474,7 @@ watch(
             class="itbms-quantity"
             min="0"
           />
-          <h1
-            v-if="!quantityPass && quantityPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!quantityPass" class="text-red-400 text-sm">
             X Quantity must be non-negative integer.
           </h1>
           <h1 class="text-3xl mt-10 pb-1 border-b">Specifications</h1>
@@ -501,10 +493,7 @@ watch(
             maxlength="40"
             class="itbms-color"
           />
-          <h1
-            v-if="!colorPass && colorPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!colorPass" class="text-red-400 text-sm">
             X Color must be 1-40 characters long.
           </h1>
           <label>Ram ( GB )</label>
@@ -522,10 +511,7 @@ watch(
             class="itbms-ramGb"
             min="0"
           />
-          <h1
-            v-if="!ramGbPass && ramGbPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!ramGbPass" class="text-red-400 text-sm">
             X Ram size must be positive integer or not specified.
           </h1>
           <label>Screen Size ( Inches )</label>
@@ -549,10 +535,7 @@ watch(
             max="99"
             step="0.01"
           />
-          <h1
-            v-if="!screenSizeInchPass && screenSizeInchPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!screenSizeInchPass" class="text-red-400 text-sm">
             X Screen size must be positive number with at most 2 decimal points
             or not specified.
           </h1>
@@ -571,10 +554,7 @@ watch(
             class="itbms-storageGb"
             min="0"
           />
-          <h1
-            v-if="!storageGbPass && storageGbPass !== null"
-            class="text-red-400 text-sm"
-          >
+          <h1 v-if="!storageGbPass" class="text-red-400 text-sm">
             X Storage size must be positive integer or not specified.
           </h1>
           <div class="btn-form mt-5 flex space-x-4 text-2xl">
