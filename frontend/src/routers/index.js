@@ -7,7 +7,7 @@ import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
 import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
-const history = createWebHistory();
+const history = createWebHistory('/kk2/');
 const routes = [
   {
     path: "/sale-items",

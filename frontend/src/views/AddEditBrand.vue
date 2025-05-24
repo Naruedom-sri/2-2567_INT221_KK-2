@@ -30,6 +30,28 @@ const nameInput = ref();
 const websiteUrlInput = ref();
 const countryInput = ref();
 
+const namePass = ref(null);
+const websitePass = ref(true);
+const countryPass = ref(true);
+const validInput = ref(false);
+
+function isValidUrl() {
+  try {
+    new URL(websiteUrl.value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+const checkValidateInput = () => {
+  console.log("name pass:", namePass.value);
+  console.log("website pass:", websitePass.value);
+  console.log("country pass:", countryPass.value);
+  validInput.value =
+    namePass.value && websitePass.value && countryPass.value ? true : false;
+};
+
 const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
@@ -38,6 +60,7 @@ const checkIsEditing = async () => {
       websiteUrl.value = brand.value.websiteUrl;
       country.value = brand.value.countryOfOrigin;
       isActive.value = brand.value.isActive;
+      namePass.value = true;
     }
   } catch (error) {
     console.log(error);
@@ -63,21 +86,59 @@ const checkUpdatedFiled = () => {
   ) {
     isUpdatedFiled.value = true;
   } else {
-    console.log("not update");
     isUpdatedFiled.value = false;
   }
 };
 
 const checkDisabled = () => {
-  if (!isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+  if (
+    !isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    !validInput.value
+  ) {
     isDisabled.value = true;
-  } else if (isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    !validInput.value
+  ) {
     isDisabled.value = true;
-  } else if (!isContainAllNonOtionalFiled.value && isUpdatedFiled.value) {
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    !validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    !validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    validInput.value
+  ) {
     isDisabled.value = true;
   } else {
     isDisabled.value = false;
   }
+  console.log("contain non null filed:", isContainAllNonOtionalFiled.value);
+  console.log("is update filed:", isUpdatedFiled.value);
+  console.log("valid input:", validInput.value);
 };
 
 const addUpdateNewBrand = async () => {
@@ -136,7 +197,6 @@ watch(
   () => {
     checkAllNonOptionalFiled();
     checkUpdatedFiled();
-    checkDisabled();
   },
   { immediate: true }
 );
@@ -227,7 +287,15 @@ onMounted(() => {
           <h1 class="pb-1 text-3xl border-b">Overview</h1>
           <label>Name<span>*</span></label>
           <input
+            autofocus
             @keydown.enter.prevent="focusNext('websiteUrlInput')"
+            @blur="
+              name?.length > 30 || name === undefined
+                ? (namePass = false)
+                : (namePass = true),
+                checkValidateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. Apple"
             ref="nameInput"
             v-model.trim="name"
@@ -236,9 +304,23 @@ onMounted(() => {
             maxlength="30"
             class="itbms-name"
           />
+          <h1
+            v-if="!namePass && namePass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Brand name must be 1-30 characters long.
+          </h1>
           <label>Website Url</label>
           <input
             @keydown.enter.prevent="focusNext('countryInput')"
+            @blur="
+              websiteUrl?.length > 40 ||
+              (!isValidUrl() && websiteUrl !== '' && websiteUrl !== undefined)
+                ? (websitePass = false)
+                : (websitePass = true),
+                checkValidateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. https://www.apple.com"
             ref="websiteUrlInput"
             v-model.trim="websiteUrl"
@@ -246,13 +328,18 @@ onMounted(() => {
             maxlength="40"
             class="itbms-websiteUrl"
           />
+          <h1 v-if="!websitePass" class="text-red-400 text-sm">
+            X Brand URL must be valid URL or not specified.
+          </h1>
           <h1>isActive</h1>
           <div class="space-x-2">
             <input
               v-model="isActive"
               type="checkbox"
               @click="
-                isActive === true ? (isActive = false) : (isActive = true)
+                isActive === true ? (isActive = false) : (isActive = true),
+                  checkUpdatedFiled(),
+                  checkDisabled()
               "
               class="itbms-isActive"
             />
@@ -261,6 +348,13 @@ onMounted(() => {
           <label>Country of Origin</label>
           <input
             @keydown.enter.prevent="focusNext('nameInput')"
+            @blur="
+              country?.length > 80
+                ? (countryPass = false)
+                : (countryPass = true),
+                checkValidateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. America"
             ref="countryInput"
             v-model.trim="country"
@@ -268,6 +362,10 @@ onMounted(() => {
             max="80"
             class="itbms-countryOfOrigin"
           />
+          <h1 v-if="!countryPass" class="text-red-400 text-sm">
+            X Brand country of origin must be 1-80 characters long or not
+            specified.
+          </h1>
           <div class="btn-form mt-5 flex space-x-4 text-2xl">
             <button
               type="button"
@@ -278,11 +376,11 @@ onMounted(() => {
             </button>
             <button
               v-if="!isEditing"
-              :disabled="!isContainAllNonOtionalFiled"
+              :disabled="isDisabled"
               type="submit"
               class="itbms-save-button w-full py-2 rounded-4xl duration-150"
               :class="
-                !isContainAllNonOtionalFiled
+                isDisabled
                   ? 'border border-gray-400 text-gray-400 '
                   : 'bg-blue-500 hover:text-white hover:cursor-pointer'
               "

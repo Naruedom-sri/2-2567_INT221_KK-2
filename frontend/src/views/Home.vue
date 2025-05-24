@@ -19,7 +19,7 @@ const brands = ["Apple", "Samsung", "Vivo", "Oppo", "Huawei", "Sony"];
         class="w-36 flex flex-col items-center"
       >
         <img
-          :src="`/imgs/homes/${brand.toLocaleLowerCase()}.png`"
+          :src="`/kk2/imgs/homes/${brand.toLocaleLowerCase()}.png`"
           :alt="`${brand.toLocaleLowerCase()}`"
           class="object-cover"
         />

@@ -9,6 +9,7 @@ const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const countImg = ref(1);
 const updateTime = () => {
   const date = new Date();
   time.value = date.toLocaleTimeString();
@@ -22,6 +23,7 @@ const getAllSaleItems = async () => {
     items.value = [];
   }
 };
+
 onMounted(() => {
   updateTime();
   getAllSaleItems();
@@ -31,7 +33,77 @@ onMounted(() => {
 <template>
   <NavBar />
   <div class="gallery-container text-white">
-    <div class="promote h-96 flex flex-col justify-center items-center gap-8">
+    <div class="promote text-lg">
+      <div
+        class="w-full absolute duration-500"
+        :class="
+          countImg === 2 || countImg === 4
+            ? 'text-black'
+            : 'text-white'
+        "
+      >
+        <div class="my-11 flex justify-center gap-5">
+          <h1
+            @click="countImg = 1"
+            class="w-44 py-2 text-center hover:cursor-pointer"
+            :class="countImg === 1 ? 'underline' : 'hover:opacity-80'"
+          >
+            Galaxy S25 Ultra
+          </h1>
+          <h1
+            @click="countImg = 2"
+            class="w-44 py-2 text-center hover:cursor-pointer"
+            :class="countImg === 2 ? 'underline' : 'hover:opacity-80'"
+          >
+            Pixel 9 Pro
+          </h1>
+          <h1
+            @click="countImg = 3"
+            class="w-44 py-2 text-center hover:cursor-pointer"
+            :class="countImg === 3 ? 'underline' : 'hover:opacity-80'"
+          >
+            iPhone 12 Pro Max
+          </h1>
+          <h1
+            @click="countImg = 4"
+            class="w-44 py-2 text-center hover:cursor-pointer"
+            :class="countImg === 4 ? 'underline' : 'hover:opacity-80'"
+          >
+            Galaxy S25 | S25+
+          </h1>
+        </div>
+        <div class="relative flex flex-col items-center gap-5 top-130">
+          <h1 v-if="countImg === 1" class="font-black text-4xl">
+            Galaxy S25 Ultra
+          </h1>
+          <h1 v-else-if="countImg === 2" class="font-black text-4xl">
+            Pixel 9 Pro
+          </h1>
+          <h1 v-else-if="countImg === 3" class="font-black text-4xl">
+            iPhone 12 Pro Max
+          </h1>
+          <h1 v-else class="font-black text-4xl">Galaxy S25 | S25+</h1>
+          <div class="space-x-4">
+            <button class="text-base underline">More Detail</button>
+            <button
+              class="px-3 py-2 text-base rounded-4xl duration-500"
+              :class="
+                countImg === 2 || countImg === 4
+                  ? 'bg-black text-white'
+                  : 'bg-white text-black'
+              "
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
+      </div>
+      <img
+        :src="`/kk2/imgs/product-${countImg}.png`"
+        alt="product"
+        class="img-promote w-full h-[800px] object-cover"
+        :class="countImg === 2 ? 'object-top' : ''"
+      />
     </div>
     <div
       class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
@@ -108,9 +180,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.promote {
-  background-image: url("/src/assets/imgs/promote-item.png");
-  background-size: contain;
-  background-repeat: no-repeat;
+.animation {
+  animation-name: op;
+  animation-duration: 1s;
+}
+.img-promote {
+  z-index: -100;
+}
+@keyframes op {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>
