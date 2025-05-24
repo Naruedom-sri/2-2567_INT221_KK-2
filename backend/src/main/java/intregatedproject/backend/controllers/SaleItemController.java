@@ -72,8 +72,11 @@ public class SaleItemController {
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands,sortField,sortDirection);
+        List<ResponseSaleItemDetailDto> saleItemsDto = saleItems.stream().map(saleItem -> modelMapper
+                                                        .map(saleItem, ResponseSaleItemDetailDto.class))
+                                                        .collect(Collectors.toList());
         ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
-        dto.setSaleItems(saleItems);
+        dto.setSaleItems(saleItemsDto);
         dto.setPage(page);
         dto.setSize(size);
         dto.setSort(sortField+": "+sortDirection);

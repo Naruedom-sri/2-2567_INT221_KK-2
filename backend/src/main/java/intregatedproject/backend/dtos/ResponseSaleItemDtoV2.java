@@ -1,6 +1,5 @@
 package intregatedproject.backend.dtos;
 
-import intregatedproject.backend.entities.SaleItem;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ResponseSaleItemDtoV2 {
-    private List<SaleItem> saleItems;
+    private List<ResponseSaleItemDetailDto> saleItems;
     private boolean last;
     private boolean first;
     private Integer totalPages;

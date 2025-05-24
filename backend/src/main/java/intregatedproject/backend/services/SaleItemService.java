@@ -87,7 +87,7 @@ public class SaleItemService {
             String sortDirection
     ) {
         if (filterBrands == null || filterBrands.isEmpty()) {
-            if ("Brand.name".equals(sortField)) {
+            if ("Brand.name".equalsIgnoreCase(sortField)) {
                 if ("asc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findAllByOrderByBrand_NameAsc();
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
