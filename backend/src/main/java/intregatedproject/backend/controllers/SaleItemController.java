@@ -1,9 +1,6 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.RequestSaleItemDto;
-import intregatedproject.backend.dtos.ResponseSaleItemDetailDto;
-import intregatedproject.backend.dtos.ResponseSaleItemDto;
-import intregatedproject.backend.dtos.ResponseSaleItemDtoEdit;
+import intregatedproject.backend.dtos.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.services.SaleItemService;
 import org.modelmapper.ModelMapper;
@@ -65,13 +62,30 @@ public class SaleItemController {
         return ResponseEntity.status(204).body(null);
     }
 
-    //dont touch my pbi10,11
-    @GetMapping("/v1/sale-items/sort")
-    public ResponseEntity<List<ResponseSaleItemDto>> getAllSortedByBrandName() {
-        List<SaleItem> items = service.getAllSortedByBrandName();
-        List<ResponseSaleItemDto> dtoList = items.stream()
-                .map(item -> modelMapper.map(item, ResponseSaleItemDto.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtoList);
+
+    @GetMapping("/v2/sale-items")
+    public ResponseEntity<ResponseSaleItemDtoV2> getAllSortedByBrandName(
+            @RequestParam(required = false) List<String> filterBrands,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String sortField,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands,sortField,sortDirection);
+        ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
+        dto.setSaleItems(saleItems);
+        dto.setPage(page);
+        dto.setSize(size);
+        dto.setSort(sortField+": "+sortDirection);
+
+//        dto.setSaleItems(pageResult.getContent());
+//        dto.setFirst(pageResult.isFirst());
+//        dto.setLast(pageResult.isLast());
+//        dto.setTotalPages(pageResult.getTotalPages());
+//        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
+//        dto.setSize(pageResult.getSize());
+//        dto.setSort(sortField+": "+sortDirection);
+//        dto.setPage(page);
+        return ResponseEntity.ok(dto);
     }
 }
