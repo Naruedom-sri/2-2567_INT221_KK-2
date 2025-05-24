@@ -40,6 +40,33 @@ const storageInput = ref();
 const screenSizeInput = ref();
 const quantityInput = ref();
 
+const brandPass = ref(null);
+const modelPass = ref(null);
+const descriptionPass = ref(null);
+const pricePass = ref(null);
+const colorPass = ref(true);
+const quantityPass = ref(true);
+const ramGbPass = ref(true);
+const storageGbPass = ref(true);
+const screenSizeInchPass = ref(true);
+
+const validInput = ref(false);
+
+const checkVaildateInput = () => {
+  validInput.value =
+    brandPass.value &&
+    modelPass.value &&
+    colorPass.value &&
+    descriptionPass.value &&
+    pricePass.value &&
+    quantityPass.value &&
+    ramGbPass.value &&
+    storageGbPass.value &&
+    screenSizeInchPass.value
+      ? true
+      : false;
+};
+
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   brands.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -51,7 +78,7 @@ const getAllBrand = async () => {
 };
 
 const goBackToPreviousPage = () => {
-   route.back();
+  route.back();
 };
 
 const checkIsEditing = async () => {
@@ -70,6 +97,15 @@ const checkIsEditing = async () => {
       quantity.value = item.value.quantity;
       storageGb.value = item.value.storageGb;
       color.value = item.value.color;
+      brandPass.value = true;
+      modelPass.value = true;
+      colorPass.value = true;
+      descriptionPass.value = true;
+      pricePass.value = true;
+      ramGbPass.value = true;
+      storageGbPass.value = true;
+      screenSizeInchPass.value = true;
+      quantityPass.value = true;
     }
   } catch (error) {
     console.log(error);
@@ -97,7 +133,7 @@ const checkAllNonOptionalFiled = () => {
 const checkUpdatedFiled = () => {
   if (
     model.value !== item.value.model ||
-    brandItem.value !== item.value.brand ||
+    brandItem.value?.id !== item.value.brand?.id ||
     description.value !== item.value.description ||
     price.value !== item.value.price ||
     ramGb.value !== item.value.ramGb ||
@@ -110,6 +146,7 @@ const checkUpdatedFiled = () => {
   } else {
     isUpdatedFiled.value = false;
   }
+  console.log(isUpdatedFiled.value);
 };
 
 const addUpdateNewSaleItem = async () => {
@@ -125,6 +162,7 @@ const addUpdateNewSaleItem = async () => {
       storageGb: storageGb.value,
       color: color.value,
     };
+
     if (!props.isEditing) {
       const data = await createData(
         `${BASE_API_DOMAIN}/v1/sale-items`,
@@ -149,11 +187,47 @@ const addUpdateNewSaleItem = async () => {
   }
 };
 const checkDisabled = () => {
-  if (!isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+  if (
+    !isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    !validInput.value
+  ) {
     isDisabled.value = true;
-  } else if (isContainAllNonOtionalFiled.value && !isUpdatedFiled.value) {
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    !validInput.value
+  ) {
     isDisabled.value = true;
-  } else if (!isContainAllNonOtionalFiled.value && isUpdatedFiled.value) {
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    !validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    !isContainAllNonOtionalFiled.value &&
+    isUpdatedFiled.value &&
+    !validInput.value
+  ) {
+    isDisabled.value = true;
+  } else if (
+    isContainAllNonOtionalFiled.value &&
+    !isUpdatedFiled.value &&
+    validInput.value
+  ) {
     isDisabled.value = true;
   } else {
     isDisabled.value = false;
@@ -208,7 +282,6 @@ watch(
   () => {
     checkAllNonOptionalFiled();
     checkUpdatedFiled();
-    checkDisabled();
   },
   { immediate: true }
 );
@@ -291,6 +364,13 @@ watch(
           <label>Brand<span>*</span></label>
           <select
             autofocus
+            @blur="
+              brandItem === undefined
+                ? (brandPass = false)
+                : (brandPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             v-model.trim="brandItem"
             required
             class="itbms-brand px-5 py-2 rounded-lg bg-[rgba(22,22,23,255)]"
@@ -304,9 +384,22 @@ watch(
               {{ brand.name }}
             </option>
           </select>
+          <h1
+            v-if="!brandPass && brandPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Brand must be selected.
+          </h1>
           <label>Model<span>*</span> </label>
           <input
             @keydown.enter.prevent="focusNext('descriptionInput')"
+            @blur="
+              model?.length > 60 || model === undefined || model === ''
+                ? (modelPass = false)
+                : (modelPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. iPhone 15 Pro Max"
             ref="modelInput"
             v-model.trim="model"
@@ -315,19 +408,48 @@ watch(
             class="itbms-model"
             maxlength="60"
           />
+          <h1
+            v-if="!modelPass && modelPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Model must be 1-60 characters long.
+          </h1>
           <label>Description<span>*</span></label>
           <textarea
             @keydown.enter.prevent="focusNext('priceInput')"
+            @blur="
+              description?.length > 65535 ||
+              description === undefined ||
+              description === ''
+                ? (descriptionPass = false)
+                : (descriptionPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. Flagship smartphone with A17 chip and 256GB storage"
             ref="descriptionInput"
             v-model.trim="description"
             required
+            maxlength="65535"
             class="itbms-description px-4 py-2 h-32 rounded-xl bg-[rgba(22,22,23,255)]"
           ></textarea>
+          <h1
+            v-if="!descriptionPass && descriptionPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Description must be 1-65,535 characters long.
+          </h1>
           <h1 class="pb-1 text-3xl border-b mt-10">Pricing</h1>
           <label>Price ( ฿ )<span>*</span></label>
           <input
             @keydown.enter.prevent="focusNext('quantityInput')"
+            @blur="
+              price < 0 || price === undefined || price === ''
+                ? (pricePass = false)
+                : (pricePass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. 12990"
             ref="priceInput"
             v-model="price"
@@ -336,10 +458,20 @@ watch(
             class="itbms-price"
             min="0"
           />
-
+          <h1
+            v-if="!pricePass && pricePass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Price must be non-negative integer.
+          </h1>
           <label>Quantity</label>
           <input
             @keydown.enter.prevent="focusNext('colorInput')"
+            @blur="
+              quantity < 0 ? (quantityPass = false) : (quantityPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. 5"
             ref="quantityInput"
             v-model="quantity"
@@ -347,20 +479,42 @@ watch(
             class="itbms-quantity"
             min="0"
           />
+          <h1
+            v-if="!quantityPass && quantityPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Quantity must be non-negative integer.
+          </h1>
           <h1 class="text-3xl mt-10 pb-1 border-b">Specifications</h1>
           <label>Color</label>
           <input
             @keydown.enter.prevent="focusNext('ramInput')"
+            @blur="
+              color?.length > 40 ? (colorPass = false) : (colorPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. Midnight Blue"
             ref="colorInput"
             v-model.trim="color"
             type="text"
-            maxlength="50"
+            maxlength="40"
             class="itbms-color"
           />
+          <h1
+            v-if="!colorPass && colorPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Color must be 1-40 characters long.
+          </h1>
           <label>Ram ( GB )</label>
           <input
             @keydown.enter.prevent="focusNext('screenSizeInput')"
+            @blur="
+              ramGb < 0 ? (ramGbPass = false) : (ramGbPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. 8"
             ref="ramInput"
             v-model="ramGb"
@@ -368,20 +522,48 @@ watch(
             class="itbms-ramGb"
             min="0"
           />
+          <h1
+            v-if="!ramGbPass && ramGbPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Ram size must be positive integer or not specified.
+          </h1>
           <label>Screen Size ( Inches )</label>
           <input
             @keydown.enter.prevent="focusNext('storageInput')"
+            @blur="
+              screenSizeInch < 0 ||
+              (!/^\d+(\.\d{1,2})?$/.test(parseFloat(screenSizeInch)) &&
+                screenSizeInch !== undefined &&
+                screenSizeInch !== '')
+                ? (screenSizeInchPass = false)
+                : (screenSizeInchPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. 6.7"
             v-model="screenSizeInch"
             type="number"
             class="itbms-screenSizeInch"
             min="0"
             max="99"
-            step="0.1"
+            step="0.01"
           />
+          <h1
+            v-if="!screenSizeInchPass && screenSizeInchPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Screen size must be positive number with at most 2 decimal points
+            or not specified.
+          </h1>
           <label>Storage ( GB )</label>
           <input
             @keydown.enter.prevent="focusNext('modelInput')"
+            @blur="
+              storageGb < 0 ? (storageGbPass = false) : (storageGbPass = true),
+                checkVaildateInput(),
+                checkDisabled()
+            "
             placeholder="e.g. 256"
             ref="storageInput"
             v-model="storageGb"
@@ -389,6 +571,12 @@ watch(
             class="itbms-storageGb"
             min="0"
           />
+          <h1
+            v-if="!storageGbPass && storageGbPass !== null"
+            class="text-red-400 text-sm"
+          >
+            X Storage size must be positive integer or not specified.
+          </h1>
           <div class="btn-form mt-5 flex space-x-4 text-2xl">
             <button
               type="button"
@@ -399,11 +587,11 @@ watch(
             </button>
             <button
               v-if="!isEditing"
-              :disabled="!isContainAllNonOtionalFiled"
+              :disabled="isDisabled"
               type="submit"
               class="itbms-save-button w-full py-2 rounded-4xl duration-150"
               :class="
-                !isContainAllNonOtionalFiled
+                isDisabled
                   ? 'border border-gray-400 text-gray-400'
                   : 'bg-blue-500 hover:text-white hover:cursor-pointer'
               "
@@ -414,7 +602,7 @@ watch(
               v-else
               :disabled="isDisabled"
               type="submit"
-              class="itbms-save-button w-full py-2 rounded-4xl hover:cursor-pointer duration-150"
+              class="itbms-save-button w-full py-2 rounded-4xl duration-150"
               :class="
                 isDisabled
                   ? 'border border-gray-400 text-gray-400'
