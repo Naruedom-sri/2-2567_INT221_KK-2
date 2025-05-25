@@ -5,6 +5,7 @@ import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.services.SaleItemService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,23 +73,20 @@ public class SaleItemController {
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands,sortField,sortDirection);
-        List<ResponseSaleItemDetailDto> saleItemsDto = saleItems.stream().map(saleItem -> modelMapper
+        Page<SaleItem> pageResult = service.paginate(saleItems, page, size);
+        List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream().map(saleItem -> modelMapper
                                                         .map(saleItem, ResponseSaleItemDetailDto.class))
                                                         .collect(Collectors.toList());
         ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
         dto.setSaleItems(saleItemsDto);
         dto.setPage(page);
-        dto.setSize(size);
+        dto.setSize(pageResult.getSize());
         dto.setSort(sortField+": "+sortDirection.toUpperCase());
+        dto.setFirst(pageResult.isFirst());
+        dto.setLast(pageResult.isLast());
+        dto.setTotalPages(pageResult.getTotalPages());
+        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
 
-//        dto.setSaleItems(pageResult.getContent());
-//        dto.setFirst(pageResult.isFirst());
-//        dto.setLast(pageResult.isLast());
-//        dto.setTotalPages(pageResult.getTotalPages());
-//        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
-//        dto.setSize(pageResult.getSize());
-//        dto.setSort(sortField+": "+sortDirection);
-//        dto.setPage(page);
         return ResponseEntity.ok(dto);
     }
 }
