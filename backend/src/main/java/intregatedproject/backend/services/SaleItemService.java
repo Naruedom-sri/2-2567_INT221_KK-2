@@ -102,6 +102,13 @@ public class SaleItemService {
             }
         }
 
+        if (filterBrands.size() > 1) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+            return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(direction, "brand.name"));
+        }
+
         return saleItemRepository.findByBrand_NameIn(filterBrands);
     }
 

@@ -79,7 +79,7 @@ public class SaleItemController {
         dto.setSaleItems(saleItemsDto);
         dto.setPage(page);
         dto.setSize(size);
-        dto.setSort(sortField+": "+sortDirection);
+        dto.setSort(sortField+": "+sortDirection.toUpperCase());
 
 //        dto.setSaleItems(pageResult.getContent());
 //        dto.setFirst(pageResult.isFirst());
