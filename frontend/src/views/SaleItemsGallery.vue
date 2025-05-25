@@ -10,6 +10,20 @@ const items = ref([]);
 const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
+const brandFilterList = ref(["Apple", "Samsung"]);
+const sizePage = ref(10);
+const isFilter = ref(false);
+const isSort = ref(false);
+
+const clearFilter = () => {
+  brandFilterList.value = [];
+  isFilter.value = false;
+};
+
+const clearSort = () => {
+  isSort.value = false;
+};
+
 const updateTime = () => {
   const date = new Date();
   time.value = date.toLocaleTimeString();
@@ -36,11 +50,7 @@ onMounted(() => {
     <div class="promote text-lg">
       <div
         class="w-full absolute duration-500"
-        :class="
-          countImg === 2 || countImg === 4
-            ? 'text-black'
-            : 'text-white'
-        "
+        :class="countImg === 2 || countImg === 4 ? 'text-black' : 'text-white'"
       >
         <div class="my-11 flex justify-center gap-5">
           <h1
@@ -121,7 +131,63 @@ onMounted(() => {
         Add Sale Item
       </RouterLink>
     </div>
-    <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
+    <div class="flex justify-between mx-7 mt-7 pb-7 border-b">
+      <div class="filter flex gap-2">
+        <div
+          class="items-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
+        >
+          <p v-if="brandFilterList.length === 0" class="text-white/80">
+            Filter by brand(s)
+          </p>
+          <div
+            v-else
+            v-for="(item, index) in brandFilterList"
+            :key="index"
+            class="itbms-filter-item flex justify-between bg-blue-500 rounded-2xl text-base"
+          >
+            <p class="mx-4">{{ item }}</p>
+            <button class="w-5 bg-gray-300 rounded-r-2xl text-black">x</button>
+          </div>
+        </div>
+        <img
+          src="/src/assets/imgs/filter.png"
+          alt="filter"
+          class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer"
+        />
+        <button
+        @click="clearFilter"
+          class="px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+        >
+          Clear
+        </button>
+      </div>
+      <div class="sort-page flex gap-2">
+        <div class="page self-center space-x-3 mx-2">
+          <label>show</label>
+          <select v-model="sizePage" class="border rounded bg-black">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <img
+          src="/src/assets/imgs/asc-sort.png"
+          alt="asc"
+          class="w-10 object-cover border rounded"
+        />
+        <img
+          src="/src/assets/imgs/none-sort.png"
+          alt="none"
+          class="w-10 object-cover border rounded"
+        />
+        <img
+          src="/src/assets/imgs/desc-sort.png"
+          alt="desc"
+          class="w-10 object-cover border rounded"
+        />
+      </div>
+    </div>
+
     <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"
@@ -176,6 +242,7 @@ onMounted(() => {
       </RouterLink>
     </div>
   </div>
+  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
   <Footer />
 </template>
 
