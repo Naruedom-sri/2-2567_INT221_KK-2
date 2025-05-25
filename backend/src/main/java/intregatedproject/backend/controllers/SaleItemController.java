@@ -65,28 +65,32 @@ public class SaleItemController {
 
 
     @GetMapping("/v2/sale-items")
-    public ResponseEntity<ResponseSaleItemDtoV2> getAllSortedByBrandName(
+    public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
             @RequestParam(required = false) List<String> filterBrands,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam String sortField,
+            @RequestParam(defaultValue = "createdOn") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands,sortField,sortDirection);
+        filterBrands = filterBrands == null ? List.of() : filterBrands;
+        page = page < 0 ? 0 : page;
+        size = size < 0 ? 10 : size;
+        sortField = sortField == null ? "createdOn" : sortField;
+        sortDirection = sortDirection == null ? "asc" : sortDirection;
+        List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands, sortField, sortDirection);
         Page<SaleItem> pageResult = service.paginate(saleItems, page, size);
         List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream().map(saleItem -> modelMapper
-                                                        .map(saleItem, ResponseSaleItemDetailDto.class))
-                                                        .collect(Collectors.toList());
+                        .map(saleItem, ResponseSaleItemDetailDto.class))
+                .collect(Collectors.toList());
         ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
         dto.setSaleItems(saleItemsDto);
         dto.setPage(page);
         dto.setSize(pageResult.getSize());
-        dto.setSort(sortField+": "+sortDirection.toUpperCase());
+        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
         dto.setFirst(pageResult.isFirst());
         dto.setLast(pageResult.isLast());
         dto.setTotalPages(pageResult.getTotalPages());
         dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
-
         return ResponseEntity.ok(dto);
     }
 }

@@ -5,7 +5,7 @@ import { getDataById } from "@/libs/api";
 import { deleteData } from "@/libs/api";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
@@ -13,6 +13,7 @@ import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 const {
   params: { itemId },
 } = useRoute();
+
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const statusStore = useSaleItemStatusStore();
 const item = ref({});

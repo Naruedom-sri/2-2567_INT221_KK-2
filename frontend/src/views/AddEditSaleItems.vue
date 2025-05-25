@@ -1,5 +1,5 @@
 <script setup>
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import { ref, onMounted, watch } from "vue";
 import { getAllData, createData, updateData, getDataById } from "@/libs/api";

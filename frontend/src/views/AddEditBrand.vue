@@ -1,6 +1,6 @@
 DeletCan
 <script setup>
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 import { ref, onMounted, watch } from "vue";
 import { createData, updateData, getDataById } from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";

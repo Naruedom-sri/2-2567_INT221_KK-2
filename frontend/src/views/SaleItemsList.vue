@@ -5,7 +5,7 @@ import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const brands = ref([]);

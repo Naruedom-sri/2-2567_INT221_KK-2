@@ -1,5 +1,5 @@
 <script setup>
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 const brands = ["Apple", "Samsung", "Vivo", "Oppo", "Huawei", "Sony"];
 </script>

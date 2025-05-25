@@ -73,7 +73,7 @@ public class SaleItemService {
 
     public SaleItem updateSaleItem(int id, RequestSaleItemDto saleItemDto) {
         SaleItem updateSaleItem = getSaleItemById(id);
-        covertDtoToEntity(saleItemDto,updateSaleItem);
+        covertDtoToEntity(saleItemDto, updateSaleItem);
         return saleItemRepository.save(updateSaleItem);
     }
 
@@ -94,24 +94,37 @@ public class SaleItemService {
                     return saleItemRepository.findAllByOrderByBrand_NameAsc();
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findAllByOrderByBrand_NameDesc();
+                } else {
+                    return saleItemRepository.findAllByOrderByBrand_NameAsc();
                 }
             } else {
                 if ("asc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findAllByOrderByCreatedOnAsc();
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findAllByOrderByCreatedOnDesc();
+                } else {
+                    return saleItemRepository.findAllByOrderByCreatedOnAsc();
+                }
+            }
+        } else {
+            if ("Brand.name".equalsIgnoreCase(sortField)) {
+                if ("asc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
+                } else if ("desc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.desc("brand.name")));
+                }else{
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
+                }
+            } else {
+                if ("asc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.createdOn")));
+                } else if ("desc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.desc("brand.createdOn")));
+                } else {
+                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.createdOn")));
                 }
             }
         }
-
-        if (filterBrands.size() > 1) {
-            Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
-                    ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-            return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(direction, "brand.name"));
-        }
-
-        return saleItemRepository.findByBrand_NameIn(filterBrands);
     }
 
     public Page<SaleItem> paginate(List<SaleItem> sortedFilteredItems, int page, int size) {
@@ -121,8 +134,6 @@ public class SaleItemService {
         List<SaleItem> pageContent = sortedFilteredItems.subList(start, end);
         return new PageImpl<>(pageContent, PageRequest.of(page, size), sortedFilteredItems.size());
     }
-
-
 
 }
 

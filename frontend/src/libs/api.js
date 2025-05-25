@@ -44,6 +44,14 @@ const getAllData = async (url) => {
   return data;
 };
 
+const getAllDataWithParam = async (url, params) => {
+  const response = await fetch(`${url}?${params.toString()}`);
+  if (!response.ok)
+    throw new Error(`Can't fetch data with status : ${response.status}`);
+  const data = await response.json();
+  return data;
+};
+
 const createData = async (url, newData) => {
   const statusStore = useSaleItemStatusStore();
   const response = await fetch(`${url}`, {
@@ -61,4 +69,5 @@ const createData = async (url, newData) => {
   const data = await response.json();
   return data;
 };
-export { updateData, getDataById, deleteData, getAllData, createData };
+
+export { updateData, getDataById, deleteData, getAllData, createData,getAllDataWithParam };

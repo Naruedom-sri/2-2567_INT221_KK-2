@@ -1,5 +1,5 @@
 <script setup>
-import NavBar from "@/components/์NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, onMounted } from "vue";
 import { getAllData, deleteData, getDataById } from "@/libs/api";

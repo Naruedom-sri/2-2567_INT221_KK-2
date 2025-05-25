@@ -11,6 +11,5 @@ public interface SaleItemRepository extends JpaRepository<SaleItem, Integer> {
     List<SaleItem> findAllByOrderByBrand_NameDesc();
     List<SaleItem> findAllByOrderByCreatedOnAsc();
     List<SaleItem> findAllByOrderByCreatedOnDesc();
-    List<SaleItem> findByBrand_NameIn(List<String> brands);
     List<SaleItem> findByBrand_NameIn(List<String> brands, Sort sort);
 }
