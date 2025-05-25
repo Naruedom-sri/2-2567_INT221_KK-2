@@ -86,15 +86,6 @@ public class SaleItemController {
         dto.setPage(page);
         dto.setSize(size);
         dto.setSort(sortField + ": " + sortDirection.toUpperCase());
-
-//        dto.setSaleItems(pageResult.getContent());
-//        dto.setFirst(pageResult.isFirst());
-//        dto.setLast(pageResult.isLast());
-//        dto.setTotalPages(pageResult.getTotalPages());
-//        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
-//        dto.setSize(pageResult.getSize());
-//        dto.setSort(sortField+": "+sortDirection);
-//        dto.setPage(page);
         return ResponseEntity.ok(dto);
     }
 }
