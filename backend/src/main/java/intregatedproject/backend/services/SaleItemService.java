@@ -6,6 +6,7 @@ import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -79,12 +80,38 @@ public class SaleItemService {
         saleItemRepository.delete(existingItem);
     }
 
-    //dont touch my pbi10,11
-    public List<SaleItem> getAllSortedByBrandName(){
-        return saleItemRepository.findAll(
-                Sort.by(Sort.Direction.ASC, "brand.name")
-        );
+
+    public List<SaleItem> getAllSortedAndFilter(
+            List<String> filterBrands,
+            String sortField,
+            String sortDirection
+    ) {
+        if (filterBrands == null || filterBrands.isEmpty()) {
+            if ("Brand.name".equalsIgnoreCase(sortField)) {
+                if ("asc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findAllByOrderByBrand_NameAsc();
+                } else if ("desc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findAllByOrderByBrand_NameDesc();
+                }
+            } else {
+                if ("asc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findAllByOrderByCreatedOnAsc();
+                } else if ("desc".equalsIgnoreCase(sortDirection)) {
+                    return saleItemRepository.findAllByOrderByCreatedOnDesc();
+                }
+            }
+        }
+        return saleItemRepository.findByBrand_NameIn(filterBrands);
+    }
+
+    public Page<SaleItem> paginate(List<SaleItem> sortedFilteredItems, int page, int size) {
+        return Page.empty();
     }
 
 
+
 }
+
+
+
+

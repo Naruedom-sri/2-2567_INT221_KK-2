@@ -7,14 +7,28 @@ import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
+const brands = ref([]);
 const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
-const brandFilterList = ref(["Apple", "Samsung"]);
+
+const brandFilterList = ref([]);
 const sizePage = ref(10);
 const isFilter = ref(false);
-const isSort = ref(false);
+const isSort = ref({ sortFiled: "brand.name", sortDirection: "none" });
+const isShowAllBrand = ref(false);
 
+const addToFilterList = (brandName) => {
+  if (!brandFilterList.value.includes(brandName)) {
+    brandFilterList.value.push(brandName);
+  }
+};
+
+const removeFromFilterList = (brandName) => {
+  brandFilterList.value = brandFilterList.value.filter(
+    (name) => name !== brandName
+  );
+};
 const clearFilter = () => {
   brandFilterList.value = [];
   isFilter.value = false;
@@ -38,9 +52,20 @@ const getAllSaleItems = async () => {
   }
 };
 
+const getAllBrand = async () => {
+  brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+  brands.value.sort((a, b) => a.name.localeCompare(b.name));
+  try {
+  } catch (error) {
+    console.log(error);
+    brands.value = [];
+  }
+};
+
 onMounted(() => {
   updateTime();
   getAllSaleItems();
+  getAllBrand();
 });
 </script>
 
@@ -132,7 +157,7 @@ onMounted(() => {
       </RouterLink>
     </div>
     <div class="flex justify-between mx-7 mt-7 pb-7 border-b">
-      <div class="filter flex gap-2">
+      <div class="filter flex gap-2 overflow-y-hidden">
         <div
           class="items-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
         >
@@ -141,22 +166,28 @@ onMounted(() => {
           </p>
           <div
             v-else
-            v-for="(item, index) in brandFilterList"
+            v-for="(brand, index) in brandFilterList"
             :key="index"
             class="itbms-filter-item flex justify-between bg-blue-500 rounded-2xl text-base"
           >
-            <p class="mx-4">{{ item }}</p>
-            <button class="w-5 bg-gray-300 rounded-r-2xl text-black">x</button>
+            <p class="mx-4">{{ brand }}</p>
+            <button
+              @click="removeFromFilterList(brand)"
+              class="itbms-filter-item-clear w-5 bg-gray-300 rounded-r-2xl text-black hover:cursor-pointer"
+            >
+              x
+            </button>
           </div>
         </div>
         <img
+          @click="isShowAllBrand = !isShowAllBrand"
           src="/src/assets/imgs/filter.png"
           alt="filter"
           class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer"
         />
         <button
-        @click="clearFilter"
-          class="px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+          @click="clearFilter"
+          class="itbms-brand-filter-clear px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
         >
           Clear
         </button>
@@ -164,7 +195,10 @@ onMounted(() => {
       <div class="sort-page flex gap-2">
         <div class="page self-center space-x-3 mx-2">
           <label>show</label>
-          <select v-model="sizePage" class="border rounded bg-black">
+          <select
+            v-model="sizePage"
+            class="itbms-page-size border rounded bg-black"
+          >
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -173,21 +207,33 @@ onMounted(() => {
         <img
           src="/src/assets/imgs/asc-sort.png"
           alt="asc"
-          class="w-10 object-cover border rounded"
+          class="itbms-brand-asc w-10 object-cover border rounded"
         />
         <img
           src="/src/assets/imgs/none-sort.png"
           alt="none"
-          class="w-10 object-cover border rounded"
+          class="itbms-brand-none w-10 object-cover border rounded"
         />
         <img
           src="/src/assets/imgs/desc-sort.png"
           alt="desc"
-          class="w-10 object-cover border rounded"
+          class="itbms-brand-desc w-10 object-cover border rounded"
         />
       </div>
     </div>
-
+    <div
+      v-if="isShowAllBrand"
+      class="dropdown-brand flex flex-col bg-white text-black text-sm z-50 absolute left-100"
+    >
+      <div
+        @click="addToFilterList(brand.name)"
+        v-for="(brand, index) in brands"
+        :key="index"
+        class="px-2 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+      >
+        <p>{{ brand.name }}</p>
+      </div>
+    </div>
     <div class="item-container grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"
@@ -251,9 +297,22 @@ onMounted(() => {
   animation-name: op;
   animation-duration: 1s;
 }
+.dropdown-brand {
+  animation-name: op2;
+  animation-duration: 0.4s;
+}
 .img-promote {
   z-index: -100;
 }
+@keyframes op2 {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes op {
   from {
     opacity: 0;
