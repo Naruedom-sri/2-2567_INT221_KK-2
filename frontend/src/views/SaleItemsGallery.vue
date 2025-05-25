@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { getAllData } from "@/libs/api";
-import NavBar from "@/components/์NavBar.vue";
+import { getAllData, getAllDataWithParam } from "@/libs/api";
+import NavBar from "@/components/NavBar.vue";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
@@ -13,14 +13,52 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
 
 const brandFilterList = ref([]);
-const sizePage = ref(10);
-const isFilter = ref(false);
-const isSort = ref({ sortFiled: "brand.name", sortDirection: "none" });
+const pageSize = ref(10);
+const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
+const currentPage = ref(0);
 const isShowAllBrand = ref(false);
+const params = new URLSearchParams();
+
+const getAllSaleItemBySortAndFilter = async () => {
+  try {
+    params.delete("page");
+    params.delete("size");
+    params.delete("sortField");
+    params.delete("sortDirection");
+    params.delete("filterBrands");
+
+    brandFilterList.value.forEach((brand) =>
+      params.append("filterBrands", brand)
+    );
+    params.append("page", currentPage.value);
+    params.append("size", pageSize.value);
+    params.append("sortField", isSort.value.sortFiled);
+    params.append("sortDirection", isSort.value.sortDirection);
+
+    sessionStorage.setItem(
+      "filterBrands",
+      JSON.stringify(brandFilterList.value)
+    );
+    sessionStorage.setItem("pageSize", String(pageSize.value));
+    sessionStorage.setItem("currentPage", String(currentPage.value));
+    sessionStorage.setItem("sortField", isSort.value.sortFiled);
+    sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
+    console.log(sessionStorage.getItem("filterBrands"));
+    const data = await getAllDataWithParam(
+      `${BASE_API_DOMAIN}/v2/sale-items`,
+      params
+    );
+    items.value = data.saleItems;
+  } catch (error) {
+    console.log(error);
+    items.value = [];
+  }
+};
 
 const addToFilterList = (brandName) => {
   if (!brandFilterList.value.includes(brandName)) {
     brandFilterList.value.push(brandName);
+    getAllSaleItemBySortAndFilter();
   }
 };
 
@@ -28,16 +66,30 @@ const removeFromFilterList = (brandName) => {
   brandFilterList.value = brandFilterList.value.filter(
     (name) => name !== brandName
   );
+  getAllSaleItemBySortAndFilter();
 };
 const clearFilter = () => {
   brandFilterList.value = [];
-  isFilter.value = false;
+  getAllSaleItemBySortAndFilter();
 };
 
 const clearSort = () => {
-  isSort.value = false;
+  isSort.value.sortFiled = "createOn";
+  isSort.value.sortDirection = "none";
+  getAllSaleItemBySortAndFilter();
 };
 
+const sortAsc = () => {
+  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortDirection = "asc";
+  getAllSaleItemBySortAndFilter();
+};
+
+const sortDesc = () => {
+  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortDirection = "desc";
+  getAllSaleItemBySortAndFilter();
+};
 const updateTime = () => {
   const date = new Date();
   time.value = date.toLocaleTimeString();
@@ -63,8 +115,28 @@ const getAllBrand = async () => {
 };
 
 onMounted(() => {
+  const savedBrands = sessionStorage.getItem("filterBrands");
+  const savedSize = sessionStorage.getItem("pageSize");
+  const savedSortField = sessionStorage.getItem("sortField");
+  const savedSortDirection = sessionStorage.getItem("sortDirection");
+  const savedPage = sessionStorage.getItem("currentPage");
+
+  console.log(savedBrands);
+  if (savedBrands) {
+    try {
+      brandFilterList.value = JSON.parse(savedBrands);
+    } catch (e) {
+      console.error("Failed to parse filterBrands", e);
+    }
+  }
+
+  if (savedSize) pageSize.value = parseInt(savedSize);
+  if (savedSortField) isSort.value.sortFiled = savedSortField;
+  if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
+  if (savedPage) currentPage.value = parseInt(savedPage);
+  
   updateTime();
-  getAllSaleItems();
+  getAllSaleItemBySortAndFilter();
   getAllBrand();
 });
 </script>
@@ -156,8 +228,8 @@ onMounted(() => {
         Add Sale Item
       </RouterLink>
     </div>
-    <div class="flex justify-between mx-7 mt-7 pb-7 border-b">
-      <div class="filter flex gap-2 overflow-y-hidden">
+    <div class="mx-7 py-7 border-b flex justify-between">
+      <div class="filter gap-2 flex">
         <div
           class="items-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
         >
@@ -179,24 +251,31 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <img
-          @click="isShowAllBrand = !isShowAllBrand"
-          src="/src/assets/imgs/filter.png"
-          alt="filter"
-          class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer"
-        />
-        <button
-          @click="clearFilter"
-          class="itbms-brand-filter-clear px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
-        >
-          Clear
-        </button>
+        <div class="max-h-10 flex gap-2">
+          <img
+            @click="isShowAllBrand = !isShowAllBrand"
+            src="/src/assets/imgs/filter.png"
+            alt="filter"
+            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer"
+            :class="
+              isShowAllBrand
+                ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+                : ''
+            "
+          />
+          <button
+            @click="clearFilter"
+            class="itbms-brand-filter-clear px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+          >
+            Clear
+          </button>
+        </div>
       </div>
-      <div class="sort-page flex gap-2">
+      <div class="sort-page max-h-10 flex gap-2">
         <div class="page self-center space-x-3 mx-2">
           <label>show</label>
           <select
-            v-model="sizePage"
+            v-model="pageSize"
             class="itbms-page-size border rounded bg-black"
           >
             <option value="5">5</option>
@@ -205,19 +284,37 @@ onMounted(() => {
           </select>
         </div>
         <img
+          @click="sortAsc"
           src="/src/assets/imgs/asc-sort.png"
           alt="asc"
-          class="itbms-brand-asc w-10 object-cover border rounded"
+          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          :class="
+            isSort.sortDirection === 'asc'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+              : ''
+          "
         />
         <img
+          @click="clearSort"
           src="/src/assets/imgs/none-sort.png"
           alt="none"
-          class="itbms-brand-none w-10 object-cover border rounded"
+          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          :class="
+            isSort.sortDirection === 'none'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+              : ''
+          "
         />
         <img
+          @click="sortDesc"
           src="/src/assets/imgs/desc-sort.png"
           alt="desc"
-          class="itbms-brand-desc w-10 object-cover border rounded"
+          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          :class="
+            isSort.sortDirection === 'desc'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+              : ''
+          "
         />
       </div>
     </div>
@@ -234,7 +331,8 @@ onMounted(() => {
         <p>{{ brand.name }}</p>
       </div>
     </div>
-    <div class="item-container grid grid-cols-5 gap-5 p-7">
+
+    <div class="item-container clear-both grid grid-cols-5 gap-5 p-7">
       <h1
         v-show="items.length === 0"
         class="itmbs-row h-screen col-span-5 text-white text-5xl text-center"
@@ -245,7 +343,10 @@ onMounted(() => {
         @click="statusStore.clearStatusAndMethod()"
         v-for="(item, index) in items"
         v-show="items.length !== 0"
-        :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
+        :to="{
+          name: 'SaleItemsDetail',
+          params: { itemId: item.id },
+        }"
         :key="index"
         class="itbms-row w-full pt-4 rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
       >

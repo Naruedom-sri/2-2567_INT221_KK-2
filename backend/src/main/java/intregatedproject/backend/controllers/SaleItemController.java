@@ -35,6 +35,7 @@ public class SaleItemController {
         ResponseSaleItemDetailDto dto = modelMapper.map(item, ResponseSaleItemDetailDto.class);
         return ResponseEntity.ok(dto);
     }
+
     @GetMapping("/v1/sale-items/edit/{id}")
     public ResponseEntity<ResponseSaleItemDtoEdit> getSaleItemByIdEdit(@PathVariable int id) {
         SaleItem item = service.getSaleItemById(id);
@@ -63,32 +64,37 @@ public class SaleItemController {
     }
 
 
-//    @GetMapping("/v2/sale-items")
-//    public ResponseEntity<ResponseSaleItemDtoV2> getAllSortedByBrandName(
-//            @RequestParam(required = false) List<String> filterBrands,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size,
-//            @RequestParam String sortField,
-//            @RequestParam(defaultValue = "asc") String sortDirection
-//    ) {
-//        List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands,sortField,sortDirection);
-//        List<ResponseSaleItemDetailDto> saleItemsDto = saleItems.stream().map(saleItem -> modelMapper
-//                                                        .map(saleItem, ResponseSaleItemDetailDto.class))
-//                                                        .collect(Collectors.toList());
-//        ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
-//        dto.setSaleItems(saleItemsDto);
-//        dto.setPage(page);
-//        dto.setSize(size);
+    @GetMapping("/v2/sale-items")
+    public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
+            @RequestParam(required = false) List<String> filterBrands,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdOn") String sortField,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        filterBrands = filterBrands == null ? List.of() : filterBrands;
+        page = page < 0 ? 0 : page;
+        size = size < 0 ? 10 : size;
+        sortField = sortField == null ? "createdOn" : sortField;
+        sortDirection = sortDirection == null ? "asc" : sortDirection;
+        List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands, sortField, sortDirection);
+        List<ResponseSaleItemDetailDto> saleItemsDto = saleItems.stream().map(saleItem -> modelMapper
+                        .map(saleItem, ResponseSaleItemDetailDto.class))
+                .collect(Collectors.toList());
+        ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
+        dto.setSaleItems(saleItemsDto);
+        dto.setPage(page);
+        dto.setSize(size);
+        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
+
+//        dto.setSaleItems(pageResult.getContent());
+//        dto.setFirst(pageResult.isFirst());
+//        dto.setLast(pageResult.isLast());
+//        dto.setTotalPages(pageResult.getTotalPages());
+//        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
+//        dto.setSize(pageResult.getSize());
 //        dto.setSort(sortField+": "+sortDirection);
-//
-////        dto.setSaleItems(pageResult.getContent());
-////        dto.setFirst(pageResult.isFirst());
-////        dto.setLast(pageResult.isLast());
-////        dto.setTotalPages(pageResult.getTotalPages());
-////        dto.setTotalElements((int) pageResult.getTotalElements()); // cast long → int
-////        dto.setSize(pageResult.getSize());
-////        dto.setSort(sortField+": "+sortDirection);
-////        dto.setPage(page);
-//        return  ResponseEntity.ok(dto);
-//    }
+//        dto.setPage(page);
+        return ResponseEntity.ok(dto);
+    }
 }
