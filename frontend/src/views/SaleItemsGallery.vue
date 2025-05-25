@@ -17,6 +17,9 @@ const pageSize = ref(10);
 const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
 const currentPage = ref(0);
 const isShowAllBrand = ref(false);
+const totalPage = ref(0);
+const isLastPage = ref();
+const isFirstPage = ref();
 const params = new URLSearchParams();
 
 const getAllSaleItemBySortAndFilter = async () => {
@@ -49,10 +52,36 @@ const getAllSaleItemBySortAndFilter = async () => {
       params
     );
     items.value = data.saleItems;
+    totalPage.value = data.totalPages;
+    isLastPage.value = data.last;
+    isFirstPage.value = data.first;
   } catch (error) {
     console.log(error);
     items.value = [];
   }
+};
+
+const nextPage = () => {
+  currentPage.value += 1;
+  getAllSaleItemBySortAndFilter();
+};
+const previousPage = () => {
+  currentPage.value -= 1;
+  getAllSaleItemBySortAndFilter();
+};
+
+const firstPage = () => {
+  currentPage.value = 0;
+  getAllSaleItemBySortAndFilter();
+};
+const lastPage = () => {
+  currentPage.value = totalPage.value - 1;
+  getAllSaleItemBySortAndFilter();
+};
+
+const clickPageNumber = (numPage) => {
+  currentPage.value = numPage - 1;
+  getAllSaleItemBySortAndFilter();
 };
 
 const addToFilterList = (brandName) => {
@@ -273,6 +302,7 @@ onMounted(() => {
         <div class="page self-center space-x-3 mx-2">
           <label>show</label>
           <select
+            @change="getAllSaleItemBySortAndFilter"
             v-model="pageSize"
             class="itbms-page-size border rounded bg-black"
           >
@@ -385,6 +415,53 @@ onMounted(() => {
           class="w-60 mx-auto rounded-4xl"
         />
       </RouterLink>
+      <div
+        v-if="items.length !== 0"
+        class="nav-page h-10 flex items-center col-span-5 bg-white text-black"
+      >
+        <button
+          @click="firstPage"
+          :disabled="isFirstPage"
+          class="itbms-page-first px-3 border"
+          :class="isFirstPage ? 'opacity-40' : ''"
+        >
+          First
+        </button>
+        <button
+          @click="previousPage"
+          :disabled="isFirstPage"
+          class="itbms-page-prev px-3 border"
+          :class="isFirstPage ? 'opacity-40' : ''"
+        >
+          <
+        </button>
+        <div
+          @click="clickPageNumber(page)"
+          v-for="(page, index) in totalPage"
+          :key="index"
+          class="px-3 border hover:bg-blue-500"
+          :class="`itbms-page-${page - 1}`"
+          v-bind:class="currentPage === page - 1 ? 'bg-blue-500' : ''"
+        >
+          <p>{{ page }}</p>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="isLastPage"
+          class="itbms-page-next px-3 border"
+          :class="isLastPage ? 'opacity-40' : ''"
+        >
+          >
+        </button>
+        <button
+          @click="lastPage"
+          :disabled="isLastPage"
+          class="itbms-page-last px-3 border"
+          :class="isLastPage ? 'opacity-40' : ''"
+        >
+          Last
+        </button>
+      </div>
     </div>
   </div>
   <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />

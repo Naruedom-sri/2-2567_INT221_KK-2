@@ -7,6 +7,8 @@ import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -126,7 +128,11 @@ public class SaleItemService {
     }
 
     public Page<SaleItem> paginate(List<SaleItem> sortedFilteredItems, int page, int size) {
-        return Page.empty();
+        int start = Math.min(page * size, sortedFilteredItems.size());
+        int end = Math.min(start + size, sortedFilteredItems.size());
+
+        List<SaleItem> pageContent = sortedFilteredItems.subList(start, end);
+        return new PageImpl<>(pageContent, PageRequest.of(page, size), sortedFilteredItems.size());
     }
 
 }
