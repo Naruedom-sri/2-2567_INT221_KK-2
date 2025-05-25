@@ -43,7 +43,7 @@ const getAllSaleItemBySortAndFilter = async () => {
     sessionStorage.setItem("currentPage", String(currentPage.value));
     sessionStorage.setItem("sortField", isSort.value.sortFiled);
     sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
-    console.log(sessionStorage.getItem("filterBrands"));
+    
     const data = await getAllDataWithParam(
       `${BASE_API_DOMAIN}/v2/sale-items`,
       params
@@ -134,7 +134,7 @@ onMounted(() => {
   if (savedSortField) isSort.value.sortFiled = savedSortField;
   if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
   if (savedPage) currentPage.value = parseInt(savedPage);
-  
+
   updateTime();
   getAllSaleItemBySortAndFilter();
   getAllBrand();
