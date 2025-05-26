@@ -63,7 +63,7 @@ const getAllSaleItemBySortAndFilter = async () => {
       `${BASE_API_DOMAIN}/v2/sale-items`,
       params
     );
-    items.value = data.saleItems;
+    items.value = data.content;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
