@@ -15,11 +15,13 @@ const countImg = ref(1);
 const brandFilterList = ref([]);
 const pageSize = ref(10);
 const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
-const currentPage = ref(0);
+const indexPage = ref(0);
 const isShowAllBrand = ref(false);
 const totalPage = ref(0);
+const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
+const tempIndexPage = ref(0);
 const params = new URLSearchParams();
 
 const getAllSaleItemBySortAndFilter = async () => {
@@ -33,7 +35,15 @@ const getAllSaleItemBySortAndFilter = async () => {
     brandFilterList.value.forEach((brand) =>
       params.append("filterBrands", brand)
     );
-    params.append("page", currentPage.value);
+    console.log("index page", indexPage.value);
+    console.log("temp page", tempIndexPage.value);
+
+    params.append(
+      "page",
+      indexPage.value === 9 || indexPage.value === 0
+        ? tempIndexPage.value
+        : indexPage.value
+    );
     params.append("size", pageSize.value);
     params.append("sortField", isSort.value.sortFiled);
     params.append("sortDirection", isSort.value.sortDirection);
@@ -43,9 +53,11 @@ const getAllSaleItemBySortAndFilter = async () => {
       JSON.stringify(brandFilterList.value)
     );
     sessionStorage.setItem("pageSize", String(pageSize.value));
-    sessionStorage.setItem("currentPage", String(currentPage.value));
+    sessionStorage.setItem("indexPage", String(indexPage.value));
+    sessionStorage.setItem("tempIndexPage", String(tempIndexPage.value));
     sessionStorage.setItem("sortField", isSort.value.sortFiled);
     sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
+    sessionStorage.setItem("pageList", JSON.stringify(pageList.value));
 
     const data = await getAllDataWithParam(
       `${BASE_API_DOMAIN}/v2/sale-items`,
@@ -61,32 +73,80 @@ const getAllSaleItemBySortAndFilter = async () => {
   }
 };
 
-const nextPage = () => {
-  currentPage.value += 1;
-  getAllSaleItemBySortAndFilter();
+const nextNavPage = () => {
+  if (
+    !isLastPage.value &&
+    pageList.value[indexPage.value] !== totalPage.value
+  ) {
+    pageList.value.push(pageList.value[indexPage.value] + 1);
+    pageList.value.shift();
+  }
 };
-const previousPage = () => {
-  currentPage.value -= 1;
+
+const previousNavPage = () => {
+  if (!isFirstPage.value && pageList.value[indexPage.value] !== 1) {
+    pageList.value.unshift(pageList.value[indexPage.value] - 1);
+    pageList.value.pop();
+  }
+};
+
+const nextPage = () => {
+  indexPage.value += 1;
+  tempIndexPage.value += 1;
+  if (indexPage.value >= 9) {
+    indexPage.value = 9;
+    nextNavPage();
+    tempIndexPage.value = pageList.value[indexPage.value] - 1;
+  }
+
   getAllSaleItemBySortAndFilter();
 };
 
-const firstPage = () => {
-  currentPage.value = 0;
-  getAllSaleItemBySortAndFilter();
-};
-const lastPage = () => {
-  currentPage.value = totalPage.value - 1;
+const previousPage = () => {
+  indexPage.value -= 1;
+  tempIndexPage.value -= 1;
+  if (indexPage.value <= 0) {
+    indexPage.value = 0;
+    previousNavPage();
+    tempIndexPage.value = pageList.value[indexPage.value] - 1;
+  }
   getAllSaleItemBySortAndFilter();
 };
 
 const clickPageNumber = (numPage) => {
-  currentPage.value = numPage - 1;
+  indexPage.value = pageList.value.findIndex((page) => page === numPage);
+  tempIndexPage.value = numPage - 1;
+  getAllSaleItemBySortAndFilter();
+};
+
+const firstPage = () => {
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  pageList.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  getAllSaleItemBySortAndFilter();
+};
+
+const lastPage = () => {
+  tempIndexPage.value = totalPage.value - 1;
+  indexPage.value = totalPage.value - 1;
+  if (totalPage.value > 10) {
+    pageList.value = [];
+    let tempTotalPage = totalPage.value;
+    for (let index = 0; index < 10; index++) {
+      pageList.value.unshift(tempTotalPage--);
+    }
+    indexPage.value = pageList.value.findIndex(
+      (page) => page === totalPage.value
+    );
+  }
   getAllSaleItemBySortAndFilter();
 };
 
 const addToFilterList = (brandName) => {
   if (!brandFilterList.value.includes(brandName)) {
     brandFilterList.value.push(brandName);
+    indexPage.value = 0;
+    tempIndexPage.value = 0;
     getAllSaleItemBySortAndFilter();
   }
 };
@@ -95,35 +155,48 @@ const removeFromFilterList = (brandName) => {
   brandFilterList.value = brandFilterList.value.filter(
     (name) => name !== brandName
   );
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
 };
+
 const clearFilter = () => {
   brandFilterList.value = [];
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
 };
 
 const clearSort = () => {
   isSort.value.sortFiled = "createOn";
   isSort.value.sortDirection = "none";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
 };
 
 const sortAsc = () => {
   isSort.value.sortFiled = "brand.name";
   isSort.value.sortDirection = "asc";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
 };
 
 const sortDesc = () => {
   isSort.value.sortFiled = "brand.name";
   isSort.value.sortDirection = "desc";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
 };
+
 const updateTime = () => {
   const date = new Date();
   time.value = date.toLocaleTimeString();
   setInterval(updateTime, 1000);
 };
+
 const getAllSaleItems = async () => {
   try {
     items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
@@ -148,19 +221,23 @@ onMounted(() => {
   const savedSize = sessionStorage.getItem("pageSize");
   const savedSortField = sessionStorage.getItem("sortField");
   const savedSortDirection = sessionStorage.getItem("sortDirection");
-  const savedPage = sessionStorage.getItem("currentPage");
+  const savedIndexPage = sessionStorage.getItem("indexPage");
+  const savedTempIndexPage = sessionStorage.getItem("tempIndexPage");
+  const savedPageList = sessionStorage.getItem("pageList");
   if (savedBrands) {
     try {
       brandFilterList.value = JSON.parse(savedBrands);
+      pageList.value = JSON.parse(savedPageList);
     } catch (e) {
-      console.error("Failed to parse filterBrands", e);
+      console.error("Failed to parse filter Brands", e);
     }
   }
 
   if (savedSize) pageSize.value = parseInt(savedSize);
   if (savedSortField) isSort.value.sortFiled = savedSortField;
   if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
-  if (savedPage) currentPage.value = parseInt(savedPage);
+  if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
+  if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
 
   updateTime();
   getAllSaleItemBySortAndFilter();
@@ -302,7 +379,11 @@ onMounted(() => {
         <div class="page self-center space-x-3 mx-2">
           <label>show</label>
           <select
-            @change="getAllSaleItemBySortAndFilter"
+            @change="
+              (indexPage = 0),
+                (tempIndexPage = 0),
+                getAllSaleItemBySortAndFilter()
+            "
             v-model="pageSize"
             class="itbms-page-size border rounded bg-black"
           >
@@ -417,47 +498,69 @@ onMounted(() => {
       </RouterLink>
       <div
         v-if="items.length !== 0"
-        class="nav-page h-10 flex items-center col-span-5 bg-white text-black"
+        class="nav-page mt-2 flex items-center justify-center col-span-5 text-white"
       >
         <button
           @click="firstPage"
           :disabled="isFirstPage"
-          class="itbms-page-first px-3 border"
-          :class="isFirstPage ? 'opacity-40' : ''"
+          class="itbms-page-first px-3 py-1 border rounded-l duration-200"
+          :class="
+            isFirstPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+          "
         >
           First
         </button>
         <button
           @click="previousPage"
           :disabled="isFirstPage"
-          class="itbms-page-prev px-3 border"
-          :class="isFirstPage ? 'opacity-40' : ''"
+          class="itbms-page-prev px-3 py-1 border duration-200"
+          :class="
+            isFirstPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+          "
         >
           <
         </button>
         <div
           @click="clickPageNumber(page)"
-          v-for="(page, index) in totalPage"
+          v-for="(page, index) in totalPage > 10 ? pageList : totalPage"
           :key="index"
-          class="px-3 border hover:bg-blue-500"
-          :class="`itbms-page-${page - 1}`"
-          v-bind:class="currentPage === page - 1 ? 'bg-blue-500' : ''"
+          class="px-3 py-1 border hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          :class="`itbms-page-${pageList.findIndex(
+            (pageNum) => pageNum === page
+          )}`"
+          v-bind:class="
+            indexPage === pageList.findIndex((pageNum) => pageNum === page)
+              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+              : ''
+          "
         >
           <p>{{ page }}</p>
         </div>
         <button
           @click="nextPage"
           :disabled="isLastPage"
-          class="itbms-page-next px-3 border"
-          :class="isLastPage ? 'opacity-40' : ''"
+          class="itbms-page-next px-3 py-1 border duration-200"
+          :class="
+            isLastPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 '
+          "
         >
           >
         </button>
         <button
           @click="lastPage"
           :disabled="isLastPage"
-          class="itbms-page-last px-3 border"
-          :class="isLastPage ? 'opacity-40' : ''"
+          class="itbms-page-last px-3 py-1 border rounded-r duration-200"
+          :class="
+            isLastPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+          "
         >
           Last
         </button>
