@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ResponseSaleItemDtoV2 {
-    private List<ResponseSaleItemDetailDto> saleItems;
+    private List<ResponseSaleItemDetailDto> content;
     private boolean last;
     private boolean first;
     private Integer totalPages;
