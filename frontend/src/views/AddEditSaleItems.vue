@@ -18,7 +18,7 @@ const statusStore = useSaleItemStatusStore();
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
-const brandItem = ref();
+const brandItem = ref("");
 const model = ref();
 const color = ref();
 const description = ref();
@@ -360,9 +360,7 @@ watch(
           <select
             autofocus
             @blur="
-              brandItem === undefined
-                ? (brandPass = false)
-                : (brandPass = true),
+              brandItem === '' ? (brandPass = false) : (brandPass = true),
                 checkVaildateInput(),
                 checkDisabled()
             "
@@ -370,6 +368,7 @@ watch(
             required
             class="itbms-brand px-5 py-2 rounded-lg bg-[rgba(22,22,23,255)]"
           >
+            <option value="">Please an option</option>
             <option
               v-for="(brand, index) in brands"
               :key="index"
@@ -381,9 +380,9 @@ watch(
           </select>
           <h1
             v-if="!brandPass && brandPass !== null"
-            class="text-red-400 text-sm"
+            class="itbms-message text-red-400 text-sm"
           >
-            X Brand must be selected.
+            Brand must be selected.
           </h1>
           <label>Model<span>*</span> </label>
           <input
@@ -405,9 +404,9 @@ watch(
           />
           <h1
             v-if="!modelPass && modelPass !== null"
-            class="text-red-400 text-sm"
+            class="itbms-message text-red-400 text-sm"
           >
-            X Model must be 1-60 characters long.
+            Model must be 1-60 characters long.
           </h1>
           <label>Description<span>*</span></label>
           <textarea
@@ -430,9 +429,9 @@ watch(
           ></textarea>
           <h1
             v-if="!descriptionPass && descriptionPass !== null"
-            class="text-red-400 text-sm"
+            class="itbms-message text-red-400 text-sm"
           >
-            X Description must be 1-65,535 characters long.
+            Description must be 1-65,535 characters long.
           </h1>
           <h1 class="pb-1 text-3xl border-b mt-10">Pricing</h1>
           <label>Price ( ฿ )<span>*</span></label>
@@ -455,9 +454,9 @@ watch(
           />
           <h1
             v-if="!pricePass && pricePass !== null"
-            class="text-red-400 text-sm"
+            class="itbms-message text-red-400 text-sm"
           >
-            X Price must be non-negative integer.
+            Price must be non-negative integer.
           </h1>
           <label>Quantity</label>
           <input
@@ -474,8 +473,8 @@ watch(
             class="itbms-quantity"
             min="0"
           />
-          <h1 v-if="!quantityPass" class="text-red-400 text-sm">
-            X Quantity must be non-negative integer.
+          <h1 v-if="!quantityPass" class="itbms-message text-red-400 text-sm">
+            Quantity must be non-negative integer.
           </h1>
           <h1 class="text-3xl mt-10 pb-1 border-b">Specifications</h1>
           <label>Color</label>
@@ -493,8 +492,8 @@ watch(
             maxlength="40"
             class="itbms-color"
           />
-          <h1 v-if="!colorPass" class="text-red-400 text-sm">
-            X Color must be 1-40 characters long.
+          <h1 v-if="!colorPass" class="itbms-message text-red-400 text-sm">
+            Color must be 1-40 characters long.
           </h1>
           <label>Ram ( GB )</label>
           <input
@@ -511,8 +510,8 @@ watch(
             class="itbms-ramGb"
             min="0"
           />
-          <h1 v-if="!ramGbPass" class="text-red-400 text-sm">
-            X Ram size must be positive integer or not specified.
+          <h1 v-if="!ramGbPass" class="itbms-message text-red-400 text-sm">
+            RAM size must be positive integer or not specified.
           </h1>
           <label>Screen Size ( Inches )</label>
           <input
@@ -535,9 +534,12 @@ watch(
             max="99"
             step="0.01"
           />
-          <h1 v-if="!screenSizeInchPass" class="text-red-400 text-sm">
-            X Screen size must be positive number with at most 2 decimal points
-            or not specified.
+          <h1
+            v-if="!screenSizeInchPass"
+            class="itbms-message text-red-400 text-sm"
+          >
+            Screen size must be positive number with at most 2 decimal points or
+            not specified.
           </h1>
           <label>Storage ( GB )</label>
           <input
@@ -554,8 +556,8 @@ watch(
             class="itbms-storageGb"
             min="0"
           />
-          <h1 v-if="!storageGbPass" class="text-red-400 text-sm">
-            X Storage size must be positive integer or not specified.
+          <h1 v-if="!storageGbPass" class="itbms-message text-red-400 text-sm">
+            Storage size must be positive integer or not specified.
           </h1>
           <div class="btn-form mt-5 flex space-x-4 text-2xl">
             <button

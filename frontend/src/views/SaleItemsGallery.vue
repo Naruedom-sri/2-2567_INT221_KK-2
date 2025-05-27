@@ -498,7 +498,7 @@ onMounted(() => {
         />
       </RouterLink>
       <div
-        v-if="items.length !== 0"
+        v-show="items.length !== 0 && totalPage > 1"
         class="nav-page mt-2 flex items-center justify-center col-span-5 text-white"
       >
         <button

@@ -306,9 +306,9 @@ onMounted(() => {
           />
           <h1
             v-if="!namePass && namePass !== null"
-            class="text-red-400 text-sm"
+            class="itbms-message text-red-400 text-sm"
           >
-            X Brand name must be 1-30 characters long.
+            Brand name must be 1-30 characters long.
           </h1>
           <label>Website Url</label>
           <input
@@ -328,8 +328,8 @@ onMounted(() => {
             maxlength="40"
             class="itbms-websiteUrl"
           />
-          <h1 v-if="!websitePass" class="text-red-400 text-sm">
-            X Brand URL must be valid URL or not specified.
+          <h1 v-if="!websitePass" class="itbms-message text-red-400 text-sm">
+            Brand URL must be valid URL or not specified.
           </h1>
           <h1>isActive</h1>
           <div class="space-x-2">
@@ -362,8 +362,8 @@ onMounted(() => {
             max="80"
             class="itbms-countryOfOrigin"
           />
-          <h1 v-if="!countryPass" class="text-red-400 text-sm">
-            X Brand country of origin must be 1-80 characters long or not
+          <h1 v-if="!countryPass" class="itbms-message text-red-400 text-sm">
+            Brand country of origin must be 1-80 characters long or not
             specified.
           </h1>
           <div class="btn-form mt-5 flex space-x-4 text-2xl">
