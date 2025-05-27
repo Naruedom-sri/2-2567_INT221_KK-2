@@ -83,19 +83,19 @@ public class SaleItemService {
 
     public List<SaleItem> getAllSortedAndFilter(List<String> filterBrands, String sortField, String sortDirection) {
         if (filterBrands == null || filterBrands.isEmpty()) {
-            if ("Brand.name".equalsIgnoreCase(sortField)) {
+            if ("brand.name".equalsIgnoreCase(sortField)) {
                 if ("asc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllByOrderByBrand_NameAsc();
+                    return saleItemRepository.findAllSortedByBrandNameAsc();
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllByOrderByBrand_NameDesc();
+                    return saleItemRepository.findAllSortedByBrandNameDesc();
                 } else {
-                    return saleItemRepository.findAllByOrderByBrand_NameAsc();
+                    return saleItemRepository.findAllSortedByBrandNameAsc();
                 }
             } else {
                 return saleItemRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
             }
         } else {
-            if ("Brand.name".equalsIgnoreCase(sortField)) {
+            if ("brand.name".equalsIgnoreCase(sortField)) {
                 if ("asc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
@@ -107,7 +107,9 @@ public class SaleItemService {
                 return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
             }
         }
+
     }
+
 
     public Page<SaleItem> paginate(List<SaleItem> sortedFilteredItems, int page, int size) {
         int start = Math.min(page * size, sortedFilteredItems.size());
