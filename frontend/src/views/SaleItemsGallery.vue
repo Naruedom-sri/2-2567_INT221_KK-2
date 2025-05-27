@@ -63,7 +63,7 @@ const getAllSaleItemBySortAndFilter = async () => {
       `${BASE_API_DOMAIN}/v2/sale-items`,
       params
     );
-    items.value = data.saleItems;
+    items.value = data.content;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
@@ -333,9 +333,10 @@ onMounted(() => {
       </RouterLink>
     </div>
     <div class="mx-7 py-7 border-b flex justify-between">
-      <div class="filter gap-2 flex">
+      <div class="gap-2 flex">
         <div
-          class="items-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
+          @click="isShowAllBrand = !isShowAllBrand"
+          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
         >
           <p v-if="brandFilterList.length === 0" class="text-white/80">
             Filter by brand(s)
@@ -360,7 +361,7 @@ onMounted(() => {
             @click="isShowAllBrand = !isShowAllBrand"
             src="/src/assets/imgs/filter.png"
             alt="filter"
-            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer"
+            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300"
             :class="
               isShowAllBrand
                 ? 'bg-gradient-to-r from-purple-500 to-blue-300'
@@ -435,7 +436,7 @@ onMounted(() => {
         @click="addToFilterList(brand.name)"
         v-for="(brand, index) in brands"
         :key="index"
-        class="px-2 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+        class="itbms-filter-item px-2 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
       >
         <p>{{ brand.name }}</p>
       </div>

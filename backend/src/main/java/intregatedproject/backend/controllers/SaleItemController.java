@@ -84,7 +84,7 @@ public class SaleItemController {
                         .map(saleItem, ResponseSaleItemDetailDto.class))
                 .collect(Collectors.toList());
         ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
-        dto.setSaleItems(saleItemsDto);
+        dto.setContent(saleItemsDto);
         dto.setPage(page);
         dto.setSize(pageResult.getSize());
         dto.setSort(sortField + ": " + sortDirection.toUpperCase());

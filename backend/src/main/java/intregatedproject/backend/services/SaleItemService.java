@@ -36,9 +36,7 @@ public class SaleItemService {
 
     public SaleItem getSaleItemById(int id) {
         try {
-            return saleItemRepository.findById(id)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("Sale item with id " + id + " not found"));
+            return saleItemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sale item with id " + id + " not found"));
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -83,11 +81,7 @@ public class SaleItemService {
     }
 
 
-    public List<SaleItem> getAllSortedAndFilter(
-            List<String> filterBrands,
-            String sortField,
-            String sortDirection
-    ) {
+    public List<SaleItem> getAllSortedAndFilter(List<String> filterBrands, String sortField, String sortDirection) {
         if (filterBrands == null || filterBrands.isEmpty()) {
             if ("Brand.name".equalsIgnoreCase(sortField)) {
                 if ("asc".equalsIgnoreCase(sortDirection)) {
@@ -98,13 +92,7 @@ public class SaleItemService {
                     return saleItemRepository.findAllByOrderByBrand_NameAsc();
                 }
             } else {
-                if ("asc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllByOrderByCreatedOnAsc();
-                } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllByOrderByCreatedOnDesc();
-                } else {
-                    return saleItemRepository.findAllByOrderByCreatedOnAsc();
-                }
+                return saleItemRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
             }
         } else {
             if ("Brand.name".equalsIgnoreCase(sortField)) {
@@ -112,17 +100,11 @@ public class SaleItemService {
                     return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
                 } else if ("desc".equalsIgnoreCase(sortDirection)) {
                     return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.desc("brand.name")));
-                }else{
+                } else {
                     return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
                 }
             } else {
-                if ("asc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.createdOn")));
-                } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.desc("brand.createdOn")));
-                } else {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.createdOn")));
-                }
+                return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
             }
         }
     }
