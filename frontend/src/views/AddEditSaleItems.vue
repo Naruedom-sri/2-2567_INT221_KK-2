@@ -400,7 +400,7 @@ watch(
             required
             type="text"
             class="itbms-model"
-            maxlength="60"
+    
           />
           <h1
             v-if="!modelPass && modelPass !== null"
@@ -424,7 +424,6 @@ watch(
             ref="descriptionInput"
             v-model.trim="description"
             required
-            maxlength="65535"
             class="itbms-description px-4 py-2 h-32 rounded-xl bg-[rgba(22,22,23,255)]"
           ></textarea>
           <h1
@@ -489,7 +488,6 @@ watch(
             ref="colorInput"
             v-model.trim="color"
             type="text"
-            maxlength="40"
             class="itbms-color"
           />
           <h1 v-if="!colorPass" class="itbms-message text-red-400 text-sm">
