@@ -301,7 +301,6 @@ onMounted(() => {
             v-model.trim="name"
             required
             type="text"
-            maxlength="30"
             class="itbms-name"
           />
           <h1
@@ -325,7 +324,6 @@ onMounted(() => {
             ref="websiteUrlInput"
             v-model.trim="websiteUrl"
             type="text"
-            maxlength="40"
             class="itbms-websiteUrl"
           />
           <h1 v-if="!websitePass" class="itbms-message text-red-400 text-sm">

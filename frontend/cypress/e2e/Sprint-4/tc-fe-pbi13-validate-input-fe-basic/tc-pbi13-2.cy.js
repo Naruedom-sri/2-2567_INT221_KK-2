@@ -268,7 +268,7 @@ describe(`TC-FE-PBI13-VALIDATE-INPUT-FE-BASIC-2\n
         cy.get('@save').should(($btn)=>{
             expect($btn.is(':disabled') || $btn.hasClass('disabled')).to.be.true
         })
-        cy.contains('.itbms-message','Screen size must be positive number with at most 2 decimal points or not specified').should('exist') ;
+        cy.contains('.itbms-message','Screen size must be positive number with at most 2 decimal points or not specified.').should('exist') ;
     })
 
     it(`[Step 1.9] should have "Add Sale Item" button and click to open the page for entry new sale item\n

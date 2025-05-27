@@ -400,7 +400,6 @@ watch(
             required
             type="text"
             class="itbms-model"
-    
           />
           <h1
             v-if="!modelPass && modelPass !== null"
@@ -449,7 +448,6 @@ watch(
             required
             type="number"
             class="itbms-price"
-            min="0"
           />
           <h1
             v-if="!pricePass && pricePass !== null"
@@ -470,7 +468,6 @@ watch(
             v-model="quantity"
             type="number"
             class="itbms-quantity"
-            min="0"
           />
           <h1 v-if="!quantityPass" class="itbms-message text-red-400 text-sm">
             Quantity must be non-negative integer.
@@ -491,7 +488,7 @@ watch(
             class="itbms-color"
           />
           <h1 v-if="!colorPass" class="itbms-message text-red-400 text-sm">
-            Color must be 1-40 characters long.
+            Color must be 1-40 characters long or not specified.
           </h1>
           <label>Ram ( GB )</label>
           <input
@@ -506,7 +503,6 @@ watch(
             v-model="ramGb"
             type="number"
             class="itbms-ramGb"
-            min="0"
           />
           <h1 v-if="!ramGbPass" class="itbms-message text-red-400 text-sm">
             RAM size must be positive integer or not specified.
@@ -528,8 +524,6 @@ watch(
             v-model="screenSizeInch"
             type="number"
             class="itbms-screenSizeInch"
-            min="0"
-            max="99"
             step="0.01"
           />
           <h1
@@ -552,7 +546,6 @@ watch(
             v-model="storageGb"
             type="number"
             class="itbms-storageGb"
-            min="0"
           />
           <h1 v-if="!storageGbPass" class="itbms-message text-red-400 text-sm">
             Storage size must be positive integer or not specified.
