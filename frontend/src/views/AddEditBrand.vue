@@ -45,9 +45,6 @@ function isValidUrl() {
 }
 
 const checkValidateInput = () => {
-  console.log("name pass:", namePass.value);
-  console.log("website pass:", websitePass.value);
-  console.log("country pass:", countryPass.value);
   validInput.value =
     namePass.value && websitePass.value && countryPass.value ? true : false;
 };
@@ -136,9 +133,6 @@ const checkDisabled = () => {
   } else {
     isDisabled.value = false;
   }
-  console.log("contain non null filed:", isContainAllNonOtionalFiled.value);
-  console.log("is update filed:", isUpdatedFiled.value);
-  console.log("valid input:", validInput.value);
 };
 
 const addUpdateNewBrand = async () => {

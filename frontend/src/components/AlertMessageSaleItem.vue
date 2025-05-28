@@ -5,7 +5,6 @@ const statusStore = useSaleItemStatusStore();
 const status = statusStore.getStatus();
 const showMessage = ref(true);
 const setIntervalShowMessage = () => {
-  console.log(status);
   setTimeout(() => {
     showMessage.value = false;
     statusStore.clearStatusAndMethod();

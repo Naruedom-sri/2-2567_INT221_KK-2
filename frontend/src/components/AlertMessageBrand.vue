@@ -10,8 +10,6 @@ const props = defineProps({
 });
 
 const setIntervalShowMessage = () => {
-  console.log(method);
-  console.log(status);
   setTimeout(() => {
     showMessage.value = false;
     statusStore.clearStatusAndMethod();

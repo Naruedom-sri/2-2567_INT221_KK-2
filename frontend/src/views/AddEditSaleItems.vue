@@ -152,7 +152,6 @@ const checkUpdatedFiled = () => {
   } else {
     isUpdatedFiled.value = false;
   }
-  console.log(isUpdatedFiled.value);
 };
 
 const addUpdateNewSaleItem = async () => {

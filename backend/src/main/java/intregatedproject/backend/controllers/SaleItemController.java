@@ -68,16 +68,16 @@ public class SaleItemController {
     @GetMapping("/v2/sale-items")
     public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
             @RequestParam(required = false) List<String> filterBrands,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "createdOn") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         filterBrands = filterBrands == null ? List.of() : filterBrands;
-        page = page < 0 ? 0 : page;
-        size = size < 0 ? 10 : size;
-        sortField = sortField == null ? "createdOn" : sortField;
-        sortDirection = sortDirection == null ? "asc" : sortDirection;
+        page = page == null || page < 0 ? 0 : page;
+        size = size == null || size <= 0 ? 10 : size;
+        sortField = sortField == null || sortField.isBlank() ? "createdOn" : sortField;
+        sortDirection = sortDirection == null || sortDirection.isBlank() ? "asc" : sortDirection;
         List<SaleItem> saleItems = service.getAllSortedAndFilter(filterBrands, sortField, sortDirection);
         Page<SaleItem> pageResult = service.paginate(saleItems, page, size);
         List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream().map(saleItem -> modelMapper

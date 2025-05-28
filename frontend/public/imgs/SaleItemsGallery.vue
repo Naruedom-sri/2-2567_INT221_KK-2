@@ -23,6 +23,7 @@ const isFirstPage = ref();
 const tempIndexPage = ref(0);
 const params = new URLSearchParams();
 
+const onHover = ref(null);
 const getAllSaleItemBySortAndFilter = async () => {
   try {
     params.delete("page");
@@ -34,8 +35,6 @@ const getAllSaleItemBySortAndFilter = async () => {
     brandFilterList.value.forEach((brand) =>
       params.append("filterBrands", brand)
     );
-    console.log("index page", indexPage.value);
-    console.log("temp page", tempIndexPage.value);
 
     params.append(
       "page",
@@ -190,8 +189,6 @@ const sortDesc = () => {
   getAllSaleItemBySortAndFilter();
 };
 
-
-
 const getAllSaleItems = async () => {
   try {
     items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
@@ -338,15 +335,15 @@ onMounted(() => {
         </div>
         <div class="max-h-10 flex gap-2">
           <img
+            @mouseenter="onHover = 'filter'"
+            @mouseleave="onHover = null"
             @click="isShowAllBrand = !isShowAllBrand"
-            src="/src/assets/imgs/filter.png"
+            :src="`/kk2/imgs/${
+              isShowAllBrand || onHover === 'filter' ? 'filter-black' : 'filter'
+            }.png`"
             alt="filter"
-            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300"
-            :class="
-              isShowAllBrand
-                ? 'bg-gradient-to-r from-purple-500 to-blue-300'
-                : ''
-            "
+            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+            :class="isShowAllBrand ? 'bg-white' : ''"
           />
           <button
             @click="clearFilter"
@@ -374,41 +371,47 @@ onMounted(() => {
           </select>
         </div>
         <img
+          @mouseenter="onHover = 'asc'"
+          @mouseleave="onHover = null"
           @click="sortAsc"
-          src="/src/assets/imgs/asc-sort.png"
+          :src="`/kk2/imgs/${
+            isSort.sortDirection === 'asc' || onHover === 'asc'
+              ? 'asc-sort-black'
+              : 'asc-sort'
+          }.png`"
           alt="asc"
-          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300"
-          :class="
-            isSort.sortDirection === 'asc'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
-              : ''
-          "
+          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          :class="isSort.sortDirection === 'asc' ? 'bg-white' : ''"
         />
         <img
+          @mouseenter="onHover = 'none'"
+          @mouseleave="onHover = null"
           @click="clearSort"
-          src="/src/assets/imgs/none-sort.png"
+          :src="`/kk2/imgs/${
+            isSort.sortDirection === 'none' || onHover === 'none'
+              ? 'none-sort-black'
+              : 'none-sort'
+          }.png`"
           alt="none"
-          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 "
-          :class="
-            isSort.sortDirection === 'none'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
-              : ''
-          "
+          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          :class="isSort.sortDirection === 'none' ? 'bg-white' : ''"
         />
         <img
+          @mouseenter="onHover = 'desc'"
+          @mouseleave="onHover = null"
           @click="sortDesc"
-          src="/src/assets/imgs/desc-sort.png"
+          :src="`/kk2/imgs/${
+            isSort.sortDirection === 'desc' || onHover === 'desc'
+              ? 'desc-sort-black'
+              : 'desc-sort'
+          }.png`"
           alt="desc"
-          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300  "
-          :class="
-            isSort.sortDirection === 'desc'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
-              : ''
-          "
+          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          :class="isSort.sortDirection === 'desc' ? 'bg-white' : ''"
         />
         <RouterLink
           :to="{ name: 'AddSaleItems' }"
-          class="itbms-sale-item-add flex items-center justify-center w-10 text-2xl border rounded  over:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 hover:text-3xl "
+          class="itbms-sale-item-add flex items-center justify-center w-10 text-2xl border rounded duration-200 over:cursor-pointer hover:bg-white hover:text-black"
         >
           +
         </RouterLink>
@@ -496,7 +499,7 @@ onMounted(() => {
           :class="
             isFirstPage
               ? 'opacity-60'
-              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
           "
         >
           First
@@ -508,7 +511,7 @@ onMounted(() => {
           :class="
             isFirstPage
               ? 'opacity-60'
-              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
           "
         >
           <
@@ -517,13 +520,13 @@ onMounted(() => {
           @click="clickPageNumber(page)"
           v-for="(page, index) in totalPage > 10 ? pageList : totalPage"
           :key="index"
-          class="px-3 py-1 border hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          class="px-3 py-1 border hover:cursor-pointer hover:bg-white hover:text-black duration-200"
           :class="`itbms-page-${pageList.findIndex(
             (pageNum) => pageNum === page
           )}`"
           v-bind:class="
             indexPage === pageList.findIndex((pageNum) => pageNum === page)
-              ? 'bg-gradient-to-r from-purple-500 to-blue-300'
+              ? 'bg-white text-black'
               : ''
           "
         >
@@ -536,7 +539,7 @@ onMounted(() => {
           :class="
             isLastPage
               ? 'opacity-60'
-              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 '
+              : 'hover:cursor-pointer hover:bg-white hover:text-black '
           "
         >
           >
@@ -548,7 +551,7 @@ onMounted(() => {
           :class="
             isLastPage
               ? 'opacity-60'
-              : 'hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
           "
         >
           Last

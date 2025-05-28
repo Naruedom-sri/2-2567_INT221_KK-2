@@ -51,12 +51,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex) {
+    public ResponseEntity<Object> handleGenericException(Exception ex, HttpServletRequest request) {
         return new ResponseEntity<>(
-                Map.of(
+                Map.of("timestamp",
+                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         "status", 500,
                         "error", "Internal Server Error",
-                        "message", "Something went wrong: " + ex.getMessage()),
+                        "message", "Something went wrong: " + ex.getMessage(),
+                        "path", request.getRequestURI()),
+
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
