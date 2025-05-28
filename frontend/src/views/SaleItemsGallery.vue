@@ -8,7 +8,6 @@ import Footer from "@/components/Footer.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const brands = ref([]);
-const time = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
 
@@ -191,11 +190,7 @@ const sortDesc = () => {
   getAllSaleItemBySortAndFilter();
 };
 
-const updateTime = () => {
-  const date = new Date();
-  time.value = date.toLocaleTimeString();
-  setInterval(updateTime, 1000);
-};
+
 
 const getAllSaleItems = async () => {
   try {
@@ -239,7 +234,6 @@ onMounted(() => {
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
 
-  updateTime();
   getAllSaleItemBySortAndFilter();
   getAllBrand();
 });
@@ -253,7 +247,7 @@ onMounted(() => {
         class="w-full absolute duration-500"
         :class="countImg === 2 || countImg === 4 ? 'text-black' : 'text-white'"
       >
-        <div class="my-11 flex justify-center gap-5">
+        <div class="my-8 flex justify-center gap-5">
           <h1
             @click="countImg = 1"
             class="w-44 py-2 text-center hover:cursor-pointer"
@@ -283,21 +277,21 @@ onMounted(() => {
             Galaxy S25 | S25+
           </h1>
         </div>
-        <div class="relative flex flex-col items-center gap-5 top-130">
-          <h1 v-if="countImg === 1" class="font-black text-4xl">
+        <div class="relative flex flex-col items-center gap-4 top-125">
+          <h1 v-if="countImg === 1" class="font-black text-3xl">
             Galaxy S25 Ultra
           </h1>
-          <h1 v-else-if="countImg === 2" class="font-black text-4xl">
+          <h1 v-else-if="countImg === 2" class="font-black text-3xl">
             Pixel 9 Pro
           </h1>
-          <h1 v-else-if="countImg === 3" class="font-black text-4xl">
+          <h1 v-else-if="countImg === 3" class="font-black text-3xl">
             iPhone 12 Pro Max
           </h1>
-          <h1 v-else class="font-black text-4xl">Galaxy S25 | S25+</h1>
+          <h1 v-else class="font-black text-3xl">Galaxy S25 | S25+</h1>
           <div class="space-x-4">
             <button class="text-base underline">More Detail</button>
             <button
-              class="px-3 py-2 text-base rounded-4xl duration-500"
+              class="px-3 py-1 text-base rounded-4xl duration-500"
               :class="
                 countImg === 2 || countImg === 4
                   ? 'bg-black text-white'
@@ -312,31 +306,17 @@ onMounted(() => {
       <img
         :src="`/kk2/imgs/product-${countImg}.png`"
         alt="product"
-        class="img-promote w-full h-[800px] object-cover"
+        class="img-promote w-full h-[720px] object-cover border-b"
         :class="countImg === 2 ? 'object-top' : ''"
       />
     </div>
-    <div
-      class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
-    >
-      <button
-        class="filter w-36 h-full hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
-      >
-        Filter
-      </button>
-      <p class="text-lg">{{ time }}</p>
-      <RouterLink
-        :to="{ name: 'AddSaleItems' }"
-        class="itbms-sale-item-add w-36 h-full flex justify-center items-center hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
-      >
-        Add Sale Item
-      </RouterLink>
-    </div>
-    <div class="mx-7 py-7 border-b flex justify-between">
+
+    <div class="mx-7 pt-7 flex justify-between">
       <div class="gap-2 flex">
         <div
           @click="isShowAllBrand = !isShowAllBrand"
-          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border rounded"
+          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border"
+          :class="isShowAllBrand ? 'rounded-t' : 'rounded'"
         >
           <p v-if="brandFilterList.length === 0" class="text-white/80">
             Filter by brand(s)
@@ -397,7 +377,7 @@ onMounted(() => {
           @click="sortAsc"
           src="/src/assets/imgs/asc-sort.png"
           alt="asc"
-          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300"
           :class="
             isSort.sortDirection === 'asc'
               ? 'bg-gradient-to-r from-purple-500 to-blue-300'
@@ -408,7 +388,7 @@ onMounted(() => {
           @click="clearSort"
           src="/src/assets/imgs/none-sort.png"
           alt="none"
-          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 "
           :class="
             isSort.sortDirection === 'none'
               ? 'bg-gradient-to-r from-purple-500 to-blue-300'
@@ -419,30 +399,38 @@ onMounted(() => {
           @click="sortDesc"
           src="/src/assets/imgs/desc-sort.png"
           alt="desc"
-          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 duration-200"
+          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300  "
           :class="
             isSort.sortDirection === 'desc'
               ? 'bg-gradient-to-r from-purple-500 to-blue-300'
               : ''
           "
         />
+        <RouterLink
+          :to="{ name: 'AddSaleItems' }"
+          class="itbms-sale-item-add flex items-center justify-center w-10 text-2xl border rounded  over:cursor-pointer hover:bg-gradient-to-r from-purple-500 to-blue-300 hover:text-3xl "
+        >
+          +
+        </RouterLink>
       </div>
     </div>
     <div
       v-if="isShowAllBrand"
-      class="dropdown-brand flex flex-col bg-white text-black text-sm z-50 absolute left-100"
+      class="dropdown-brand w-96 h-50 mx-7 flex flex-col bg-white text-black text-sm z-50 overflow-y-auto"
+      :class="isShowAllBrand ? '' : ''"
     >
       <div
         @click="addToFilterList(brand.name)"
         v-for="(brand, index) in brands"
         :key="index"
-        class="itbms-filter-item px-2 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+        class="itbms-filter-item px-4 py-2 bg-[rgba(22,22,23,255)] border-l text-white hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+        :class="index === brands.length - 1 ? 'border-b' : ''"
       >
         <p>{{ brand.name }}</p>
       </div>
     </div>
 
-    <div class="item-container clear-both grid grid-cols-5 gap-5 p-7">
+    <div class="item-container grid grid-cols-5 gap-5 py-7 border-t mt-7 mx-7">
       <h1
         v-show="items.length === 0"
         class="itmbs-row h-screen col-span-5 text-white text-5xl text-center"
