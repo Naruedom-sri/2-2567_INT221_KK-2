@@ -52,6 +52,17 @@ const screenSizeInchPass = ref(true);
 
 const validInput = ref(false);
 
+const checkScreenSize = () => {
+  if (screenSizeInch.value === undefined || screenSizeInch.value === "") {
+    screenSizeInchPass.value = true;
+  } else if (
+    screenSizeInch.value <= 0 ||
+    !/^\d+(\.\d{1,2})?$/.test(parseFloat(screenSizeInch.value))
+  ) {
+    screenSizeInchPass.value = false;
+  }
+};
+
 const checkVaildateInput = () => {
   validInput.value =
     brandPass.value &&
@@ -411,7 +422,7 @@ watch(
           <textarea
             @keydown.enter.prevent="focusNext('priceInput')"
             @blur="
-              description?.length > 65535 ||
+              description?.length > 16384 ||
               description === undefined ||
               description === ''
                 ? (descriptionPass = false)
@@ -429,7 +440,7 @@ watch(
             v-if="!descriptionPass && descriptionPass !== null"
             class="itbms-message text-red-400 text-sm"
           >
-            Description must be 1-65,535 characters long.
+            Description must be 1-16,384 characters long.
           </h1>
           <h1 class="pb-1 text-3xl border-b mt-10">Pricing</h1>
           <label>Price ( ฿ )<span>*</span></label>
@@ -494,7 +505,9 @@ watch(
           <input
             @keydown.enter.prevent="focusNext('screenSizeInput')"
             @blur="
-              ramGb < 0 ? (ramGbPass = false) : (ramGbPass = true),
+              ramGb <= 0 && ramGb !== ''
+                ? (ramGbPass = false)
+                : (ramGbPass = true),
                 checkVaildateInput(),
                 checkDisabled()
             "
@@ -510,16 +523,7 @@ watch(
           <label>Screen Size ( Inches )</label>
           <input
             @keydown.enter.prevent="focusNext('storageInput')"
-            @blur="
-              screenSizeInch < 0 ||
-              (!/^\d+(\.\d{1,2})?$/.test(parseFloat(screenSizeInch)) &&
-                screenSizeInch !== undefined &&
-                screenSizeInch !== '')
-                ? (screenSizeInchPass = false)
-                : (screenSizeInchPass = true),
-                checkVaildateInput(),
-                checkDisabled()
-            "
+            @blur="checkScreenSize(), checkVaildateInput(), checkDisabled()"
             placeholder="e.g. 6.7"
             v-model="screenSizeInch"
             type="number"
@@ -537,7 +541,9 @@ watch(
           <input
             @keydown.enter.prevent="focusNext('modelInput')"
             @blur="
-              storageGb < 0 ? (storageGbPass = false) : (storageGbPass = true),
+              storageGb <= 0 && storageGb !== ''
+                ? (storageGbPass = false)
+                : (storageGbPass = true),
                 checkVaildateInput(),
                 checkDisabled()
             "

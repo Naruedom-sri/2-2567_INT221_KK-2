@@ -290,7 +290,7 @@ onMounted(() => {
             autofocus
             @keydown.enter.prevent="focusNext('websiteUrlInput')"
             @blur="
-              name?.length > 30 || name === undefined
+              name?.length > 30 || name === undefined || name === ''
                 ? (namePass = false)
                 : (namePass = true),
                 checkValidateInput(),
@@ -327,7 +327,7 @@ onMounted(() => {
             class="itbms-websiteUrl"
           />
           <h1 v-if="!websitePass" class="itbms-message text-red-400 text-sm">
-            Brand URL must be valid URL or not specified.
+            Brand URL must be a valid URL or not specified.
           </h1>
           <h1>isActive</h1>
           <div class="space-x-2">
