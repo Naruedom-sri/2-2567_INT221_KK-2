@@ -4,7 +4,7 @@ import BrandList from "@/views/BrandList.vue";
 import Home from "@/views/Home.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
-import SaleItemsGallery from "../../public/imgs/SaleItemsGallery.vue";
+import SaleItemsGallery from "../views/SaleItemsGallery.vue";
 import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
 const history = createWebHistory('/kk2/');
