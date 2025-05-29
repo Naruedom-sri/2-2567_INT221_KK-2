@@ -33,7 +33,6 @@ public class BrandController {
     public ResponseEntity<ResponseBrandDetailDto> getBrandById(@PathVariable int id) {
         Brand brand = service.getBrandById(id);
         ResponseBrandDetailDto responseBrandDto = modelMapper.map(brand, ResponseBrandDetailDto.class);
-        responseBrandDto.setNoOfSaleItems(brand.getSaleItems().size());
         return ResponseEntity.ok(responseBrandDto);
     }
 
@@ -48,7 +47,6 @@ public class BrandController {
     public ResponseEntity<ResponseBrandDetailDto> updateBrand(@PathVariable int id, @RequestBody RequestBrandDto requestBrandDto) {
         Brand updatedBrand = service.updateBrand(id, requestBrandDto);
         ResponseBrandDetailDto updatedBrandDto = modelMapper.map(updatedBrand, ResponseBrandDetailDto.class);
-        updatedBrandDto.setNoOfSaleItems(updatedBrand.getSaleItems().size());
         return ResponseEntity.ok(updatedBrandDto);
     }
 

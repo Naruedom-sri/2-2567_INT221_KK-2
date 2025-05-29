@@ -1,6 +1,5 @@
 package intregatedproject.backend.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,10 +12,5 @@ public class ResponseSaleItemDto {
     private Integer storageGb;
     private Integer price;
     private String color;
-    @JsonIgnore
-    private ResponseBrandDto brand;
-    public String getBrandName() {
-        return brand.getName();
-    };
-
+    private String brandName;
 }

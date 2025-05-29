@@ -25,20 +25,11 @@ public class RequestSaleItemDto {
     }
 
     public void setQuantity(Integer quantity) {
-        if (quantity == null || quantity < 0) {
-            this.quantity = 1;
-        } else {
-            this.quantity = quantity;
-        }
+        this.quantity = quantity == null || quantity < 0 ? 1 : quantity;
     }
 
     public void setModel(String model) {
-        if (model != null && !model.trim().isEmpty()) {
-            this.model = model.trim().length() > 60 ? model.trim().substring(0, 60) : model.trim();
-        } else {
-            this.model = null;
-        }
-
+        this.model = model != null && !model.trim().isEmpty() ? model.trim() : null;
     }
 
     public void setDescription(String description) {
