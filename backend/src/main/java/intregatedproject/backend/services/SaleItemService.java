@@ -6,10 +6,7 @@ import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -81,42 +78,19 @@ public class SaleItemService {
     }
 
 
-    public List<SaleItem> getAllSortedAndFilter(List<String> filterBrands, String sortField, String sortDirection) {
-        if (filterBrands == null || filterBrands.isEmpty()) {
-            if ("brand.name".equalsIgnoreCase(sortField)) {
-                if ("asc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllSortedByBrandNameAsc();
-                } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findAllSortedByBrandNameDesc();
-                } else {
-                    return saleItemRepository.findAllSortedByBrandNameAsc();
-                }
-            } else {
-                return saleItemRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
-            }
+    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, String sortField, String sortDirection, Integer page, Integer size) {
+        Sort sort;
+        if ("brand.name".equalsIgnoreCase(sortField)) {
+            sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
         } else {
-            if ("brand.name".equalsIgnoreCase(sortField)) {
-                if ("asc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
-                } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.desc("brand.name")));
-                } else {
-                    return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("brand.name")));
-                }
-            } else {
-                return saleItemRepository.findByBrand_NameIn(filterBrands, Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
-            }
+            sort = Sort.by(Sort.Order.asc(sortField),Sort.Order.asc("id"));
         }
-
-    }
-
-
-    public Page<SaleItem> paginate(List<SaleItem> sortedFilteredItems, int page, int size) {
-        int start = Math.min(page * size, sortedFilteredItems.size());
-        int end = Math.min(start + size, sortedFilteredItems.size());
-
-        List<SaleItem> pageContent = sortedFilteredItems.subList(start, end);
-        return new PageImpl<>(pageContent, PageRequest.of(page, size), sortedFilteredItems.size());
+        Pageable pageable = PageRequest.of(page, size, sort);
+        if (filterBrands.isEmpty()) {
+            return saleItemRepository.findAllWithPage(pageable);
+        } else {
+            return saleItemRepository.findByBrand_NameIn(filterBrands,pageable);
+        }
     }
 
 }
