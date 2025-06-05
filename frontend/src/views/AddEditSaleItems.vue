@@ -559,7 +559,7 @@ watch(
             <button
               type="button"
               @click="goBackToPreviousPage"
-              class="itbms-cancel-button w-full py-2 rounded-4xl border border-red-500 text-red-500 hover:cursor-pointer hover:bg-red-500 hover:text-white duration-150"
+              class="itbms-cancel-button w-full py-2 rounded-4xl bg-red-500 text-white hover:cursor-pointer hover:bg-red-500/80 duration-150"
             >
               Cancel
             </button>
@@ -571,7 +571,7 @@ watch(
               :class="
                 isDisabled
                   ? 'border border-gray-400 text-gray-400'
-                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer hover:bg-blue-500/80'
               "
             >
               Add
@@ -584,7 +584,7 @@ watch(
               :class="
                 isDisabled
                   ? 'border border-gray-400 text-gray-400'
-                  : 'bg-blue-500 hover:text-white hover:cursor-pointer'
+                  : 'bg-blue-500 hover:text-white hover:cursor-pointer hover:bg-blue-500/80'
               "
             >
               Save

@@ -236,7 +236,7 @@ onMounted(() => getSaleItem());
           <div class="flex justify-between gap-4 space-y-5">
             <button
               @click="showDialog = true"
-              class="itbms-delete-button flex-1 py-3 border rounded-4xl border-red-500 text-3xl text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
+              class="itbms-delete-button flex-1 py-3 bg-red-500 rounded-4xl text-3xl text-white hover:bg-red-500/80 hover:cursor-pointer duration-200"
             >
               Delete
             </button>
@@ -247,7 +247,7 @@ onMounted(() => getSaleItem());
               }"
               class="itbms-edit-button flex-1"
               ><button
-                class="w-full py-3 border rounded-4xl border-blue-500 text-3xl text-blue-500 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
+                class="w-full py-3 rounded-4xl bg-yellow-500 text-3xl hover:bg-yellow-500/80 hover:cursor-pointer duration-200"
               >
                 Edit
               </button></RouterLink
@@ -263,7 +263,7 @@ onMounted(() => getSaleItem());
     </div>
     <ConfirmDialog
       :visible="showDialog"
-      title="Delete Confirmation"
+      title="Are you sure?"
       message="Do you want to delete this sale item?"
       @confirm="deleteSaleItem"
       @cancel="showDialog = false"

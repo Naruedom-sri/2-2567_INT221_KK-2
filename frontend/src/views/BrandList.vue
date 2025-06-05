@@ -141,7 +141,7 @@ onMounted(() => {
   </div>
   <ConfirmDialog
     :visible="showDialog"
-    title="Delete Confirmation"
+    :title="haveSaleItem ? 'Warning!' : 'Are you sure?'"
     :message="
       haveSaleItem
         ? `Delete ${brandName} is not allowed. There are sale items with ${brandName} brand.`

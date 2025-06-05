@@ -14,12 +14,12 @@ const countImg = ref(1);
 const brandFilterList = ref([]);
 const pageSize = ref(10);
 const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
-const indexPage = ref(0);
 const isShowAllBrand = ref(false);
 const totalPage = ref(0);
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
+const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const params = new URLSearchParams();
 
@@ -92,11 +92,15 @@ const nextPage = () => {
   indexPage.value += 1;
   tempIndexPage.value += 1;
   if (indexPage.value >= 9) {
-    indexPage.value = 9;
-    nextNavPage();
-    tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    if (indexPage.value !== 9) {
+      indexPage.value = 9;
+      nextNavPage();
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    } else {
+      indexPage.value = 9;
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    }
   }
-
   getAllSaleItemBySortAndFilter();
 };
 
@@ -104,9 +108,14 @@ const previousPage = () => {
   indexPage.value -= 1;
   tempIndexPage.value -= 1;
   if (indexPage.value <= 0) {
-    indexPage.value = 0;
-    previousNavPage();
-    tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    if (indexPage.value !== 0) {
+      indexPage.value = 0;
+      previousNavPage();
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    } else {
+      indexPage.value = 0;
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    }
   }
   getAllSaleItemBySortAndFilter();
 };
@@ -208,6 +217,21 @@ const getAllBrand = async () => {
   }
 };
 
+const animations = ref([false, false, false, false]);
+const phoneLabels = [
+  "Galaxy S25 Ultra",
+  "Pixel 9 Pro",
+  "iPhone 12 Pro Max",
+  "Galaxy S25 | S25+",
+];
+const setAnimation = () => {
+  animations.value.forEach((boolean, index) => {
+    setTimeout(() => {
+      animations.value[index] = true;
+    }, index * 200);
+  });
+};
+
 onMounted(() => {
   const savedBrands = sessionStorage.getItem("filterBrands");
   const savedSize = sessionStorage.getItem("pageSize");
@@ -233,6 +257,7 @@ onMounted(() => {
 
   getAllSaleItemBySortAndFilter();
   getAllBrand();
+  setAnimation();
 });
 </script>
 
@@ -246,35 +271,23 @@ onMounted(() => {
       >
         <div class="my-8 flex justify-center gap-5">
           <h1
-            @click="countImg = 1"
+            v-for="(phoneName, index) in phoneLabels"
+            :key="index"
+            @click="countImg = index + 1"
             class="w-44 py-2 text-center hover:cursor-pointer"
-            :class="countImg === 1 ? 'underline' : 'hover:opacity-80'"
+            :class="[
+              countImg === index + 1
+                ? 'underline'
+                : 'hover:scale-110 duration-200',
+              animations[index] ? 'animation-slide-down' : 'opacity-0',
+            ]"
           >
-            Galaxy S25 Ultra
-          </h1>
-          <h1
-            @click="countImg = 2"
-            class="w-44 py-2 text-center hover:cursor-pointer"
-            :class="countImg === 2 ? 'underline' : 'hover:opacity-80'"
-          >
-            Pixel 9 Pro
-          </h1>
-          <h1
-            @click="countImg = 3"
-            class="w-44 py-2 text-center hover:cursor-pointer"
-            :class="countImg === 3 ? 'underline' : 'hover:opacity-80'"
-          >
-            iPhone 12 Pro Max
-          </h1>
-          <h1
-            @click="countImg = 4"
-            class="w-44 py-2 text-center hover:cursor-pointer"
-            :class="countImg === 4 ? 'underline' : 'hover:opacity-80'"
-          >
-            Galaxy S25 | S25+
+            {{ phoneName }}
           </h1>
         </div>
-        <div class="relative flex flex-col items-center gap-4 top-125">
+        <div
+          class="animation-slide-up relative flex flex-col items-center gap-4 top-125"
+        >
           <h1 v-if="countImg === 1" class="font-black text-3xl">
             Galaxy S25 Ultra
           </h1>
@@ -312,10 +325,14 @@ onMounted(() => {
       <div class="gap-2 flex">
         <div
           @click="isShowAllBrand = !isShowAllBrand"
-          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 py-2 px-4 border"
+          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 px-4 border"
           :class="isShowAllBrand ? 'rounded-t' : 'rounded'"
         >
-          <p v-if="brandFilterList.length === 0" class="text-white/80">
+          <p
+            v-if="brandFilterList.length === 0"
+            class="text-white/80"
+            :class="brandFilterList.length === 0 ? '' : 'py-2'"
+          >
             Filter by brand(s)
           </p>
           <div
@@ -333,7 +350,7 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <div class="max-h-10 flex gap-2">
+        <div class="max-h-8 flex gap-2">
           <img
             @mouseenter="onHover = 'filter'"
             @mouseleave="onHover = null"
@@ -342,7 +359,7 @@ onMounted(() => {
               isShowAllBrand || onHover === 'filter' ? 'filter-black' : 'filter'
             }.png`"
             alt="filter"
-            class="itbms-brand-filter-button w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+            class="itbms-brand-filter-button w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
             :class="isShowAllBrand ? 'bg-white' : ''"
           />
           <button
@@ -353,7 +370,7 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <div class="sort-page max-h-10 flex gap-2">
+      <div class="sort-page max-h-8 flex gap-2">
         <div class="page self-center space-x-3 mx-2">
           <label>show</label>
           <select
@@ -380,7 +397,7 @@ onMounted(() => {
               : 'asc-sort'
           }.png`"
           alt="asc"
-          class="itbms-brand-asc w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          class="itbms-brand-asc w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
           :class="isSort.sortDirection === 'asc' ? 'bg-white' : ''"
         />
         <img
@@ -393,7 +410,7 @@ onMounted(() => {
               : 'none-sort'
           }.png`"
           alt="none"
-          class="itbms-brand-none w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          class="itbms-brand-none w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
           :class="isSort.sortDirection === 'none' ? 'bg-white' : ''"
         />
         <img
@@ -406,12 +423,12 @@ onMounted(() => {
               : 'desc-sort'
           }.png`"
           alt="desc"
-          class="itbms-brand-desc w-10 object-cover border rounded hover:cursor-pointer hover:bg-white"
+          class="itbms-brand-desc w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
           :class="isSort.sortDirection === 'desc' ? 'bg-white' : ''"
         />
         <RouterLink
           :to="{ name: 'AddSaleItems' }"
-          class="itbms-sale-item-add flex items-center justify-center w-10 text-2xl border rounded duration-200 over:cursor-pointer hover:bg-white hover:text-black"
+          class="itbms-sale-item-add flex items-center justify-center w-8 text-2xl border rounded duration-200 over:cursor-pointer hover:bg-white hover:text-black"
         >
           +
         </RouterLink>
@@ -433,7 +450,9 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="item-container grid grid-cols-5 gap-5 py-7 border-t mt-7 mx-7">
+    <div
+      class="item-container grid grid-cols-5 gap-x-5 gap-y-10 py-10 border-t mt-7 mx-7"
+    >
       <h1
         v-show="items.length === 0"
         class="itmbs-row h-screen col-span-5 text-white text-5xl text-center"
@@ -449,53 +468,64 @@ onMounted(() => {
           params: { itemId: item.id },
         }"
         :key="index"
-        class="itbms-row w-full pt-4 rounded-4xl shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:shadow-sm duration-300"
+        class="itbms-row w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[5%] hover:shadow-sm duration-300"
       >
+        <img
+          src="/src/assets/imgs/iphone-item.png"
+          alt="sale-item"
+          class="w-60 mx-auto rounded-4xl"
+        />
         <div
-          class="item-detail flex flex-col items-center space-y-1 text-white text-lg"
+          class="item-detail flex flex-col items-center space-y-3 text-white text-lg"
         >
-          <p class="itbms-brand font-semibold text-2xl">{{ item.brandName }}</p>
-          <p class="itbms-model font-bold">{{ item.model }}</p>
-          <p class="itbms-ramGb text-sm">
-            {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-            /
-            <span class="itbms-storageGb">{{
-              item.storageGb === null || item.storageGb === ""
-                ? "-"
-                : item.storageGb
-            }}</span
-            ><span
-              v-show="item.storageGb !== null && item.storageGb !== ''"
-              class="itbms-storageGb-unit"
-            >
-              GB</span
-            >
-          </p>
+          <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
+          <p class="itbms-model">{{ item.model }}</p>
+          <div class="ram-storage flex items-center gap-4 text-xs">
+            <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
+              {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
+              <span
+                v-show="item.storageGb !== null && item.storageGb !== ''"
+                class="itbms-storageGb-unit"
+              >
+                GB</span
+              >
+            </p>
+
+            <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
+              {{
+                item.storageGb === null || item.storageGb === ""
+                  ? "-"
+                  : item.storageGb
+              }}
+              <span
+                v-show="item.storageGb !== null && item.storageGb !== ''"
+                class="itbms-storageGb-unit"
+              >
+                GB</span
+              >
+            </p>
+          </div>
+
           <p class="itbms-price text-sm text-white/80">
             From ฿<span class="itbms-price-unit mx-0.5">{{
               item.price.toLocaleString()
             }}</span>
           </p>
           <button
-            class="py-2 px-4 mt-4 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90"
+            class="w-60 py-2 mb-5 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90"
           >
             Add to Cart
           </button>
         </div>
-        <img
-          src="/src/assets/imgs/iphone-item.png"
-          alt="sale-item"
-          class="w-60 mx-auto rounded-4xl"
-        />
       </RouterLink>
       <div
         v-show="items.length !== 0 && totalPage > 1"
-        class="nav-page mt-2 flex items-center justify-center col-span-5 text-white"
+        class="nav-page mt-2 gap-1 flex items-center justify-center col-span-5 text-white"
       >
         <button
           @click="firstPage"
           :disabled="isFirstPage"
-          class="itbms-page-first px-3 py-1 border rounded-l duration-200"
+          class="itbms-page-first px-3 py-1 rounded duration-200"
           :class="
             isFirstPage
               ? 'opacity-60'
@@ -507,7 +537,7 @@ onMounted(() => {
         <button
           @click="previousPage"
           :disabled="isFirstPage"
-          class="itbms-page-prev px-3 py-1 border duration-200"
+          class="itbms-page-prev px-3 py-1 rounded duration-200"
           :class="
             isFirstPage
               ? 'opacity-60'
@@ -520,13 +550,13 @@ onMounted(() => {
           @click="clickPageNumber(page)"
           v-for="(page, index) in totalPage > 10 ? pageList : totalPage"
           :key="index"
-          class="px-3 py-1 border hover:cursor-pointer hover:bg-white hover:text-black duration-200"
+          class="px-3 py-1 rounded hover:cursor-pointer hover:bg-white hover:text-black duration-200"
           :class="`itbms-page-${pageList.findIndex(
             (pageNum) => pageNum === page
           )}`"
           v-bind:class="
             indexPage === pageList.findIndex((pageNum) => pageNum === page)
-              ? 'bg-white text-black'
+              ? 'bg-white text-black rounded'
               : ''
           "
         >
@@ -535,7 +565,7 @@ onMounted(() => {
         <button
           @click="nextPage"
           :disabled="isLastPage"
-          class="itbms-page-next px-3 py-1 border duration-200"
+          class="itbms-page-next px-3 py-1 rounded duration-200"
           :class="
             isLastPage
               ? 'opacity-60'
@@ -547,7 +577,7 @@ onMounted(() => {
         <button
           @click="lastPage"
           :disabled="isLastPage"
-          class="itbms-page-last px-3 py-1 border rounded-r duration-200"
+          class="itbms-page-last px-3 py-1 rounded duration-200"
           :class="
             isLastPage
               ? 'opacity-60'
@@ -564,18 +594,45 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.animation {
-  animation-name: op;
+.animation-opacity {
+  animation-name: opacity;
   animation-duration: 1s;
 }
+
+.animation-slide-down {
+  animation: slide-down 0.5s ease-out;
+}
+.animation-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
 .dropdown-brand {
-  animation-name: op2;
+  animation-name: opacity-2;
   animation-duration: 0.4s;
 }
-.img-promote {
-  z-index: -100;
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-@keyframes op2 {
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes opacity-2 {
   from {
     opacity: 0;
   }
@@ -584,7 +641,7 @@ onMounted(() => {
   }
 }
 
-@keyframes op {
+@keyframes opacity {
   from {
     opacity: 0;
   }

@@ -83,7 +83,7 @@ public class SaleItemService {
         if ("brand.name".equalsIgnoreCase(sortField)) {
             sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
         } else {
-            sort = Sort.by(Sort.Order.asc(sortField),Sort.Order.asc("id"));
+            sort = Sort.by(Sort.Order.asc("id"));   
         }
         Pageable pageable = PageRequest.of(page, size, sort);
         if (filterBrands.isEmpty()) {

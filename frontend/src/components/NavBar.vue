@@ -33,7 +33,7 @@ const isSearch = ref(false);
         About
       </button>
     </div>
-    <div class="symbol flex gap-3.5">
+    <div class="symbol flex items-center gap-3.5">
       <div
         class="search-bar flex"
         :class="
@@ -63,21 +63,13 @@ const isSearch = ref(false);
         src="/src/assets/imgs/account-symbol.png"
         alt="account"
         class="w-7 object-cover hover:cursor-pointer"
-        :class="
-          isSearch
-            ? 'border border-[rgba(22,22,23,255)] rounded-2xl'
-            : 'duration-100  ease-in'
-        "
+      
+        
       />
       <img
         src="/src/assets/imgs/cart-symbol.png"
         alt="cart"
         class="w-7 object-cover hover:cursor-pointer"
-        :class="
-          isSearch
-            ? 'border border-[rgba(22,22,23,255)] rounded-2xl'
-            : 'duration-100  ease-in'
-        "
       />
     </div>
   </div>
