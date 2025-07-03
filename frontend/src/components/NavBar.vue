@@ -5,14 +5,14 @@ const isSearch = ref(false);
 
 <template>
   <div
-    class="container-header flex justify-between items-center w-full h-[60px] pl-10 pr-20 bg-[rgba(22,22,23,255)] text-white"
+    class="container-header flex justify-between items-center w-full h-16 px-10 bg-[rgba(22,22,23,255)] text-white"
   >
     <div class="logo">
       <RouterLink :to="{ name: 'LandingPage' }">
         <img
-          src="/src/assets/imgs/itbms-logo.png"
+          src="/src/assets/imgs/icons/itbms-logo.png"
           alt="logo"
-          class="w-40 h-20 object-cover"
+          class="w-14 object-cover"
         />
       </RouterLink>
     </div>

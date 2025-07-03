@@ -87,7 +87,7 @@ onMounted(() => {
       <div class="flex justify-center mb-10">
         <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
           <img
-            src="/src/assets/imgs/symbol-phone.png"
+            src="/src/assets/imgs/phone-symbol.png"
             alt="phone"
             class="w-36 object-cover"
           />

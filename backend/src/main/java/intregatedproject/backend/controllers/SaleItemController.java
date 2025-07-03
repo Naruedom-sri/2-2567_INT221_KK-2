@@ -64,7 +64,7 @@ public class SaleItemController {
         return ResponseEntity.status(204).body(null);
     }
 
-    
+        
     @GetMapping("/v2/sale-items")
     public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
             @RequestParam(required = false) List<String> filterBrands,

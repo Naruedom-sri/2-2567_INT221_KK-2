@@ -2,50 +2,60 @@
 
 <template>
   <div class="landing-container h-screen bg-black">
-    <div class="grid grid-cols-2 h-full text-white">
-      <div class="landing-content self-center w-xl mx-auto">
-        <h1 class="text-5xl/normal glow-text">
-          Transform Your Life with iPhone
-        </h1>
-        <p class="text-2xl mt-6">Fast. Powerful. Pro-level Camera.</p>
+    <div class="bg-container grid grid-cols-2 h-full text-white">
+      <div class="landing-content slide-fade self-center w-xl mx-auto">
+        <h1 class="text-5xl/normal">Transform Your Life with iPhone</h1>
         <p class="text-2xl my-6">
           0% Installments for Up to 10 Months + Tons of Freebies!
         </p>
-        <div
-          class="itbms-shopnow w-fit mx-auto mt-10 mb-4 px-4 py-2.5 border border-blue-500 rounded-4xl text-2xl text-blue-500 hover:bg-blue-500 hover:text-white duration-300"
-        >
-          <RouterLink :to="{ name: 'SaleItemsGallery' }">Shop Now</RouterLink>
-        </div>
-        <div class="itbms-seller w-fit mx-auto">
-          <RouterLink
-            :to="{ name: 'SaleItemsList' }"
-            class="underline hover:text-blue-500 duration-200"
-            >Seller</RouterLink
+        <div class="flex items-center">
+          <div
+            class="itbms-shopnow w-fit py-2 px-4 text-xl bg-blue-500 rounded-3xl hover:bg-blue-500/80 duration-300"
           >
+            <RouterLink :to="{ name: 'SaleItemsGallery' }">Shop Now</RouterLink>
+          </div>
+          <div
+            class="itbms-seller w-fit py-2 px-4 text-xl text-blue-500 hover:mr-1 duration-300"
+          >
+            <RouterLink :to="{ name: 'SaleItemsList' }">Seller</RouterLink>
+          </div>
+          <p class="text-blue-500">></p>
         </div>
       </div>
       <img
         src="/src/assets/imgs/iphone-15.png"
         alt="iphone"
-        class="self-end w-full h-[92%] object-cover hover:scale-[102%] duration-500"
+        class="fade self-end w-full h-[92%] object-cover hover:scale-[102%] duration-500"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
-.landing-container {
+.slide-fade {
   animation-name: slide-fade;
-  animation-timing-function: ease-in;
-  animation-duration: 0.7s;
+  animation-timing-function: ease-in-out;
+  animation-duration: 1s;
 }
 
-.glow-text {
-  text-shadow: 0 0 5px #fff, 0 0 3px #fff;
+.fade {
+  animation-name: fade;
+  animation-timing-function: ease-in;
+  animation-duration: 1s;
 }
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slide-fade {
   from {
-    transform: translateY(500px);
+    transform: translateY(200px);
     opacity: 0;
   }
   to {

@@ -22,8 +22,9 @@ const isFirstPage = ref();
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const params = new URLSearchParams();
-
 const onHover = ref(null);
+const itemAnimations = ref([]);
+
 const getAllSaleItemBySortAndFilter = async () => {
   try {
     params.delete("page");
@@ -65,10 +66,23 @@ const getAllSaleItemBySortAndFilter = async () => {
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
+    setAnimationItems();
   } catch (error) {
     console.log(error);
     items.value = [];
   }
+};
+
+const setAnimationItems = () => {
+  itemAnimations.value = [];
+  items.value.forEach((_) => {
+    itemAnimations.value.push(false);
+  });
+  itemAnimations.value.forEach((boolean, index) => {
+    setTimeout(() => {
+      itemAnimations.value[index] = true;
+    }, index * 200);
+  });
 };
 
 const nextNavPage = () => {
@@ -217,7 +231,7 @@ const getAllBrand = async () => {
   }
 };
 
-const animations = ref([false, false, false, false]);
+const phoneLabelAnimations = ref([false, false, false, false]);
 const phoneLabels = [
   "Galaxy S25 Ultra",
   "Pixel 9 Pro",
@@ -225,9 +239,9 @@ const phoneLabels = [
   "Galaxy S25 | S25+",
 ];
 const setAnimation = () => {
-  animations.value.forEach((boolean, index) => {
+  phoneLabelAnimations.value.forEach((boolean, index) => {
     setTimeout(() => {
-      animations.value[index] = true;
+      phoneLabelAnimations.value[index] = true;
     }, index * 200);
   });
 };
@@ -254,7 +268,6 @@ onMounted(() => {
   if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
-
   getAllSaleItemBySortAndFilter();
   getAllBrand();
   setAnimation();
@@ -269,24 +282,26 @@ onMounted(() => {
         class="w-full absolute duration-500"
         :class="countImg === 2 || countImg === 4 ? 'text-black' : 'text-white'"
       >
-        <div class="my-8 flex justify-center gap-5">
+        <div class="my-8 flex justify-center gap-15">
           <h1
             v-for="(phoneName, index) in phoneLabels"
             :key="index"
             @click="countImg = index + 1"
-            class="w-44 py-2 text-center hover:cursor-pointer"
+            class="w-fit hover:cursor-pointer"
             :class="[
               countImg === index + 1
-                ? 'underline'
+                ? 'border-b'
                 : 'hover:scale-110 duration-200',
-              animations[index] ? 'animation-slide-down' : 'opacity-0',
+              phoneLabelAnimations[index]
+                ? 'animation-slide-down'
+                : 'opacity-0',
             ]"
           >
             {{ phoneName }}
           </h1>
         </div>
         <div
-          class="animation-slide-up relative flex flex-col items-center gap-4 top-125"
+          class="animation-slide-up relative flex flex-col items-center gap-4 top-128"
         >
           <h1 v-if="countImg === 1" class="font-black text-3xl">
             Galaxy S25 Ultra
@@ -299,7 +314,7 @@ onMounted(() => {
           </h1>
           <h1 v-else class="font-black text-3xl">Galaxy S25 | S25+</h1>
           <div class="space-x-4">
-            <button class="text-base underline">More Detail</button>
+            <button class="text-base border-b">More Detail</button>
             <button
               class="px-3 py-1 text-base rounded-4xl duration-500"
               :class="
@@ -469,6 +484,7 @@ onMounted(() => {
         }"
         :key="index"
         class="itbms-row w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[5%] hover:shadow-sm duration-300"
+        :class="itemAnimations[index] ? 'animation-slide-up' : 'opacity-0'"
       >
         <img
           src="/src/assets/imgs/iphone-item.png"
@@ -600,13 +616,13 @@ onMounted(() => {
 }
 
 .animation-slide-down {
-  animation: slide-down 0.5s ease-out;
+  animation: slide-down 0.5s ease-in-out;
 }
 .animation-slide-up {
   animation: slide-up 0.5s ease-out;
 }
 .dropdown-brand {
-  animation-name: opacity-2;
+  animation-name: opacity;
   animation-duration: 0.4s;
 }
 
@@ -629,15 +645,6 @@ onMounted(() => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes opacity-2 {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 
