@@ -11,7 +11,6 @@ import java.time.Instant;
 public class ResponseSaleItemDetailDto extends ResponseSaleItemDto {
     private String description;
     private BigDecimal screenSizeInch;
-    private String color;
     private Integer quantity;
     private Instant createdOn;
     private Instant updatedOn;
