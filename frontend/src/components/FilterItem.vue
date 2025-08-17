@@ -13,6 +13,7 @@ const emit = defineEmits([
   "toggleIsShow",
   "addMinMaxPriceToFilterList",
 ]);
+
 </script>
 
 <template>
@@ -37,7 +38,7 @@ const emit = defineEmits([
         <p class="mx-4">
           {{ item === -1 ? "Not specified" : item }}
           <span
-            v-if="props.class === 'storage-size' && item !== -1"
+            v-if="props.class === 'storage-size' && item !== 'Not specified'"
             class="unit"
             >{{ item !== "1" ? "Gb" : "Tb" }}</span
           >
@@ -67,18 +68,21 @@ const emit = defineEmits([
             : '',
           `itbms-${props.class}-item`,
           props.filterList.includes(option) ||
-          props.filterList.includes(option.name)
+          props.filterList.includes(option.name) 
             ? 'opacity-50 cursor-not-allowed'
             : 'hover:bg-blue-500 cursor-pointer',
         ]"
-        :disabled="props.filterList.includes(option)"
+        :disabled="
+          props.filterList.includes(option) ||
+          props.filterList.includes(option.name) 
+        "
       >
         {{ props.class === "brand" ? option.name : option }}
         <span v-if="props.class === 'price'" class="unit">Bath</span>
         <span
           v-if="props.class === 'storage-size' && option !== 'Not specified'"
           class="unit"
-          >{{ option !== "1" ? "Gb" : "Tb" }}</span
+          >{{ option !== 1 ? "Gb" : "Tb" }}</span
         >
       </button>
     </div>

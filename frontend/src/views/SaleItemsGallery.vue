@@ -56,7 +56,7 @@ const getAllSaleItemBySortAndFilter = async () => {
       params.append("filterBrands", brand)
     );
     storageFilterList.value.forEach((size) =>
-      params.append("filterStorages", size)
+      params.append("filterStorages", size === "Not specified" ? -1 : size)
     );
 
     params.append(
@@ -209,7 +209,7 @@ const addToFilterList = (item, className) => {
     !storageFilterList.value.includes(item) &&
     className === "storage-size"
   ) {
-    storageFilterList.value.push(item === "Not specified" ? -1 : item);
+    storageFilterList.value.push(item);
   }
   indexPage.value = 0;
   tempIndexPage.value = 0;
