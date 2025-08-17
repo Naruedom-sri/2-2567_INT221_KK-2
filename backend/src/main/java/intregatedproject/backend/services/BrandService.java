@@ -1,6 +1,6 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.RequestBrandDto;
+import intregatedproject.backend.dtos.brands.RequestBrandDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.exceptions.BrandAlreadyExistsException;
 import intregatedproject.backend.exceptions.BrandHasSaleItemException;

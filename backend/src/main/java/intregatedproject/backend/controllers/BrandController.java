@@ -1,8 +1,8 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.RequestBrandDto;
-import intregatedproject.backend.dtos.ResponseBrandDetailDto;
-import intregatedproject.backend.dtos.ResponseBrandDto;
+import intregatedproject.backend.dtos.brands.RequestBrandDto;
+import intregatedproject.backend.dtos.brands.ResponseBrandDetailDto;
+import intregatedproject.backend.dtos.brands.ResponseBrandDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.services.BrandService;
 import org.modelmapper.ModelMapper;

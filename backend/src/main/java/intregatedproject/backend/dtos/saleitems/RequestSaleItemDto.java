@@ -1,6 +1,7 @@
-package intregatedproject.backend.dtos;
+package intregatedproject.backend.dtos.saleitems;
 
 
+import intregatedproject.backend.dtos.brands.ResponseBrandDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,15 +30,15 @@ public class RequestSaleItemDto {
     }
 
     public void setModel(String model) {
-        this.model = model != null && !model.trim().isEmpty() ? model.trim() : null;
+        this.model = model != null && !model.isBlank() ? model.trim() : null;
     }
 
     public void setDescription(String description) {
-        this.description = description != null && !description.trim().isEmpty() ? description.trim() : null;
+        this.description = description != null && !description.isBlank() ? description.trim() : null;
     }
 
     public void setColor(String color) {
-        this.color = color != null && !color.trim().isEmpty() ? color.trim() : null;
+        this.color = color != null && !color.isBlank() ? color.trim() : null;
     }
 
 }

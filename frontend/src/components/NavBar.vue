@@ -19,19 +19,20 @@ const isSearch = ref(false);
     <div class="link flex h-full text-center gap-3">
       <RouterLink
         :to="{ name: 'Home' }"
-        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+        class="w-24 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
         >Home</RouterLink
       >
       <RouterLink
         :to="{ name: 'SaleItemsGallery' }"
-        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+        class="w-24 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
         >Product</RouterLink
       >
-      <button
-        class="w-20 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
+      <RouterLink
+        :to="{ name: 'AboutUs' }"
+        class="w-24 flex justify-center items-center border-4 border-[rgba(22,22,23,255)] hover:border-b-blue-500 duration-200"
       >
-        About
-      </button>
+        About Us
+      </RouterLink>
     </div>
     <div class="symbol flex items-center gap-3.5">
       <div
@@ -63,8 +64,6 @@ const isSearch = ref(false);
         src="/src/assets/imgs/account-symbol.png"
         alt="account"
         class="w-7 object-cover hover:cursor-pointer"
-      
-        
       />
       <img
         src="/src/assets/imgs/cart-symbol.png"

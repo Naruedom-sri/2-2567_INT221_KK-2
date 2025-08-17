@@ -1,13 +1,11 @@
-package intregatedproject.backend.dtos;
+package intregatedproject.backend.dtos.brands;
 
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
-public class ResponseBrandDto {
-    private Integer id;
-    private String name;
+@Getter
+public class ResponseBrandDetailDto extends ResponseBrandDto{
     private String websiteUrl;
     private String countryOfOrigin;
     private Boolean isActive;

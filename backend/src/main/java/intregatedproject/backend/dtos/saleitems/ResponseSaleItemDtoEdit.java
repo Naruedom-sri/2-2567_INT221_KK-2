@@ -1,5 +1,6 @@
-package intregatedproject.backend.dtos;
+package intregatedproject.backend.dtos.saleitems;
 
+import intregatedproject.backend.dtos.brands.ResponseBrandDto;
 import lombok.Getter;
 import lombok.Setter;
 

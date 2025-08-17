@@ -5,16 +5,30 @@ import NavBar from "@/components/NavBar.vue";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
+import FilterItem from "@/components/FilterItem.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const brands = ref([]);
+const prices = ref([
+  "0 - 5,000",
+  "5,001 - 10,000",
+  "10,001 - 20,000",
+  "20,001 - 30,000",
+  "30,001 - 40,000",
+  "40,001 - 50,000",
+]);
+const storages = ref(["32", "64", "128", "256", "512", "1", "Not specified"]);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
 
 const brandFilterList = ref([]);
+const priceFilterList = ref([]);
+const storageFilterList = ref([]);
 const pageSize = ref(10);
 const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
 const isShowAllBrand = ref(false);
+const isShowAllPrice = ref(false);
+const isShowAllStorage = ref(false);
 const totalPage = ref(0);
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
@@ -24,6 +38,8 @@ const tempIndexPage = ref(0);
 const params = new URLSearchParams();
 const onHover = ref(null);
 const itemAnimations = ref([]);
+const minPrice = ref("");
+const maxPrice = ref("");
 
 const getAllSaleItemBySortAndFilter = async () => {
   try {
@@ -32,9 +48,15 @@ const getAllSaleItemBySortAndFilter = async () => {
     params.delete("sortField");
     params.delete("sortDirection");
     params.delete("filterBrands");
+    params.delete("filterStorages");
+    params.delete("filterPriceLower");
+    params.delete("filterPriceUpper");
 
     brandFilterList.value.forEach((brand) =>
       params.append("filterBrands", brand)
+    );
+    storageFilterList.value.forEach((size) =>
+      params.append("filterStorages", size)
     );
 
     params.append(
@@ -46,17 +68,29 @@ const getAllSaleItemBySortAndFilter = async () => {
     params.append("size", pageSize.value);
     params.append("sortField", isSort.value.sortFiled);
     params.append("sortDirection", isSort.value.sortDirection);
-
+    params.append("filterPriceLower", minPrice.value);
+    params.append("filterPriceUpper", maxPrice.value);
     sessionStorage.setItem(
       "filterBrands",
       JSON.stringify(brandFilterList.value)
     );
+    sessionStorage.setItem(
+      "filterStorages",
+      JSON.stringify(storageFilterList.value)
+    );
+    sessionStorage.setItem(
+      "filterPrices",
+      JSON.stringify(priceFilterList.value)
+    );
+
     sessionStorage.setItem("pageSize", String(pageSize.value));
     sessionStorage.setItem("indexPage", String(indexPage.value));
     sessionStorage.setItem("tempIndexPage", String(tempIndexPage.value));
     sessionStorage.setItem("sortField", isSort.value.sortFiled);
     sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
     sessionStorage.setItem("pageList", JSON.stringify(pageList.value));
+    sessionStorage.setItem("minPrice", String(minPrice.value));
+    sessionStorage.setItem("maxPrice", String(maxPrice.value));
 
     const data = await getAllDataWithParam(
       `${BASE_API_DOMAIN}/v2/sale-items`,
@@ -163,19 +197,71 @@ const lastPage = () => {
   getAllSaleItemBySortAndFilter();
 };
 
-const addToFilterList = (brandName) => {
-  if (!brandFilterList.value.includes(brandName)) {
-    brandFilterList.value.push(brandName);
-    indexPage.value = 0;
-    tempIndexPage.value = 0;
-    getAllSaleItemBySortAndFilter();
+const addToFilterList = (item, className) => {
+  if (!brandFilterList.value.includes(item.name) && className === "brand") {
+    brandFilterList.value.push(item.name);
+  } else if (className === "price") {
+    priceFilterList.value.splice(0, 1, item);
+    const splitArr = priceFilterList.value[0].split(" ");
+    minPrice.value = parseInt(splitArr[0].replace(/,/g, ""));
+    maxPrice.value = parseInt(splitArr[splitArr.length - 1].replace(/,/g, ""));
+  } else if (
+    !storageFilterList.value.includes(item) &&
+    className === "storage-size"
+  ) {
+    storageFilterList.value.push(item === "Not specified" ? null : item);
   }
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  getAllSaleItemBySortAndFilter();
 };
 
-const removeFromFilterList = (brandName) => {
-  brandFilterList.value = brandFilterList.value.filter(
-    (name) => name !== brandName
-  );
+const applyMinMaxPriceToFilterList = () => {
+  let strPriceRange;
+  if (minPrice.value === "" && maxPrice.value === "") {
+    priceFilterList.value = [];
+  } else if (minPrice.value === "") {
+    minPrice.value = maxPrice.value;
+    strPriceRange =
+      minPrice.value.toLocaleString() + " - " + maxPrice.value.toLocaleString();
+    priceFilterList.value.splice(0, 1, strPriceRange);
+  } else if (maxPrice.value === "") {
+    maxPrice.value = minPrice.value;
+    strPriceRange =
+      minPrice.value.toLocaleString() + " - " + maxPrice.value.toLocaleString();
+    priceFilterList.value.splice(0, 1, strPriceRange);
+  } else {
+    strPriceRange =
+      minPrice.value.toLocaleString() + " - " + maxPrice.value.toLocaleString();
+    priceFilterList.value.splice(0, 1, strPriceRange);
+  }
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  getAllSaleItemBySortAndFilter();
+};
+
+const toggleIsShow = (className) => {
+  if (className === "brand") isShowAllBrand.value = !isShowAllBrand.value;
+  else if (className === "price") isShowAllPrice.value = !isShowAllPrice.value;
+  else isShowAllStorage.value = !isShowAllStorage.value;
+};
+
+const removeFromFilterList = (item, className) => {
+  if (className === "brand") {
+    brandFilterList.value = brandFilterList.value.filter(
+      (name) => name !== item
+    );
+  } else if (className === "price") {
+    priceFilterList.value = priceFilterList.value.filter(
+      (price) => price !== item
+    );
+    minPrice.value = "";
+    maxPrice.value = "";
+  } else if (className === "storage-size") {
+    storageFilterList.value = storageFilterList.value.filter(
+      (size) => size !== item
+    );
+  }
   indexPage.value = 0;
   tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
@@ -183,6 +269,10 @@ const removeFromFilterList = (brandName) => {
 
 const clearFilter = () => {
   brandFilterList.value = [];
+  priceFilterList.value = [];
+  storageFilterList.value = [];
+  minPrice.value = [];
+  maxPrice.value = "";
   indexPage.value = 0;
   tempIndexPage.value = 0;
   getAllSaleItemBySortAndFilter();
@@ -212,15 +302,6 @@ const sortDesc = () => {
   getAllSaleItemBySortAndFilter();
 };
 
-const getAllSaleItems = async () => {
-  try {
-    items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
-  } catch (error) {
-    console.log(error);
-    items.value = [];
-  }
-};
-
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   brands.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -248,18 +329,37 @@ const setAnimation = () => {
 
 onMounted(() => {
   const savedBrands = sessionStorage.getItem("filterBrands");
+  const savedStorages = sessionStorage.getItem("filterStorages");
+  const savedPrices = sessionStorage.getItem("filterPrices");
   const savedSize = sessionStorage.getItem("pageSize");
   const savedSortField = sessionStorage.getItem("sortField");
   const savedSortDirection = sessionStorage.getItem("sortDirection");
   const savedIndexPage = sessionStorage.getItem("indexPage");
   const savedTempIndexPage = sessionStorage.getItem("tempIndexPage");
   const savedPageList = sessionStorage.getItem("pageList");
+  const savedMinPrice = sessionStorage.getItem("minPrice");
+  const savedMaxPrice = sessionStorage.getItem("maxPrice");
+
   if (savedBrands) {
     try {
       brandFilterList.value = JSON.parse(savedBrands);
       pageList.value = JSON.parse(savedPageList);
     } catch (e) {
-      console.error("Failed to parse filter Brands", e);
+      console.error("Failed to parse filter brands", e);
+    }
+  }
+  if (savedStorages) {
+    try {
+      storageFilterList.value = JSON.parse(savedStorages);
+    } catch (e) {
+      console.error("Failed to parse filter storages", e);
+    }
+  }
+  if (savedPrices) {
+    try {
+      priceFilterList.value = JSON.parse(savedPrices);
+    } catch (e) {
+      console.error("Failed to parse filter prices", e);
     }
   }
 
@@ -268,8 +368,10 @@ onMounted(() => {
   if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
-  getAllSaleItemBySortAndFilter();
+  if (savedMinPrice) minPrice.value = parseInt(savedMinPrice);
+  if (savedMaxPrice) maxPrice.value = parseInt(savedMaxPrice);
   getAllBrand();
+  getAllSaleItemBySortAndFilter();
   setAnimation();
 });
 </script>
@@ -336,35 +438,83 @@ onMounted(() => {
       />
     </div>
 
-    <div class="mx-7 pt-7 flex justify-between">
-      <div class="gap-2 flex">
-        <div
-          @click="isShowAllBrand = !isShowAllBrand"
-          class="itbms-brand-filter flex flex-wrap items-center gap-2 w-96 px-4 border"
-          :class="isShowAllBrand ? 'rounded-t' : 'rounded'"
-        >
-          <p
-            v-if="brandFilterList.length === 0"
-            class="text-white/80"
-            :class="brandFilterList.length === 0 ? '' : 'py-2'"
-          >
-            Filter by brand(s)
-          </p>
-          <div
-            v-else
-            v-for="(brand, index) in brandFilterList"
-            :key="index"
-            class="itbms-filter-item flex justify-between bg-blue-500 rounded-2xl text-base"
-          >
-            <p class="mx-4">{{ brand }}</p>
-            <button
-              @click="removeFromFilterList(brand)"
-              class="itbms-filter-item-clear w-5 bg-gray-300 rounded-r-2xl text-black hover:cursor-pointer"
-            >
-              x
-            </button>
+    <div class="filter-container mx-7 pt-7 flex justify-between ">
+      <div class="brand-price-filter-container gap-2 flex">
+        <FilterItem
+          label="Filter by brand (s)"
+          class="brand"
+          :is-show="isShowAllBrand"
+          :option-list="brands"
+          :filter-list="brandFilterList"
+          @addToFilterList="addToFilterList"
+          @removeFromFilterList="removeFromFilterList"
+          @toggleIsShow="toggleIsShow"
+        />
+        <div>
+          <FilterItem
+            label="Price Range"
+            class="price"
+            :is-show="isShowAllPrice"
+            :option-list="prices"
+            :filter-list="priceFilterList"
+            @addToFilterList="addToFilterList"
+            @removeFromFilterList="removeFromFilterList"
+            @toggleIsShow="toggleIsShow"
+          />
+          <div v-if="isShowAllPrice" class="flex border">
+            <input
+              type="number"
+              placeholder="Min Price"
+              v-model="minPrice"
+              min="0"
+              class="itbms-price-item-min w-40 pl-4 py-0.5 border-r outline-none bg-[rgba(22,22,23,255)]"
+            />
+            <input
+              type="number"
+              placeholder="Max Price"
+              v-model="maxPrice"
+              min="0"
+              class="itbms-price-item-max w-[159px] pl-4 py-0.5 border-r outline-none bg-[rgba(22,22,23,255)]"
+            />
           </div>
+          <button
+            v-if="isShowAllPrice"
+            @click="applyMinMaxPriceToFilterList"
+            class="w-80 bg-[rgba(22,22,23,255)] border-b border-x rounded-b duration-200"
+            :class="[
+              (minPrice > maxPrice && maxPrice !== '') ||
+              (minPrice === '' &&
+                maxPrice === '' &&
+                priceFilterList.length === 0)
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-blue-500 cursor-pointer',
+            ]"
+            :disabled="
+              (minPrice > maxPrice && maxPrice !== '') ||
+              (minPrice === '' &&
+                maxPrice === '' &&
+                priceFilterList.length === 0)
+            "
+          >
+            Apply
+          </button>
+          <p
+            v-if="minPrice > maxPrice && maxPrice !== ''"
+            class="max-w-80 mt-2 text-red-500 text-xs"
+          >
+            The maximum price should greater than or equal minimum.
+          </p>
         </div>
+        <FilterItem
+          label="Storage Size (s)"
+          class="storage-size"
+          :is-show="isShowAllStorage"
+          :option-list="storages"
+          :filter-list="storageFilterList"
+          @addToFilterList="addToFilterList"
+          @removeFromFilterList="removeFromFilterList"
+          @toggleIsShow="toggleIsShow"
+        />
         <div class="max-h-8 flex gap-2">
           <img
             @mouseenter="onHover = 'filter'"
@@ -449,22 +599,6 @@ onMounted(() => {
         </RouterLink>
       </div>
     </div>
-    <div
-      v-if="isShowAllBrand"
-      class="dropdown-brand w-96 h-50 mx-7 flex flex-col bg-white text-black text-sm z-50 overflow-y-auto"
-      :class="isShowAllBrand ? '' : ''"
-    >
-      <div
-        @click="addToFilterList(brand.name)"
-        v-for="(brand, index) in brands"
-        :key="index"
-        class="itbms-filter-item px-4 py-2 bg-[rgba(22,22,23,255)] border-l text-white hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
-        :class="index === brands.length - 1 ? 'border-b' : ''"
-      >
-        <p>{{ brand.name }}</p>
-      </div>
-    </div>
-
     <div
       class="item-container grid grid-cols-5 gap-x-5 gap-y-10 py-10 border-t mt-7 mx-7"
     >

@@ -1,3 +1,4 @@
+import AboutUs from "@/views/Aboutus.vue";
 import AddEditBrand from "@/views/AddEditBrand.vue";
 import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
 import BrandList from "@/views/BrandList.vue";
@@ -7,7 +8,7 @@ import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
 import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
-const history = createWebHistory('/kk2/');
+const history = createWebHistory("/kk2/");
 const routes = [
   {
     path: "/sale-items",
@@ -62,6 +63,11 @@ const routes = [
     name: "EditBrand",
     component: AddEditBrand,
     props: { isEditing: true },
+  },
+  {
+    path: "/about-us",
+    name: "AboutUs",
+    component: AboutUs,
   },
 ];
 

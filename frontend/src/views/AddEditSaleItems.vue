@@ -27,7 +27,7 @@ const ramGb = ref();
 const storageGb = ref();
 const quantity = ref();
 const screenSizeInch = ref();
-const isContainAllNonOtionalFiled = ref(false);
+const isContainAllNonOptionalFiled = ref(false);
 const isUpdatedFiled = ref(false);
 const isDisabled = ref(true);
 
@@ -63,7 +63,7 @@ const checkScreenSize = () => {
   }
 };
 
-const checkVaildateInput = () => {
+const checkValidateInput = () => {
   validInput.value =
     brandPass.value &&
     modelPass.value &&
@@ -130,9 +130,9 @@ const checkAllNonOptionalFiled = () => {
     description.value !== undefined &&
     description.value !== ""
   ) {
-    isContainAllNonOtionalFiled.value = true;
+    isContainAllNonOptionalFiled.value = true;
   } else {
-    isContainAllNonOtionalFiled.value = false;
+    isContainAllNonOptionalFiled.value = false;
   }
 };
 
@@ -193,43 +193,43 @@ const addUpdateNewSaleItem = async () => {
 };
 const checkDisabled = () => {
   if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     validInput.value
   ) {
@@ -371,7 +371,7 @@ watch(
             autofocus
             @blur="
               brandItem === '' ? (brandPass = false) : (brandPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             v-model.trim="brandItem"
@@ -401,7 +401,7 @@ watch(
               model?.length > 60 || model === undefined || model === ''
                 ? (modelPass = false)
                 : (modelPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. iPhone 15 Pro Max"
@@ -426,7 +426,7 @@ watch(
               description === ''
                 ? (descriptionPass = false)
                 : (descriptionPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. Flagship smartphone with A17 chip and 256GB storage"
@@ -449,7 +449,7 @@ watch(
               price < 0 || price === undefined || price === ''
                 ? (pricePass = false)
                 : (pricePass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. 12990"
@@ -470,7 +470,7 @@ watch(
             @keydown.enter.prevent="focusNext('colorInput')"
             @blur="
               quantity < 0 ? (quantityPass = false) : (quantityPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. 5"
@@ -488,7 +488,7 @@ watch(
             @keydown.enter.prevent="focusNext('ramInput')"
             @blur="
               color?.length > 40 ? (colorPass = false) : (colorPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. Midnight Blue"
@@ -507,7 +507,7 @@ watch(
               ramGb <= 0 && ramGb !== ''
                 ? (ramGbPass = false)
                 : (ramGbPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. 8"
@@ -522,7 +522,7 @@ watch(
           <label>Screen Size ( Inches )</label>
           <input
             @keydown.enter.prevent="focusNext('storageInput')"
-            @blur="checkScreenSize(), checkVaildateInput(), checkDisabled()"
+            @blur="checkScreenSize(), checkValidateInput(), checkDisabled()"
             placeholder="e.g. 6.7"
             v-model="screenSizeInch"
             type="number"
@@ -543,7 +543,7 @@ watch(
               storageGb <= 0 && storageGb !== ''
                 ? (storageGbPass = false)
                 : (storageGbPass = true),
-                checkVaildateInput(),
+                checkValidateInput(),
                 checkDisabled()
             "
             placeholder="e.g. 256"

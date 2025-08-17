@@ -1,8 +1,10 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.RequestSaleItemDto;
+import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.exceptions.PageIsNotPresentException;
+import intregatedproject.backend.exceptions.PriceException;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,18 +80,42 @@ public class SaleItemService {
     }
 
 
-    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, String sortField, String sortDirection, Integer page, Integer size) {
+    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, List<Integer> filterStorages, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) {
+        filterBrands = filterBrands == null || filterBrands.isEmpty() ? null : filterBrands;
+        filterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages;
+        size = size <= 0 ? 10 : size;
+        if (page == null || page < 0) {
+            throw new PageIsNotPresentException("Required parameter 'page' is not present.");
+        }
+
+        if (filterPriceLower == null && filterPriceUpper != null) {
+            throw new PriceException("Required parameter 'filterPriceLower' is not present.");
+        } else if (filterPriceLower != null && filterPriceUpper == null) {
+            throw new PriceException("Required parameter 'filterPriceUpper' is not present.");
+        }
         Sort sort;
         if ("brand.name".equalsIgnoreCase(sortField)) {
             sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
         } else {
-            sort = Sort.by(Sort.Order.asc("id"));   
+            sort = Sort.by(Sort.Order.asc("id"));
         }
         Pageable pageable = PageRequest.of(page, size, sort);
-        if (filterBrands.isEmpty()) {
+        if (filterBrands == null && filterStorages == null && filterPriceLower == null) {
             return saleItemRepository.findAllWithPage(pageable);
+        } else if (filterBrands == null && filterStorages == null) {
+            return saleItemRepository.findAllByPriceBetween(filterPriceLower, filterPriceUpper, pageable);
+        } else if (filterBrands != null && filterStorages == null && filterPriceLower == null) {
+                return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
+        } else if (filterBrands == null && filterPriceLower == null) {
+                return saleItemRepository.findAllByStorageGb_In(filterStorages, pageable);
+        } else if (filterBrands != null && filterStorages == null) {
+            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands,filterPriceLower, filterPriceUpper, pageable);
+        } else if (filterBrands == null) {
+            return saleItemRepository.findAllByStorageGb_InAndPriceBetween(filterStorages,filterPriceLower, filterPriceUpper, pageable);
+        } else if (filterPriceLower == null) {
+            return saleItemRepository.findAllByBrand_NameInAndStorageGb_In(filterBrands, filterStorages, pageable);
         } else {
-            return saleItemRepository.findByBrand_NameIn(filterBrands,pageable);
+            return saleItemRepository.findAllByBrand_NameInAndStorageGbInAndPriceBetween(filterBrands, filterStorages, filterPriceLower, filterPriceUpper, pageable);
         }
     }
 

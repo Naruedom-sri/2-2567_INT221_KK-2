@@ -240,12 +240,12 @@ onMounted(() => {
         :to="{ name: 'SaleItemsGallery' }"
         v-for="(brand, index) in brands"
         :key="index"
-        class="w-36 flex flex-col items-center"
+        class="w-32 flex flex-col items-center"
       >
         <img
           :src="`/kk2/imgs/brands/${brand.toLocaleLowerCase()}.png`"
           :alt="`${brand.toLocaleLowerCase()}`"
-          class="object-cover hover:scale-110 duration-300"
+          class=" object-cover hover:scale-110 duration-300"
         />
       </RouterLink>
     </div>
@@ -253,7 +253,7 @@ onMounted(() => {
       Our latest products.
       <span class="text-white/70">Come see what's new.</span>
     </h1>
-    <div class="product flex my-10 gap-6">
+    <div class="product flex my-7 gap-6">
       <div
         class="w-md rounded-2xl text-lg px-10 pt-14 shadow-white bg-[rgba(22,22,23,255)] hover:scale-[101%] hover:cursor-pointer hover:shadow-xs duration-200"
       >
@@ -294,7 +294,7 @@ onMounted(() => {
         />
       </div>
     </div>
-    <div class="flex justify-between border-y py-10 mb-10">
+    <div class="flex justify-between border-y py-10 mb-10 text-sm">
       <div class="w-72 flex flex-col gap-7 items-center text-center">
         <img
           src="/src/assets/imgs/icons/education-icon.png"
@@ -302,7 +302,7 @@ onMounted(() => {
           class="w-14 object-cover"
         />
         <h1 class="text-2xl mb-8">Education</h1>
-        <p class="mb-[24px]">Save on a new iPhone or iPad with Apple education pricing.</p>
+        <p class="mb-[24px] ">Save on a new iPhone or iPad with Apple education pricing.</p>
         <div class="flex gap-2 hover:gap-3 duration-300">
           <button class="text-blue-500 cursor-pointer">Learn more</button>
           <button class="text-blue-500">></button>
