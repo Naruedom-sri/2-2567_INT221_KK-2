@@ -3,8 +3,8 @@ package intregatedproject.backend.services;
 import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
-import intregatedproject.backend.exceptions.PageIsNotPresentException;
-import intregatedproject.backend.exceptions.PriceException;
+import intregatedproject.backend.entities.SaleItemImage;
+import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,9 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +26,10 @@ public class SaleItemService {
     private BrandService brandService;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private SaleItemImageRepository saleItemImageRepository;
+    @Autowired
+    private FileService fileService;
 
     public List<SaleItem> getAllSaleItems() {
         try {
@@ -118,6 +124,98 @@ public class SaleItemService {
             return saleItemRepository.findAllByBrand_NameInAndStorageGbInAndPriceBetween(filterBrands, filterStorages, filterPriceLower, filterPriceUpper, pageable);
         }
     }
+
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
+//        // กันซ้ำ id ตามที่คุณทำไว้เดิม
+//        if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
+//            throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
+//        }
+//
+//        // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
+//        var newSaleItem = new SaleItem();
+//        covertDtoToEntity(saleItemDto, newSaleItem);
+//        var savedSaleItem = saleItemRepository.save(newSaleItem);
+//
+//        // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ
+//        List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
+//        List<String> storedFileNames = fileService.multiStore(safeFiles); // ต้องมั่นใจว่า function นี้ "คืนชื่อที่เก็บจริง"
+//
+//        // 3) สร้าง SaleItemImage entities (จำกัด imageViewOrder = 1..4 ต่อ sale item)
+//        List<SaleItemImage> imageEntities = new ArrayList<>();
+//        int limit = Math.min(storedFileNames.size(), 4);
+//        for (int i = 0; i < limit; i++) {
+//            MultipartFile file = safeFiles.get(i);
+//
+//            String ogFileName = org.springframework.util.StringUtils
+//                    .cleanPath(file.getOriginalFilename()); // เก็บชื่อเดิมไว้ใน ogFileName
+//
+//            String storedName = storedFileNames.get(i); // ชื่อจริงที่ถูกเซฟ (อาจสุ่ม/เปลี่ยนแล้ว)
+//
+//            SaleItemImage image = new SaleItemImage();
+//            image.setSaleItem(savedSaleItem);
+//            image.setFileName(storedName);   // ชื่อไฟล์ "จริง" ที่เก็บลงดิสก์ (กันชนกันด้วยการสุ่มชื่อแล้ว)
+//            image.setOgFileName(ogFileName); // ชื่อไฟล์ต้นฉบับจากผู้ใช้
+//            image.setImageViewOrder(i + 1);  // 1..4
+//
+//            imageEntities.add(image);
+//        }
+//
+//        // 4) เซฟลง sale_item_image (ตาม requirement ว่าอยากเซฟแยก repository ชัด ๆ)
+//        if (!imageEntities.isEmpty()) {
+//            saleItemImageRepository.saveAll(imageEntities);
+//        }
+//
+//        // 5) refresh ให้ entity sync กับ DB
+//        entityManager.refresh(savedSaleItem);
+//
+//        return savedSaleItem;
+//    }
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
+    // กันซ้ำ id ตามที่คุณทำไว้เดิม
+    if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
+        throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
+    }
+
+    // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
+    var newSaleItem = new SaleItem();
+    covertDtoToEntity(saleItemDto, newSaleItem);
+    var savedSaleItem = saleItemRepository.save(newSaleItem);
+
+    // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ
+    List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
+    List<String> storedFileNames = fileService.multiStore(safeFiles); // คืนชื่อไฟล์จริง
+
+    // 3) สร้าง SaleItemImage entities (จำกัด imageViewOrder = 1..4 ต่อ sale item)
+    List<SaleItemImage> imageEntities = new ArrayList<>();
+    int limit = Math.min(storedFileNames.size(), 4);
+    for (int i = 0; i < limit; i++) {
+        MultipartFile file = safeFiles.get(i);
+
+        String ogFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+        String storedName = storedFileNames.get(i);
+
+        SaleItemImage image = new SaleItemImage();
+        image.setSaleItem(savedSaleItem);
+        image.setFileName(storedName);
+        image.setOgFileName(ogFileName);
+        image.setImageViewOrder(i + 1);
+
+        imageEntities.add(image);
+    }
+
+    // 4) เพิ่ม imageEntities เข้า savedSaleItem เพื่อให้ bidirectional sync
+    savedSaleItem.getSaleItemImages().addAll(imageEntities);
+
+    // 5) เซฟลง sale_item_image
+    if (!imageEntities.isEmpty()) {
+        saleItemImageRepository.saveAll(imageEntities);
+    }
+
+    // **ไม่ต้อง refresh อีกแล้ว**
+    return savedSaleItem;
+}
 
 }
 

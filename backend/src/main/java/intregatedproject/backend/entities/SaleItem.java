@@ -9,6 +9,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -56,6 +58,9 @@ public class    SaleItem {
     @ColumnDefault("1")
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+
+    @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleItemImage> saleItemImages = new ArrayList<>();
 
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
