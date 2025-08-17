@@ -1,11 +1,12 @@
 <script setup>
 import NavBar from "@/components/NavBar.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onBeforeUnmount, computed } from "vue";
 import { getAllData, createData, updateData, getDataById } from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
+import iphoneItem from "@/assets/imgs/iphone-item.png";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
@@ -51,6 +52,103 @@ const storageGbPass = ref(true);
 const screenSizeInchPass = ref(true);
 
 const validInput = ref(false);
+
+const fileInputRef = ref(null);
+// Single source of truth for images in UI: [{ name, url, file, size }]
+const imageItems = ref([]);
+const uploadError = ref("");
+const openFileDialog = () => fileInputRef.value?.click();
+const onFilesSelected = (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) {
+    // No change when dialog canceled
+    uploadError.value = "";
+    e.target.value = "";
+    return;
+  }
+
+  const MAX_FILES = 4;
+  const MAX_PER_FILE = 2 * 1024 * 1024; // 2MB
+  const MAX_TOTAL = 5 * 1024 * 1024; // 5MB
+
+  const existingCount = imageItems.value.length;
+  const availableSlots = Math.max(0, MAX_FILES - existingCount);
+  if (availableSlots === 0) {
+    uploadError.value = `You already selected ${MAX_FILES} images.`;
+    e.target.value = "";
+    return;
+  }
+
+  // Take up to available slots
+  const candidates = files.slice(0, availableSlots);
+
+  // Per-file size check
+  const tooLarge = candidates.find((f) => f.size > MAX_PER_FILE);
+  if (tooLarge) {
+    uploadError.value = `Each image must be ≤ 2MB. "${tooLarge.name}" is too large.`;
+    e.target.value = "";
+    return;
+  }
+
+  // Total size check: existing + new
+  const existingTotal = imageItems.value.reduce((sum, it) => sum + (it.size || 0), 0);
+  const newTotal = candidates.reduce((sum, f) => sum + f.size, 0);
+  if (existingTotal + newTotal > MAX_TOTAL) {
+    uploadError.value = `Total size of images must be ≤ 5MB. Current total would be ${(((existingTotal + newTotal) / (1024*1024))).toFixed(2)}MB.`;
+    e.target.value = "";
+    return;
+  }
+
+  // Append new selections
+  candidates.forEach((f) => {
+    const url = URL.createObjectURL(f);
+    imageItems.value.push({ name: f.name, url, file: f, size: f.size });
+  });
+
+  uploadError.value = "";
+  // reset so selecting the same file again retriggers change
+  e.target.value = "";
+};
+
+// UI-only helpers: remove and reorder images
+const removeImageAt = (index) => {
+  const it = imageItems.value[index];
+  if (it?.url && typeof it.url === "string" && it.url.startsWith("blob:")) {
+    URL.revokeObjectURL(it.url);
+  }
+  imageItems.value.splice(index, 1);
+  // Adjust selected preview index if needed
+  if (selectedMainIndex.value >= imageItems.value.length) {
+    selectedMainIndex.value = Math.max(0, imageItems.value.length - 1);
+  } else if (index <= selectedMainIndex.value) {
+    selectedMainIndex.value = Math.max(0, selectedMainIndex.value - 1);
+  }
+};
+
+const swap = (arr, i, j) => {
+  const tmp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = tmp;
+};
+
+const moveImage = (index, dir) => {
+  const newIndex = index + dir;
+  if (newIndex < 0 || newIndex >= imageItems.value.length) return;
+  swap(imageItems.value, index, newIndex);
+  // Keep selected preview consistent when swapping
+  if (selectedMainIndex.value === index) selectedMainIndex.value = newIndex;
+  else if (selectedMainIndex.value === newIndex) selectedMainIndex.value = index;
+};
+
+const hasImages = computed(() => imageItems.value.length > 0);
+
+// Main preview selection (does not change order)
+const selectedMainIndex = ref(0);
+const setPreview = (idx) => {
+  if (idx >= 0 && idx < imageItems.value.length) {
+    selectedMainIndex.value = idx;
+  }
+};
 
 const checkScreenSize = () => {
   if (screenSizeInch.value === undefined || screenSizeInch.value === "") {
@@ -272,6 +370,14 @@ onMounted(() => {
   getAllBrand();
 });
 
+onBeforeUnmount(() => {
+  imageItems.value.forEach((it) => {
+    if (it?.url && typeof it.url === "string" && it.url.startsWith("blob:")) {
+      URL.revokeObjectURL(it.url);
+    }
+  });
+});
+
 watch(
   [
     brandItem,
@@ -332,36 +438,85 @@ watch(
       }}
     </p>
     <form @submit.prevent="addUpdateNewSaleItem" class="py-[35px] text-lg">
-      <div class="grid grid-cols-2 gap-10 mx-20">
+      <div class="grid grid-cols-2 gap-20 mx-20">
         <div class="self-center">
-          <img
-            src="/src/assets/imgs/iphone-item.png"
-            alt="iphone-item"
-            class="mx-auto"
-          />
-          <div class="w-52 flex mx-2.5 gap-2">
+    <div v-if="hasImages" class="flex flex-col items-center">
             <img
-              src="/src/assets/imgs/iphone-item.png"
-              alt="iphone-item"
-              class="object-cover border rounded-xl"
+        :src="imageItems[selectedMainIndex]?.url"
+              alt="primary"
+              class="mx-auto object-cover w-150 h-100 border rounded-xl"
             />
-            <img
-              src="/src/assets/imgs/iphone-item.png"
-              alt="iphone-item"
-              class="object-cover border rounded-xl"
-            />
-            <img
-              src="/src/assets/imgs/iphone-item.png"
-              alt="iphone-item"
-              class="object-cover border rounded-xl"
-            />
+      <div class="flex mt-3 md:gap-3">
+        <img
+  v-for="(it, idx) in imageItems.slice(0, 4)"
+  :key="it.url + ':' + idx + '-thumb'"
+    :src="it.url"
+  :alt="`thumb-${idx + 1}`"
+    @click="setPreview(idx)"
+    class="object-cover w-30 h-30 border rounded-xl hover:cursor-pointer"
+    :class="{ 'ring-4 ring-blue-400': selectedMainIndex === idx }"
+        />
+      </div>
           </div>
-          <div class="w-fit mx-auto my-4">
+          <div v-else class="mx-auto w-150 h-100 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/60">
+            No images uploaded
+          </div>
+          <div class="w-fit mx-3 my-4">
             <button
+              type="button"
+              @click="openFileDialog"
               class="py-1 px-2 text-xl border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
             >
-              Upload file image
+              Upload Images
             </button>
+            <input
+              ref="fileInputRef"
+              type="file"
+              class="hidden"
+              multiple
+              accept="image/*"
+              @change="onFilesSelected"
+            />
+            <p v-if="uploadError" class="mt-2 text-sm text-red-400">{{ uploadError }}</p>
+            <p class="mt-1 text-sm text-white/60">Max 4 images • ≤ 2MB each • ≤ 5MB total</p>
+          </div>
+      <div v-if="imageItems.length" class="mx-3 w-[360px] space-y-2">
+            <div
+        v-for="(it, idx) in imageItems"
+        :key="it.url + ':' + idx"
+              class="grid grid-cols-[40px_1fr_40px_40px] items-center gap-2"
+            >
+              <div class="text-black bg-white/80 rounded text-center py-1 select-none">{{ idx + 1 }}</div>
+        <div class="bg-white/60 text-black rounded py-1 px-3 truncate">{{ it.name }}</div>
+              <button
+                type="button"
+                class="bg-white/80 text-black rounded hover:bg-white duration-150"
+                @click="removeImageAt(idx)"
+                title="Remove"
+              >
+                ✖
+              </button>
+              <div class="flex flex-col gap-1">
+                <button
+                  type="button"
+                  class="bg-white/80 text-black rounded hover:bg-white duration-150 disabled:opacity-50"
+                  :disabled="idx === 0"
+                  @click="moveImage(idx, -1)"
+                  title="Move up"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  class="bg-white/80 text-black rounded hover:bg-white duration-150 disabled:opacity-50"
+          :disabled="idx === imageItems.length - 1"
+                  @click="moveImage(idx, 1)"
+                  title="Move down"
+                >
+                  ▼
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="flex flex-col space-y-4">
@@ -369,7 +524,7 @@ watch(
           <label>Brand<span>*</span></label>
           <select
             autofocus
-            @blur="
+            @blur=" 
               brandItem === '' ? (brandPass = false) : (brandPass = true),
                 checkValidateInput(),
                 checkDisabled()
