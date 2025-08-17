@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class    SaleItemImageResponse {
+public class SaleItemImageResponse {
     private String fileName;
     private Integer imageViewOrder;
 }

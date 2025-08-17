@@ -17,7 +17,7 @@ const prices = ref([
   "30,001 - 40,000",
   "40,001 - 50,000",
 ]);
-const storages = ref(["32", "64", "128", "256", "512", "1", "Not specified"]);
+const storages = ref([32, 64, 128, 256, 512, 1, "Not specified"]);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
 
@@ -209,7 +209,7 @@ const addToFilterList = (item, className) => {
     !storageFilterList.value.includes(item) &&
     className === "storage-size"
   ) {
-    storageFilterList.value.push(item === "Not specified" ? null : item);
+    storageFilterList.value.push(item === "Not specified" ? -1 : item);
   }
   indexPage.value = 0;
   tempIndexPage.value = 0;
@@ -438,7 +438,7 @@ onMounted(() => {
       />
     </div>
 
-    <div class="filter-container mx-7 pt-7 flex justify-between ">
+    <div class="filter-container mx-7 pt-7 flex justify-between">
       <div class="brand-price-filter-container gap-2 flex">
         <FilterItem
           label="Filter by brand (s)"

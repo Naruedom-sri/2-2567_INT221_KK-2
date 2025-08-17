@@ -35,9 +35,9 @@ const emit = defineEmits([
         :class="`itbms-${props.class}-item`"
       >
         <p class="mx-4">
-          {{ item === null ? "Not specified" : item }}
+          {{ item === -1 ? "Not specified" : item }}
           <span
-            v-if="props.class === 'storage-size' && item !== null"
+            v-if="props.class === 'storage-size' && item !== -1"
             class="unit"
             >{{ item !== "1" ? "Gb" : "Tb" }}</span
           >

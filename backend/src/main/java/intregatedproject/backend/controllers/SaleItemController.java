@@ -1,6 +1,7 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.*;
+import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.services.SaleItemService;
 import org.modelmapper.ModelMapper;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin(origins = {"http://localhost:5173","http://ip24kk2.sit.kmutt.ac.th"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://ip24kk2.sit.kmutt.ac.th"})
 public class SaleItemController {
     @Autowired
     private SaleItemService service;
@@ -64,26 +65,22 @@ public class SaleItemController {
         return ResponseEntity.status(204).body(null);
     }
 
-        
+
     @GetMapping("/v2/sale-items")
     public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
             @RequestParam(required = false) List<String> filterBrands,
-            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(required = false) List<Integer> filterStorages,
+            @RequestParam(required = false) Integer filterPriceLower,
+            @RequestParam(required = false) Integer filterPriceUpper,
+            @RequestParam Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "createdOn") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        filterBrands = filterBrands == null ? List.of() : filterBrands;
-        page = page == null || page < 0 ? 0 : page;
-        size = size == null || size <= 0 ? 10 : size;
-        sortField = sortField == null || sortField.isBlank() ? "createdOn" : sortField;
-        sortDirection = sortDirection == null || sortDirection.isBlank() ? "asc" : sortDirection;
-
-        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(filterBrands, sortField, sortDirection, page, size);
+        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(filterBrands, filterStorages, filterPriceLower, filterPriceUpper, sortField, sortDirection, page, size);
         List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream()
                 .map(saleItem -> modelMapper.map(saleItem, ResponseSaleItemDetailDto.class))
                 .collect(Collectors.toList());
-
         ResponseSaleItemDtoV2 dto = new ResponseSaleItemDtoV2();
         dto.setContent(saleItemsDto);
         dto.setPage(page);
@@ -93,7 +90,6 @@ public class SaleItemController {
         dto.setLast(pageResult.isLast());
         dto.setTotalPages(pageResult.getTotalPages());
         dto.setTotalElements((int) pageResult.getTotalElements());
-
         return ResponseEntity.ok(dto);
     }
 

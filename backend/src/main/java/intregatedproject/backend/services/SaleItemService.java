@@ -4,6 +4,7 @@ import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
+import intregatedproject.backend.exceptions.PriceException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
@@ -88,12 +89,12 @@ public class SaleItemService {
 
     public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, List<Integer> filterStorages, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) {
         filterBrands = filterBrands == null || filterBrands.isEmpty() ? null : filterBrands;
-        filterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages;
+        filterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages.stream()
+                .map(s -> s == -1 ? null : s)
+                .toList();
         size = size <= 0 ? 10 : size;
-        if (page == null || page < 0) {
-            throw new PageIsNotPresentException("Required parameter 'page' is not present.");
-        }
-
+        page = (page < 0 ? 0 : page);
+        boolean includeNull = filterStorages != null && filterStorages.contains(null);
         if (filterPriceLower == null && filterPriceUpper != null) {
             throw new PriceException("Required parameter 'filterPriceLower' is not present.");
         } else if (filterPriceLower != null && filterPriceUpper == null) {
@@ -111,21 +112,21 @@ public class SaleItemService {
         } else if (filterBrands == null && filterStorages == null) {
             return saleItemRepository.findAllByPriceBetween(filterPriceLower, filterPriceUpper, pageable);
         } else if (filterBrands != null && filterStorages == null && filterPriceLower == null) {
-                return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
+            return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
         } else if (filterBrands == null && filterPriceLower == null) {
-                return saleItemRepository.findAllByStorageGb_In(filterStorages, pageable);
+            return saleItemRepository.findAllByStorageGb(filterStorages, includeNull, pageable);
         } else if (filterBrands != null && filterStorages == null) {
-            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands,filterPriceLower, filterPriceUpper, pageable);
+            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands, filterPriceLower, filterPriceUpper, pageable);
         } else if (filterBrands == null) {
-            return saleItemRepository.findAllByStorageGb_InAndPriceBetween(filterStorages,filterPriceLower, filterPriceUpper, pageable);
+            return saleItemRepository.findAllByStorageGbAndPrice(filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
         } else if (filterPriceLower == null) {
-            return saleItemRepository.findAllByBrand_NameInAndStorageGb_In(filterBrands, filterStorages, pageable);
+            return saleItemRepository.findAllByBrandNameAndStorageGb(filterBrands, filterStorages, includeNull, pageable);
         } else {
-            return saleItemRepository.findAllByBrand_NameInAndStorageGbInAndPriceBetween(filterBrands, filterStorages, filterPriceLower, filterPriceUpper, pageable);
+            return saleItemRepository.findAllByBrandNameAndStorageGbAndPrice(filterBrands, filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
         }
     }
 
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //    @Transactional(propagation = Propagation.REQUIRES_NEW)
 //    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
 //        // กันซ้ำ id ตามที่คุณทำไว้เดิม
 //        if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
@@ -171,51 +172,52 @@ public class SaleItemService {
 //
 //        return savedSaleItem;
 //    }
-@Transactional(propagation = Propagation.REQUIRES_NEW)
-public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
-    // กันซ้ำ id ตามที่คุณทำไว้เดิม
-    if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
-        throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
+        // กันซ้ำ id ตามที่คุณทำไว้เดิม
+        if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
+            throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
+        }
+
+        // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
+        var newSaleItem = new SaleItem();
+        covertDtoToEntity(saleItemDto, newSaleItem);
+        var savedSaleItem = saleItemRepository.save(newSaleItem);
+
+        // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ
+        List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
+        List<String> storedFileNames = fileService.multiStore(safeFiles); // คืนชื่อไฟล์จริง
+
+        // 3) สร้าง SaleItemImage entities (จำกัด imageViewOrder = 1..4 ต่อ sale item)
+        List<SaleItemImage> imageEntities = new ArrayList<>();
+        int limit = Math.min(storedFileNames.size(), 4);
+        for (int i = 0; i < limit; i++) {
+            MultipartFile file = safeFiles.get(i);
+
+            String ogFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+            String storedName = storedFileNames.get(i);
+
+            SaleItemImage image = new SaleItemImage();
+            image.setSaleItem(savedSaleItem);
+            image.setFileName(storedName);
+            image.setOgFileName(ogFileName);
+            image.setImageViewOrder(i + 1);
+
+            imageEntities.add(image);
+        }
+
+        // 4) เพิ่ม imageEntities เข้า savedSaleItem เพื่อให้ bidirectional sync
+        savedSaleItem.getSaleItemImages().addAll(imageEntities);
+
+        // 5) เซฟลง sale_item_image
+        if (!imageEntities.isEmpty()) {
+            saleItemImageRepository.saveAll(imageEntities);
+        }
+
+        // **ไม่ต้อง refresh อีกแล้ว**
+        return savedSaleItem;
     }
-
-    // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
-    var newSaleItem = new SaleItem();
-    covertDtoToEntity(saleItemDto, newSaleItem);
-    var savedSaleItem = saleItemRepository.save(newSaleItem);
-
-    // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ
-    List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
-    List<String> storedFileNames = fileService.multiStore(safeFiles); // คืนชื่อไฟล์จริง
-
-    // 3) สร้าง SaleItemImage entities (จำกัด imageViewOrder = 1..4 ต่อ sale item)
-    List<SaleItemImage> imageEntities = new ArrayList<>();
-    int limit = Math.min(storedFileNames.size(), 4);
-    for (int i = 0; i < limit; i++) {
-        MultipartFile file = safeFiles.get(i);
-
-        String ogFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
-        String storedName = storedFileNames.get(i);
-
-        SaleItemImage image = new SaleItemImage();
-        image.setSaleItem(savedSaleItem);
-        image.setFileName(storedName);
-        image.setOgFileName(ogFileName);
-        image.setImageViewOrder(i + 1);
-
-        imageEntities.add(image);
-    }
-
-    // 4) เพิ่ม imageEntities เข้า savedSaleItem เพื่อให้ bidirectional sync
-    savedSaleItem.getSaleItemImages().addAll(imageEntities);
-
-    // 5) เซฟลง sale_item_image
-    if (!imageEntities.isEmpty()) {
-        saleItemImageRepository.saveAll(imageEntities);
-    }
-
-    // **ไม่ต้อง refresh อีกแล้ว**
-    return savedSaleItem;
-}
 
 }
 

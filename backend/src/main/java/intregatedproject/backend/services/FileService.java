@@ -2,7 +2,6 @@ package intregatedproject.backend.services;
 
 import intregatedproject.backend.utils.FileStorageProperties;
 import lombok.Getter;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

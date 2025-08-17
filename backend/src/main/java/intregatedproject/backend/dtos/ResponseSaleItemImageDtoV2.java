@@ -1,6 +1,6 @@
 package intregatedproject.backend.dtos;
 
-import lombok.Data;
+import intregatedproject.backend.dtos.saleitems.ResponseSaleItemDetailDto;
 import lombok.Getter;
 import lombok.Setter;
 
