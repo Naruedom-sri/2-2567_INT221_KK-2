@@ -92,5 +92,4 @@ public class SaleItemController {
         dto.setTotalElements((int) pageResult.getTotalElements());
         return ResponseEntity.ok(dto);
     }
-
 }
