@@ -1,5 +1,7 @@
 package intregatedproject.backend.services;
 
+import intregatedproject.backend.dtos.SaleItemImageRequest;
+import intregatedproject.backend.dtos.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
@@ -8,6 +10,7 @@ import intregatedproject.backend.exceptions.PriceException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -31,6 +34,8 @@ public class SaleItemService {
     private SaleItemImageRepository saleItemImageRepository;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public List<SaleItem> getAllSaleItems() {
         try {
@@ -214,12 +219,35 @@ public class SaleItemService {
         if (!imageEntities.isEmpty()) {
             saleItemImageRepository.saveAll(imageEntities);
         }
-
+        entityManager.refresh(savedSaleItem);
         // **ไม่ต้อง refresh อีกแล้ว**
         return savedSaleItem;
     }
 
+    public void deleteSaleItemByIdWImage(int id) {
+        SaleItem existingItem = getSaleItemById(id);
+        List<String> filenames = existingItem.getSaleItemImages().stream()
+                .map(SaleItemImage::getFileName)
+                .toList();
+        for (String filename : filenames) {
+            fileService.removeFile(filename);
+        }
+        saleItemRepository.delete(existingItem);
+    }
+
+    public SaleItem updateSaleItemWImg(int id, SaleItemWithImageInfo request) {
+        SaleItem updateSaleItem = getSaleItemById(id);
+        RequestSaleItemDto saleItemDto = request.getSaleItem();
+        modelMapper.map(saleItemDto, updateSaleItem);
+        List<SaleItemImageRequest> newImg = request.getImageInfos();
+
+//        List<SaleItemImage> imgToRemove = updateSaleItem.getSaleItemImages().stream()
+//                        .filter(old)
+        covertDtoToEntity(saleItemDto, updateSaleItem);
+        return saleItemRepository.save(updateSaleItem);
+    }
 }
+
 
 
 
