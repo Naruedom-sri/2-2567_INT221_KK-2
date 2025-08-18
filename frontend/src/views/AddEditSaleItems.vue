@@ -2,7 +2,13 @@
 import NavBar from "@/components/NavBar.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import { ref, onMounted, watch, onBeforeUnmount, computed } from "vue";
-import { getAllData, createData, updateData, getDataById } from "@/libs/api";
+import {
+  getAllData,
+  createData,
+  updateData,
+  createDataWithFile,
+  getDataById,
+} from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
@@ -91,10 +97,16 @@ const onFilesSelected = (e) => {
   }
 
   // Total size check: existing + new
-  const existingTotal = imageItems.value.reduce((sum, it) => sum + (it.size || 0), 0);
+  const existingTotal = imageItems.value.reduce(
+    (sum, it) => sum + (it.size || 0),
+    0
+  );
   const newTotal = candidates.reduce((sum, f) => sum + f.size, 0);
   if (existingTotal + newTotal > MAX_TOTAL) {
-    uploadError.value = `Total size of images must be ≤ 5MB. Current total would be ${(((existingTotal + newTotal) / (1024*1024))).toFixed(2)}MB.`;
+    uploadError.value = `Total size of images must be ≤ 5MB. Current total would be ${(
+      (existingTotal + newTotal) /
+      (1024 * 1024)
+    ).toFixed(2)}MB.`;
     e.target.value = "";
     return;
   }
@@ -137,7 +149,8 @@ const moveImage = (index, dir) => {
   swap(imageItems.value, index, newIndex);
   // Keep selected preview consistent when swapping
   if (selectedMainIndex.value === index) selectedMainIndex.value = newIndex;
-  else if (selectedMainIndex.value === newIndex) selectedMainIndex.value = index;
+  else if (selectedMainIndex.value === newIndex)
+    selectedMainIndex.value = index;
 };
 
 const hasImages = computed(() => imageItems.value.length > 0);
@@ -254,40 +267,68 @@ const checkUpdatedFiled = () => {
 
 const addUpdateNewSaleItem = async () => {
   try {
-    const newItem = {
-      model: model.value,
-      brand: brandItem.value,
-      description: description.value,
-      price: price.value,
-      ramGb: ramGb.value,
-      screenSizeInch: screenSizeInch.value,
-      quantity: quantity.value === undefined ? null : quantity.value,
-      storageGb: storageGb.value,
-      color: color.value,
-    };
+    const formData = new FormData();
+    formData.append("model", model.value);  
+    formData.append("brand", brandItem.value);
+    formData.append("description", description.value);
+    formData.append("price", price.value);
+    formData.append("ramGb", ramGb.value);
+    formData.append("screenSizeInch", screenSizeInch.value);
+    formData.append(
+      "quantity",
+      quantity.value === undefined ? null : quantity.value
+    );
+    formData.append("storageGb", storageGb.value);
+    formData.append("color", color.value);
+    imageItems.value.forEach((image) => {
+      formData.append("images", image.file);
+    });
 
-    if (!props.isEditing) {
-      const data = await createData(
-        `${BASE_API_DOMAIN}/v1/sale-items`,
-        newItem
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("add", 201);
-      }
-    } else {
-      const data = await updateData(
-        `${BASE_API_DOMAIN}/v1/sale-items`,
-        itemId,
-        newItem
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("update", 200);
-      }
-    }
-    goBackToPreviousPage();
+    // ส่ง saleItemImages ไปให้ได้ 
+
+
+    const data = await createDataWithFile(
+      `${BASE_API_DOMAIN}/v2/sale-items`,
+      formData
+    );
   } catch (error) {
     console.log(error);
   }
+  // try {
+  //   const newItem = {
+  //     model: model.value,
+  //     brand: brandItem.value,
+  //     description: description.value,
+  //     price: price.value,
+  //     ramGb: ramGb.value,
+  //     screenSizeInch: screenSizeInch.value,
+  //     quantity: quantity.value === undefined ? null : quantity.value,
+  //     storageGb: storageGb.value,
+  //     color: color.value,
+  //   };
+
+  //   if (!props.isEditing) {
+  //     const data = await createData(
+  //       `${BASE_API_DOMAIN}/v1/sale-items`,
+  //       newItem
+  //     );
+  //     if (data) {
+  //       statusStore.setStatusAndMethod("add", 201);
+  //     }
+  //   } else {
+  //     const data = await updateData(
+  //       `${BASE_API_DOMAIN}/v1/sale-items`,
+  //       itemId,
+  //       newItem
+  //     );
+  //     if (data) {
+  //       statusStore.setStatusAndMethod("update", 200);
+  //     }
+  //   }
+  //   goBackToPreviousPage();
+  // } catch (error) {
+  //   console.log(error);
+  // }
 };
 const checkDisabled = () => {
   if (
@@ -440,32 +481,35 @@ watch(
     <form @submit.prevent="addUpdateNewSaleItem" class="py-[35px] text-lg">
       <div class="grid grid-cols-2 gap-20 mx-20">
         <div class="self-center">
-    <div v-if="hasImages" class="flex flex-col items-center">
+          <div v-if="hasImages" class="flex flex-col items-center">
             <img
-        :src="imageItems[selectedMainIndex]?.url"
+              :src="imageItems[selectedMainIndex]?.url"
               alt="primary"
               class="mx-auto object-cover w-150 h-100 border rounded-xl"
             />
-      <div class="flex mt-3 md:gap-3">
-        <img
-  v-for="(it, idx) in imageItems.slice(0, 4)"
-  :key="it.url + ':' + idx + '-thumb'"
-    :src="it.url"
-  :alt="`thumb-${idx + 1}`"
-    @click="setPreview(idx)"
-    class="object-cover w-30 h-30 border rounded-xl hover:cursor-pointer"
-    :class="{ 'ring-4 ring-blue-400': selectedMainIndex === idx }"
-        />
-      </div>
+            <div class="flex mt-3 md:gap-3">
+              <img
+                v-for="(it, idx) in imageItems.slice(0, 4)"
+                :key="it.url + ':' + idx + '-thumb'"
+                :src="it.url"
+                :alt="`thumb-${idx + 1}`"
+                @click="setPreview(idx)"
+                class="object-cover w-30 h-30 border rounded-xl hover:cursor-pointer"
+                :class="{ 'ring-4 ring-blue-400': selectedMainIndex === idx }"
+              />
+            </div>
           </div>
-          <div v-else class="mx-auto w-150 h-100 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/60">
+          <div
+            v-else
+            class="mx-auto w-150 h-100 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/60"
+          >
             No images uploaded
           </div>
           <div class="w-fit mx-3 my-4">
             <button
               type="button"
               @click="openFileDialog"
-              class="py-1 px-2 text-xl border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+              class="py-1 px-2 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
             >
               Upload Images
             </button>
@@ -477,17 +521,30 @@ watch(
               accept="image/*"
               @change="onFilesSelected"
             />
-            <p v-if="uploadError" class="mt-2 text-sm text-red-400">{{ uploadError }}</p>
-            <p class="mt-1 text-sm text-white/60">Max 4 images • ≤ 2MB each • ≤ 5MB total</p>
+            <p v-if="uploadError" class="mt-2 text-sm text-red-400">
+              {{ uploadError }}
+            </p>
+            <p
+              v-if="imageItems.length !== 0"
+              class="mt-1 text-sm text-white/60"
+            >
+              Max 4 images • ≤ 2MB each • ≤ 5MB total
+            </p>
           </div>
-      <div v-if="imageItems.length" class="mx-3 w-[360px] space-y-2">
+          <div v-if="imageItems.length" class="mx-3 w-[360px] space-y-2">
             <div
-        v-for="(it, idx) in imageItems"
-        :key="it.url + ':' + idx"
+              v-for="(it, idx) in imageItems"
+              :key="it.url + ':' + idx"
               class="grid grid-cols-[40px_1fr_40px_40px] items-center gap-2"
             >
-              <div class="text-black bg-white/80 rounded text-center py-1 select-none">{{ idx + 1 }}</div>
-        <div class="bg-white/60 text-black rounded py-1 px-3 truncate">{{ it.name }}</div>
+              <div
+                class="text-black bg-white/80 rounded text-center py-1 select-none"
+              >
+                {{ idx + 1 }}
+              </div>
+              <div class="bg-white/60 text-black rounded py-1 px-3 truncate">
+                {{ it.name }}
+              </div>
               <button
                 type="button"
                 class="bg-white/80 text-black rounded hover:bg-white duration-150"
@@ -509,7 +566,7 @@ watch(
                 <button
                   type="button"
                   class="bg-white/80 text-black rounded hover:bg-white duration-150 disabled:opacity-50"
-          :disabled="idx === imageItems.length - 1"
+                  :disabled="idx === imageItems.length - 1"
                   @click="moveImage(idx, 1)"
                   title="Move down"
                 >
@@ -524,7 +581,7 @@ watch(
           <label>Brand<span>*</span></label>
           <select
             autofocus
-            @blur=" 
+            @blur="
               brandItem === '' ? (brandPass = false) : (brandPass = true),
                 checkValidateInput(),
                 checkDisabled()

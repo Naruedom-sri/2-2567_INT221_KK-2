@@ -1,6 +1,7 @@
 package intregatedproject.backend.dtos.saleitems;
 
 
+import intregatedproject.backend.dtos.SaleItemImageResponse;
 import intregatedproject.backend.dtos.brands.ResponseBrandDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,14 +22,8 @@ public class RequestSaleItemDto {
     private BigDecimal screenSizeInch;
     private String color;
     private Integer quantity;
-    private List<SaleItemImageDto> saleItemImages;
+    private List<SaleItemImageResponse> saleItemImages;
 
-    @Getter
-    @Setter
-    public static class SaleItemImageDto {
-        private String fileName;
-        private Integer imageViewOrder;
-    }
 
     public void setId(Integer id) {
         this.id = null;

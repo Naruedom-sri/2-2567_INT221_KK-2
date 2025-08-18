@@ -70,4 +70,27 @@ const createData = async (url, newData) => {
   return data;
 };
 
-export { updateData, getDataById, deleteData, getAllData, createData,getAllDataWithParam };
+const createDataWithFile = async (url, formData) => {
+  const statusStore = useSaleItemStatusStore();
+  const response = await fetch(`${url}`, {
+    method: "POST",
+    body: formData,
+  });
+  if (response.status !== 201) {
+    statusStore.setStatusAndMethod("add", response.status);
+    const error = await response.text();
+    throw new Error(`Can't create data with status :  ${response.status} and error text : ${error}`);
+  }
+  const data = await response.json();
+  return data;
+};
+
+export {
+  updateData,
+  getDataById,
+  deleteData,
+  getAllData,
+  createData,
+  createDataWithFile,
+  getAllDataWithParam,
+};

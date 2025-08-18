@@ -72,9 +72,9 @@ public class SaleItemController {
     public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
             @ModelAttribute RequestSaleItemDto saleItemCreateDTO ,
             @RequestPart(value = "images", required = false) List<MultipartFile> images){
-
+        System.out.println("saleItemCreateDTO: " + saleItemCreateDTO);
+        System.out.println("images: " + images);
         SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO,images);
-
         ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

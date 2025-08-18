@@ -49,11 +49,5 @@ public class Brand {
     private Set<SaleItem> saleItems = new LinkedHashSet<>();
 
 
-    public String getBrandName() {
-        return this.name;
-    };
 
-    public Integer getNoOfSaleItems (){
-        return saleItems.size();
-    }
 }
