@@ -1,14 +1,19 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.*;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.entities.SaleItemImage;
+import intregatedproject.backend.services.FileService;
 import intregatedproject.backend.services.SaleItemService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +26,8 @@ public class SaleItemController {
     private SaleItemService service;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private FileService fileService;
 
     @GetMapping("/v1/sale-items")
     public ResponseEntity<List<ResponseSaleItemDto>> getAllSaleItems() {
@@ -30,6 +37,7 @@ public class SaleItemController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
+
 
     @GetMapping("/v1/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemDetailDto> getSaleItemById(@PathVariable int id) {
@@ -59,9 +67,43 @@ public class SaleItemController {
         return ResponseEntity.ok(updateSaleItemDto);
     }
 
-    @DeleteMapping("/v1/sale-items/{id}")
-    public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
-        service.deleteSaleItemById(id);
+    @PostMapping(value = "/v2/sale-items",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
+            @ModelAttribute RequestSaleItemDto saleItemCreateDTO ,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images){
+
+        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO,images);
+
+        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/v2/sale-items/{id}")
+    public ResponseEntity<ResponseSaleItemImageDtoV2> getSaleItemByIdImage(@PathVariable int id) {
+        SaleItem item = service.getSaleItemById(id);
+        ResponseSaleItemImageDtoV2 dto = modelMapper.map(item, ResponseSaleItemImageDtoV2.class);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/v2/sale-items/{id}/images/{imageViewOrder}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable int id, @PathVariable Integer imageViewOrder) {
+        SaleItem item = service.getSaleItemById(id);
+        SaleItemImage image = item.getSaleItemImages().stream()
+                .filter(img -> img.getImageViewOrder().equals(imageViewOrder))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        "Image with order " + imageViewOrder + " not found for saleItem id " + id));
+
+        Resource file = fileService.loadFileAsResource(image.getFileName());
+        return ResponseEntity.ok().contentType(MediaType.valueOf(fileService.getFileType(file))).body(file);
+    }
+
+
+    @DeleteMapping("/v2/sale-items/{id}")
+    public ResponseEntity<Object> deleteSaleItemWImg(@PathVariable int id) {
+        service.deleteSaleItemByIdWImage(id);
         return ResponseEntity.status(204).body(null);
     }
 
