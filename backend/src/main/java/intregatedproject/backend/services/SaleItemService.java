@@ -10,7 +10,6 @@ import intregatedproject.backend.exceptions.PriceException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -20,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class SaleItemService {
@@ -34,8 +36,6 @@ public class SaleItemService {
     private SaleItemImageRepository saleItemImageRepository;
     @Autowired
     private FileService fileService;
-    @Autowired
-    private ModelMapper modelMapper;
 
     public List<SaleItem> getAllSaleItems() {
         try {
@@ -131,53 +131,6 @@ public class SaleItemService {
         }
     }
 
-    //    @Transactional(propagation = Propagation.REQUIRES_NEW)
-//    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
-//        // กันซ้ำ id ตามที่คุณทำไว้เดิม
-//        if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
-//            throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
-//        }
-//
-//        // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
-//        var newSaleItem = new SaleItem();
-//        covertDtoToEntity(saleItemDto, newSaleItem);
-//        var savedSaleItem = saleItemRepository.save(newSaleItem);
-//
-//        // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ
-//        List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
-//        List<String> storedFileNames = fileService.multiStore(safeFiles); // ต้องมั่นใจว่า function นี้ "คืนชื่อที่เก็บจริง"
-//
-//        // 3) สร้าง SaleItemImage entities (จำกัด imageViewOrder = 1..4 ต่อ sale item)
-//        List<SaleItemImage> imageEntities = new ArrayList<>();
-//        int limit = Math.min(storedFileNames.size(), 4);
-//        for (int i = 0; i < limit; i++) {
-//            MultipartFile file = safeFiles.get(i);
-//
-//            String ogFileName = org.springframework.util.StringUtils
-//                    .cleanPath(file.getOriginalFilename()); // เก็บชื่อเดิมไว้ใน ogFileName
-//
-//            String storedName = storedFileNames.get(i); // ชื่อจริงที่ถูกเซฟ (อาจสุ่ม/เปลี่ยนแล้ว)
-//
-//            SaleItemImage image = new SaleItemImage();
-//            image.setSaleItem(savedSaleItem);
-//            image.setFileName(storedName);   // ชื่อไฟล์ "จริง" ที่เก็บลงดิสก์ (กันชนกันด้วยการสุ่มชื่อแล้ว)
-//            image.setOgFileName(ogFileName); // ชื่อไฟล์ต้นฉบับจากผู้ใช้
-//            image.setImageViewOrder(i + 1);  // 1..4
-//
-//            imageEntities.add(image);
-//        }
-//
-//        // 4) เซฟลง sale_item_image (ตาม requirement ว่าอยากเซฟแยก repository ชัด ๆ)
-//        if (!imageEntities.isEmpty()) {
-//            saleItemImageRepository.saveAll(imageEntities);
-//        }
-//
-//        // 5) refresh ให้ entity sync กับ DB
-//        entityManager.refresh(savedSaleItem);
-//
-//        return savedSaleItem;
-//    }
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
         // กันซ้ำ id ตามที่คุณทำไว้เดิม
@@ -200,7 +153,9 @@ public class SaleItemService {
         for (int i = 0; i < limit; i++) {
             MultipartFile file = safeFiles.get(i);
 
-            String ogFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+            // กันกรณี originalFilename เป็น null จาก MultipartFile บางชนิด
+            String originalName = file.getOriginalFilename();
+            String ogFileName = (originalName == null) ? "" : org.springframework.util.StringUtils.cleanPath(originalName);
             String storedName = storedFileNames.get(i);
 
             SaleItemImage image = new SaleItemImage();
@@ -225,6 +180,7 @@ public class SaleItemService {
     }
 
     public void deleteSaleItemByIdWImage(int id) {
+    // ลบสินค้า พร้อมลบไฟล์รูปภาพบนดิสก์ทั้งหมดที่เกี่ยวข้องเพื่อไม่ให้เหลือไฟล์ขยะ
         SaleItem existingItem = getSaleItemById(id);
         List<String> filenames = existingItem.getSaleItemImages().stream()
                 .map(SaleItemImage::getFileName)
@@ -235,17 +191,89 @@ public class SaleItemService {
         saleItemRepository.delete(existingItem);
     }
 
-    public SaleItem updateSaleItemWImg(int id, SaleItemWithImageInfo request) {
-        SaleItem updateSaleItem = getSaleItemById(id);
-        RequestSaleItemDto saleItemDto = request.getSaleItem();
-        modelMapper.map(saleItemDto, updateSaleItem);
-        List<SaleItemImageRequest> newImg = request.getImageInfos();
+    @Transactional
+    public SaleItem updateSaleItemWithImages(int id, SaleItemWithImageInfo request) {
+        SaleItem saleItem = getSaleItemById(id);
+        // Avoid mapping "id" from DTO (which is intentionally null) into a managed entity.
+        // Using the dedicated copier ensures we don't alter primary key and only update allowed fields.
+        covertDtoToEntity(request.getSaleItem(), saleItem);
 
-//        List<SaleItemImage> imgToRemove = updateSaleItem.getSaleItemImages().stream()
-//                        .filter(old)
-        covertDtoToEntity(saleItemDto, updateSaleItem);
-        return saleItemRepository.save(updateSaleItem);
+        List<SaleItemImageRequest> imageRequests = request.getImageInfos();
+        if (imageRequests == null || imageRequests.isEmpty()) {
+            // No image operations requested — just persist the basic field updates.
+            return saleItemRepository.save(saleItem);
+        }
+
+    // 1) ทำ DELETE ก่อน เพื่อให้การรีเรียงลำดับที่เหลือทำได้ถูกต้อง
+        imageRequests.stream()
+                .filter(req -> req.getState() == SaleItemImageRequest.ImageState.DELETE)
+                .forEach(req -> {
+                    saleItem.getSaleItemImages().removeIf(img -> {
+                        if (img.getFileName().equals(req.getFileName())) {
+                            fileService.removeFile(img.getFileName());
+                            return true;
+                        }
+                        return false;
+                    });
+                });
+
+        // รีเรียงลำดับหลังลบ
+        List<SaleItemImage> currentImages = saleItem.getSaleItemImages()
+                .stream()
+                .sorted(Comparator.comparing(SaleItemImage::getImageViewOrder))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < currentImages.size(); i++) {
+            currentImages.get(i).setImageViewOrder(i + 1);
+        }
+
+    // 2) จัดการคำสั่ง UPDATE / REPLACE / CREATE ตามลำดับคำขอ
+        for (SaleItemImageRequest req : imageRequests) {
+            switch (req.getState()) {
+                case CREATE -> {
+            // เพิ่มรูปใหม่: ต้องมี imageFile และกำหนด order (imageViewOrder)
+                    String newFileName = fileService.store(req.getImageFile());
+                    SaleItemImage newImage = new SaleItemImage();
+                    newImage.setSaleItem(saleItem);
+                    newImage.setFileName(newFileName);
+                    newImage.setOgFileName(req.getImageFile().getOriginalFilename());
+                    newImage.setImageViewOrder(req.getImageViewOrder());
+                    saleItem.getSaleItemImages().add(newImage);
+                }
+                case UPDATE -> {
+            // เปลี่ยนลำดับของรูปเดิม: อ้างอิงจาก fileName ที่อยู่ในระบบ
+                    saleItem.getSaleItemImages().stream()
+                            .filter(img -> img.getFileName().equals(req.getFileName()))
+                            .findFirst()
+                            .ifPresent(img -> img.setImageViewOrder(req.getImageViewOrder()));
+                }
+                case REPLACE -> {
+            // แทนที่ไฟล์เดิมด้วยไฟล์ใหม่: ต้องมี fileName ของรูปเดิม + imageFile ใหม่
+                    saleItem.getSaleItemImages().stream()
+                            .filter(img -> img.getFileName().equals(req.getFileName()))
+                            .findFirst()
+                            .ifPresent(img -> {
+                                fileService.removeFile(img.getFileName());
+                                String newFileName = fileService.store(req.getImageFile());
+                                img.setFileName(newFileName);
+                                img.setOgFileName(req.getImageFile().getOriginalFilename());
+                            });
+                }
+                case DELETE -> {
+            // ทำการลบไปแล้วในขั้นตอนที่ 1 (ด้านบน) ตรงนี้จึงไม่ต้องทำอะไรเพิ่ม
+                }
+                case KEEP -> {
+            // ไม่ต้องเปลี่ยนแปลงรูป
+                }
+            }
+        }
+
+    // 3) เรียงลำดับรูปภาพอีกรอบเพื่อความชัดเจน (1..n)
+        saleItem.getSaleItemImages().sort(Comparator.comparing(SaleItemImage::getImageViewOrder));
+
+        return saleItemRepository.save(saleItem);
     }
+
 }
 
 

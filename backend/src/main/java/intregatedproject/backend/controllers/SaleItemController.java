@@ -67,21 +67,16 @@ public class SaleItemController {
         ResponseSaleItemDetailDto updateSaleItemDto = modelMapper.map(updatedSaleItem, ResponseSaleItemDetailDto.class);
         return ResponseEntity.ok(updateSaleItemDto);
     }
-
-    @PostMapping(value = "/v2/sale-items",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
-            @ModelAttribute RequestSaleItemDto saleItemCreateDTO ,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images){
-
-        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO,images);
-
-        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @DeleteMapping("/v1/sale-items/{id}")
+    public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
+        service.deleteSaleItemById(id);
+        return ResponseEntity.status(204).body(null);
     }
+    //V2
 
     @GetMapping("/v2/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemImageDtoV2> getSaleItemByIdImage(@PathVariable int id) {
+    // ดึงรายละเอียดสินค้า (เวอร์ชัน V2) พร้อมรายการรูปภาพในรูปแบบ DTO สำหรับตอบกลับหน้าบ้าน
         SaleItem item = service.getSaleItemById(id);
         ResponseSaleItemImageDtoV2 dto = modelMapper.map(item, ResponseSaleItemImageDtoV2.class);
         return ResponseEntity.ok(dto);
@@ -90,6 +85,8 @@ public class SaleItemController {
     @GetMapping("/v2/sale-items/{id}/images/{imageViewOrder}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable int id, @PathVariable Integer imageViewOrder) {
+    // ให้บริการไฟล์รูปตามลำดับการแสดงผล (imageViewOrder) ของสินค้า id ที่ระบุ
+    // ใช้เมื่อหน้าบ้านต้องการดาวน์โหลด/แสดงไฟล์จริงจาก storage
         SaleItem item = service.getSaleItemById(id);
         SaleItemImage image = item.getSaleItemImages().stream()
                 .filter(img -> img.getImageViewOrder().equals(imageViewOrder))
@@ -101,13 +98,38 @@ public class SaleItemController {
         return ResponseEntity.ok().contentType(MediaType.valueOf(fileService.getFileType(file))).body(file);
     }
 
+    @PostMapping(value = "/v2/sale-items",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
+            @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+
+    // สร้างสินค้าใหม่พร้อมอัปโหลดรูปภาพหลายไฟล์ในครั้งเดียว
+    // ฟิลด์สินค้า: saleItem.xxx
+    // รูปภาพ (หลายไฟล์): key = images (เป็น MultipartFile list)
+        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images);
+
+        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping(value = "/v2/sale-items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseSaleItemImageDtoV2> updateSaleItem(
+            @PathVariable int id,
+            @ModelAttribute SaleItemWithImageInfo request) {
+
+    // อัปเดตข้อมูลสินค้า + จัดการรูปภาพ (CREATE / UPDATE / REPLACE / DELETE / KEEP)
+    // รูปแบบฟอร์มรูปภาพ: imageInfos[n].state, .fileName, .imageViewOrder, .imageFile
+        SaleItem updated = service.updateSaleItemWithImages(id, request);
+        ResponseSaleItemImageDtoV2 dto = modelMapper.map(updated, ResponseSaleItemImageDtoV2.class);
+        return ResponseEntity.ok(dto);
+    }
 
     @DeleteMapping("/v2/sale-items/{id}")
     public ResponseEntity<Object> deleteSaleItemWImg(@PathVariable int id) {
         service.deleteSaleItemByIdWImage(id);
         return ResponseEntity.status(204).body(null);
     }
-
 
     @GetMapping("/v2/sale-items")
     public ResponseEntity<ResponseSaleItemDtoV2> getAllSaleItemBySortedAndFilterByBrandName(
