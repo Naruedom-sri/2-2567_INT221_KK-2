@@ -121,4 +121,25 @@ INSERT INTO sale_items (id, brandId, model, description, quantity, price, screen
 (84, 10, 'A77', 'Budget friendly', 20, 8250, 6.56, 6, 128, 'Ocean Blue'),
 (85, 10, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
 
- 
+
+CREATE TABLE IF NOT EXISTS saleItemImage (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
+    imageViewOrder INT ,
+    ogFileName VARCHAR(50),
+    saleItem_id int not null,
+	FOREIGN KEY (saleItem_id) REFERENCES sale_items(id)
+);
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
+('img1.jpg', 1, 'org1.jpg', 1),
+('img0.jpg', 0, 'org0.jpg', 1),
+('img3.jpg', 2, 'org3.jpg', 1),
+('img2.jpg', 3, 'org2.jpg', 1);
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
+('img4.jpg', 1, '2_original_main.jpeg', 2),
+('img5.jpg', 2, '2_original_package.jpg', 2);
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
+('img6.jpg', 1, '3_original_main.jpg', 3);

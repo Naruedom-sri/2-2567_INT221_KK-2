@@ -10,4 +10,3 @@ public class SaleItemWithImageInfo {
     private RequestSaleItemDto saleItem;
     private List<SaleItemImageRequest> imageInfos;
 }
-

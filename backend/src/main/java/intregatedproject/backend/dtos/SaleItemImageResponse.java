@@ -12,4 +12,5 @@ import lombok.Setter;
 public class SaleItemImageResponse {
     private String fileName;
     private Integer imageViewOrder;
+    private String ogFileName;
 }
