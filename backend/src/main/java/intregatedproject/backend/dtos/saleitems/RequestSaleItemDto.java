@@ -22,19 +22,8 @@ public class RequestSaleItemDto {
     private BigDecimal screenSizeInch;
     private String color;
     private Integer quantity;
-<<<<<<< HEAD
     private List<SaleItemImageResponse> saleItemImages;
 
-=======
-//    private List<SaleItemImageDto> saleItemImages;
-//
-//    @Getter
-//    @Setter
-//    public static class SaleItemImageDto {
-//        private String fileName;
-//        private Integer imageViewOrder;
-//    }
->>>>>>> cf90658bfc42c842433f13e5ebf21e090b334a02
 
     public void setId(Integer id) {
         this.id = null;

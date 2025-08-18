@@ -1,5 +1,6 @@
 package intregatedproject.backend.controllers;
 
+import intregatedproject.backend.dtos.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
@@ -66,24 +67,11 @@ public class SaleItemController {
         ResponseSaleItemDetailDto updateSaleItemDto = modelMapper.map(updatedSaleItem, ResponseSaleItemDetailDto.class);
         return ResponseEntity.ok(updateSaleItemDto);
     }
-<<<<<<< HEAD
-
-    @PostMapping(value = "/v2/sale-items",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
-            @ModelAttribute RequestSaleItemDto saleItemCreateDTO ,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images){
-        System.out.println("saleItemCreateDTO: " + saleItemCreateDTO);
-        System.out.println("images: " + images);
-        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO,images);
-        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-=======
+    
     @DeleteMapping("/v1/sale-items/{id}")
     public ResponseEntity<Object> deleteSaleItem(@PathVariable int id) {
         service.deleteSaleItemById(id);
         return ResponseEntity.status(204).body(null);
->>>>>>> cf90658bfc42c842433f13e5ebf21e090b334a02
     }
     //V2
 
