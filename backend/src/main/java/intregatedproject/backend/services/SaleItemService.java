@@ -64,7 +64,7 @@ public class SaleItemService {
         item.setScreenSizeInch(saleItemDto.getScreenSizeInch());
         item.setColor(saleItemDto.getColor());
         item.setQuantity(saleItemDto.getQuantity());
-        Brand brand = brandService.getBrandById(saleItemDto.getBrand().getId());
+        Brand brand = brandService.getBrandById(saleItemDto.getBrandId());
         item.setBrand(brand);
     }
 

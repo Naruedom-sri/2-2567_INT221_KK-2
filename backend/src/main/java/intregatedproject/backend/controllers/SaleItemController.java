@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class SaleItemController {
         service.deleteSaleItemById(id);
         return ResponseEntity.status(204).body(null);
     }
-    //V2
+    // V2
 
     @GetMapping("/v2/sale-items/{id}")
     public ResponseEntity<ResponseSaleItemImageDtoV2> getSaleItemByIdImage(@PathVariable int id) {
@@ -89,10 +90,11 @@ public class SaleItemController {
     // ให้บริการไฟล์รูปตามลำดับการแสดงผล (imageViewOrder) ของสินค้า id ที่ระบุ
     // ใช้เมื่อหน้าบ้านต้องการดาวน์โหลด/แสดงไฟล์จริงจาก storage
         SaleItem item = service.getSaleItemById(id);
+        if (item.getSaleItemImages().isEmpty()) return null;
         SaleItemImage image = item.getSaleItemImages().stream()
                 .filter(img -> img.getImageViewOrder().equals(imageViewOrder))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Image with order " + imageViewOrder + " not found for saleItem id " + id));
 
         Resource file = fileService.loadFileAsResource(image.getFileName());

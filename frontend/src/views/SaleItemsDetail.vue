@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { getDataById } from "@/libs/api";
+import { getDataById, getImageOfData } from "@/libs/api";
 import { deleteData } from "@/libs/api";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
@@ -19,13 +19,32 @@ const statusStore = useSaleItemStatusStore();
 const item = ref({});
 const route = useRouter();
 const showDialog = ref(false);
-
+const imageUrlList = ref([]);
+const mainImage = ref(null);
 const getSaleItem = async () => {
   try {
-    item.value = await getDataById(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+    item.value = await getDataById(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
+    item.value.saleItemImages.forEach((img) => {
+      getImageOfItem(itemId, img.imageViewOrder);
+    });
   } catch (error) {
     console.log(error);
     item.value = null;
+  }
+};
+
+const getImageOfItem = async (itemId, imgViewOrder) => {
+  try {
+    const imgUrl = await getImageOfData(
+      `${BASE_API_DOMAIN}/v2/sale-items`,
+      itemId,
+      imgViewOrder
+    );
+    imageUrlList.value.push(imgUrl);
+    mainImage.value = imageUrlList.value[0];
+  } catch (error) {
+    console.log(error);
+    imageUrlList.value = [];
   }
 };
 
@@ -40,6 +59,9 @@ const deleteSaleItem = async () => {
   }
 };
 onMounted(() => getSaleItem());
+onUnmounted(() => {
+  imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
+});
 </script>
 
 <template>
@@ -102,25 +124,13 @@ onMounted(() => getSaleItem());
         </div>
       </div>
       <div class="detail-content-left self-center">
-        <img
-          src="/src/assets/imgs/iphone-item.png"
-          alt="iphone-item"
-          class="mx-auto"
-        />
+        <img :src="mainImage" class="mx-auto" />
         <div class="w-52 mx-14 flex gap-2">
           <img
-            src="/src/assets/imgs/iphone-item.png"
-            alt="iphone-item"
-            class="object-cover border rounded-xl"
-          />
-          <img
-            src="/src/assets/imgs/iphone-item.png"
-            alt="iphone-item"
-            class="object-cover border rounded-xl"
-          />
-          <img
-            src="/src/assets/imgs/iphone-item.png"
-            alt="iphone-item"
+            @click="mainImage = url"
+            v-for="(url, index) in imageUrlList"
+            :src="url"
+            :key="index"
             class="object-cover border rounded-xl"
           />
         </div>

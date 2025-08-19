@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { getAllData, getAllDataWithParam } from "@/libs/api";
+import { onMounted, onUnmounted, ref } from "vue";
+import { getAllData, getAllDataWithParam, getImageOfData } from "@/libs/api";
 import NavBar from "@/components/NavBar.vue";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
@@ -100,6 +100,8 @@ const getAllSaleItemBySortAndFilter = async () => {
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
+    imageUrlList.value = [];
+    getImageOfAllItem();
     setAnimationItems();
   } catch (error) {
     console.log(error);
@@ -326,6 +328,22 @@ const setAnimation = () => {
     }, index * 200);
   });
 };
+const imageUrlList = ref([]);
+
+const getImageOfAllItem = async () => {
+  for (const item of items.value) {
+    try {
+      const imgUrl = await getImageOfData(
+        `${BASE_API_DOMAIN}/v2/sale-items`,
+        item.id,
+        1
+      );
+      imageUrlList.value.push(imgUrl);
+    } catch (error) {
+      imageUrlList.value.push(null);
+    }
+  }
+};
 
 onMounted(() => {
   const savedBrands = sessionStorage.getItem("filterBrands");
@@ -373,6 +391,9 @@ onMounted(() => {
   getAllBrand();
   getAllSaleItemBySortAndFilter();
   setAnimation();
+});
+onUnmounted(() => {
+  imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
 </script>
 
@@ -621,8 +642,7 @@ onMounted(() => {
         :class="itemAnimations[index] ? 'animation-slide-up' : 'opacity-0'"
       >
         <img
-          src="/src/assets/imgs/iphone-item.png"
-          alt="sale-item"
+          :src="imageUrlList[index] ? imageUrlList[index] : ''"
           class="w-60 mx-auto rounded-4xl"
         />
         <div

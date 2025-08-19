@@ -17,12 +17,12 @@ public class RequestSaleItemDto {
     private Integer ramGb;
     private Integer storageGb;
     private Integer price;
-    private ResponseBrandDto brand;
+//    private ResponseBrandDto brand;
+    private Integer brandId;
     private String description;
     private BigDecimal screenSizeInch;
     private String color;
     private Integer quantity;
-    private List<SaleItemImageResponse> saleItemImages;
 
 
     public void setId(Integer id) {

@@ -63,6 +63,7 @@ const fileInputRef = ref(null);
 // Single source of truth for images in UI: [{ name, url, file, size }]
 const imageItems = ref([]);
 const uploadError = ref("");
+
 const openFileDialog = () => fileInputRef.value?.click();
 const onFilesSelected = (e) => {
   const files = Array.from(e.target.files || []);
@@ -112,9 +113,15 @@ const onFilesSelected = (e) => {
   }
 
   // Append new selections
-  candidates.forEach((f) => {
+  candidates.forEach((f, index) => {
     const url = URL.createObjectURL(f);
-    imageItems.value.push({ name: f.name, url, file: f, size: f.size });
+    imageItems.value.push({
+      name: f.name,
+      url,
+      file: f,
+      size: f.size,
+      order: index + 1,
+    });
   });
 
   uploadError.value = "";
@@ -268,29 +275,46 @@ const checkUpdatedFiled = () => {
 const addUpdateNewSaleItem = async () => {
   try {
     const formData = new FormData();
-    formData.append("model", model.value);  
-    formData.append("brand", brandItem.value);
+    formData.append("model", model.value);
+    formData.append("brandId", brandItem.value.id);
     formData.append("description", description.value);
     formData.append("price", price.value);
-    formData.append("ramGb", ramGb.value);
-    formData.append("screenSizeInch", screenSizeInch.value);
+    formData.append("ramGb", ramGb.value !== undefined ? ramGb.value : "");
+    formData.append(
+      "screenSizeInch",
+      screenSizeInch.value !== undefined ? screenSizeInch.value : ""
+    );
     formData.append(
       "quantity",
-      quantity.value === undefined ? null : quantity.value
+      quantity.value !== undefined ? quantity.value : ""
     );
-    formData.append("storageGb", storageGb.value);
-    formData.append("color", color.value);
+    formData.append(
+      "storageGb",
+      storageGb.value !== undefined ? storageGb.value : ""
+    );
+    formData.append("color", color.value !== undefined ? color.value : "");
     imageItems.value.forEach((image) => {
       formData.append("images", image.file);
     });
-
-    // ส่ง saleItemImages ไปให้ได้ 
-
-
-    const data = await createDataWithFile(
-      `${BASE_API_DOMAIN}/v2/sale-items`,
-      formData
-    );
+    if (!props.isEditing) {
+      const data = await createDataWithFile(
+        `${BASE_API_DOMAIN}/v2/sale-items`,
+        formData
+      );
+      if (data) {
+        statusStore.setStatusAndMethod("add", 201);
+      }
+    } else {
+      const data = await updateData(
+        `${BASE_API_DOMAIN}/v1/sale-items`,
+        itemId,
+        newItem
+      );
+      if (data) {
+        statusStore.setStatusAndMethod("update", 200);
+      }
+    }
+    goBackToPreviousPage();
   } catch (error) {
     console.log(error);
   }

@@ -78,11 +78,19 @@ const createDataWithFile = async (url, formData) => {
   });
   if (response.status !== 201) {
     statusStore.setStatusAndMethod("add", response.status);
-    const error = await response.text();
-    throw new Error(`Can't create data with status :  ${response.status} and error text : ${error}`);
+    throw new Error(`Can't create data with status :  ${response.status}`);
   }
   const data = await response.json();
   return data;
+};
+
+const getImageOfData = async (url,itemId,imgViewOrder) => {
+  const response = await fetch(`${url}/${itemId}/images/${imgViewOrder}`);
+  if (!response.ok)
+    throw new Error(`Can't fetch data with status : ${response.status}`);
+  const blob = await response.blob();
+  const urlImg = window.URL.createObjectURL(blob)
+  return urlImg;  
 };
 
 export {
@@ -93,4 +101,5 @@ export {
   createData,
   createDataWithFile,
   getAllDataWithParam,
+  getImageOfData
 };
