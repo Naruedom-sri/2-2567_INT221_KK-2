@@ -90,7 +90,7 @@ public class SaleItemController {
     // ให้บริการไฟล์รูปตามลำดับการแสดงผล (imageViewOrder) ของสินค้า id ที่ระบุ
     // ใช้เมื่อหน้าบ้านต้องการดาวน์โหลด/แสดงไฟล์จริงจาก storage
         SaleItem item = service.getSaleItemById(id);
-        if (item.getSaleItemImages().isEmpty()) return null;
+        if (item.getSaleItemImages().isEmpty()) return null ;
         SaleItemImage image = item.getSaleItemImages().stream()
                 .filter(img -> img.getImageViewOrder().equals(imageViewOrder))
                 .findFirst()

@@ -51,7 +51,7 @@ const getImageOfItem = async (itemId, imgViewOrder) => {
 const deleteSaleItem = async () => {
   showDialog.value = false;
   try {
-    const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
+    const status = await deleteData(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
     statusStore.setStatusAndMethod("delete", status);
     route.push({ name: "SaleItemsGallery" });
   } catch (error) {
