@@ -202,6 +202,7 @@ const lastPage = () => {
 const addToFilterList = (item, className) => {
   if (!brandFilterList.value.includes(item.name) && className === "brand") {
     brandFilterList.value.push(item.name);
+    brandFilterList.value.sort();
   } else if (className === "price") {
     priceFilterList.value.splice(0, 1, item);
     const splitArr = priceFilterList.value[0].split(" ");
