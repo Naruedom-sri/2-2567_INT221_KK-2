@@ -1,4 +1,4 @@
-import AboutUs from "@/views/Aboutus.vue";
+import AboutUs from "@/views/AboutUs.vue";
 import AddEditBrand from "@/views/AddEditBrand.vue";
 import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
 import BrandList from "@/views/BrandList.vue";
