@@ -60,11 +60,13 @@ const isSearch = ref(false);
           class="w-7 object-cover hover:cursor-pointer"
         />
       </div>
-      <img
-        src="/src/assets/imgs/account-symbol.png"
-        alt="account"
-        class="w-7 object-cover hover:cursor-pointer"
-      />
+      <RouterLink :to="{ name: 'Register' }">
+        <img
+          src="/src/assets/imgs/account-symbol.png"
+          alt="account"
+          class="w-7 object-cover hover:cursor-pointer"
+        />
+      </RouterLink>
       <img
         src="/src/assets/imgs/cart-symbol.png"
         alt="cart"
