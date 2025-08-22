@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
-// import BuyerForm from "../components/BuyerForm.vue";
-// import SellerForm from "../components/SellerForm.vue";
+import BuyerForm from "../components/BuyerForm.vue";
+import SellerForm from "../components/SellerForm.vue";
 
 const accountType = ref("buyer"); 
 </script>
@@ -46,9 +46,7 @@ const accountType = ref("buyer");
         </button>
       </div>
 
-      <component
-        :is="accountType === 'buyer' ? 'BuyerForm' : 'SellerForm'"
-      />
+  <component :is="accountType === 'buyer' ? BuyerForm : SellerForm" />
     </div>
   </div>
 </template>
