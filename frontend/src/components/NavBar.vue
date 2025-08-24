@@ -74,6 +74,19 @@ onMounted(() => {
           alt="search-symbol"
           class="w-5 object-cover opacity-85 hover:opacity-100  hover:cursor-pointer"
         />
+      </div>
+      <RouterLink :to="{ name: 'Register' }">
+        <img
+          src="/src/assets/imgs/account-symbol.png"
+          alt="account"
+          class="w-7 object-cover hover:cursor-pointer"
+        />
+      </RouterLink>
+      <img
+        src="/src/assets/imgs/cart-symbol.png"
+        alt="cart"
+        class="w-7 object-cover hover:cursor-pointer"
+      />
         <img
           src="/src/assets/imgs/account-symbol.png"
           alt="account"
