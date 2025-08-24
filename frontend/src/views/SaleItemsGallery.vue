@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { getAllData, getAllDataWithParam, getImageOfData } from "@/libs/api";
 import NavBar from "@/components/NavBar.vue";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
+import AlertMessageRegister from "@/components/AlertMessageRegister.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 import FilterItem from "@/components/FilterItem.vue";
@@ -760,7 +761,8 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
+  <AlertMessageRegister v-if="statusStore.getStatus() !== null && statusStore.getMethod() === 'register'" />
+  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null && statusStore.getMethod() !== 'register'" />
   <Footer />
 </template>
 

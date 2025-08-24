@@ -78,7 +78,7 @@ const emit = defineEmits([
         "
       >
         {{ props.class === "brand" ? option.name : option }}
-        <span v-if="props.class === 'price'" class="unit">Bath</span>
+        <span v-if="props.class === 'price'" class="unit">Baht</span>
         <span
           v-if="props.class === 'storage-size' && option !== 'Not specified'"
           class="unit"

@@ -62,9 +62,9 @@ const isSearch = ref(false);
       </div>
       <RouterLink :to="{ name: 'Register' }">
         <img
-          src="/src/assets/imgs/account-symbol.png"
+          src="/src/assets/imgs/account-symbol4.png"
           alt="account"
-          class="w-7 object-cover hover:cursor-pointer"
+          class="w-7 object-cover hover:cursor-pointer "
         />
       </RouterLink>
       <img
