@@ -9,9 +9,11 @@ import intregatedproject.backend.entities.SaleItemImage;
 import intregatedproject.backend.exceptions.PriceException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
+import intregatedproject.backend.utils.SaleItemSpecification;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -92,43 +94,55 @@ public class SaleItemService {
     }
 
 
-    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, List<Integer> filterStorages, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) {
+    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, List<Integer> filterStorages, String searchContent, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) {
         filterBrands = filterBrands == null || filterBrands.isEmpty() ? null : filterBrands;
-        filterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages.stream()
-                .map(s -> s == -1 ? null : s)
-                .toList();
+        searchContent = searchContent == null || searchContent.isEmpty() ? null : searchContent;
         size = size <= 0 ? 10 : size;
         page = (page < 0 ? 0 : page);
-        boolean includeNull = filterStorages != null && filterStorages.contains(null);
         if (filterPriceLower == null && filterPriceUpper != null) {
             throw new PriceException("Required parameter 'filterPriceLower' is not present.");
         } else if (filterPriceLower != null && filterPriceUpper == null) {
             throw new PriceException("Required parameter 'filterPriceUpper' is not present.");
         }
         Sort sort;
-        if ("brand.name".equalsIgnoreCase(sortField)) {
+        if ("brand.name".equalsIgnoreCase(sortField) ||
+                "price".equalsIgnoreCase(sortField) ||
+                "model".equalsIgnoreCase(sortField) ||
+                "storageGb".equalsIgnoreCase(sortField) ||
+                "ramGb".equalsIgnoreCase(sortField) ||
+                "description".equalsIgnoreCase(sortField) ||
+                "screenSizeInch".equalsIgnoreCase(sortField) ||
+                "color".equalsIgnoreCase(sortField) ||
+                "quantity".equalsIgnoreCase(sortField)) {
             sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
         } else {
-            sort = Sort.by(Sort.Order.asc("id"));
+            sort = Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id"));
         }
+
         Pageable pageable = PageRequest.of(page, size, sort);
-        if (filterBrands == null && filterStorages == null && filterPriceLower == null) {
-            return saleItemRepository.findAllWithPage(pageable);
-        } else if (filterBrands == null && filterStorages == null) {
-            return saleItemRepository.findAllByPriceBetween(filterPriceLower, filterPriceUpper, pageable);
-        } else if (filterBrands != null && filterStorages == null && filterPriceLower == null) {
-            return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
-        } else if (filterBrands == null && filterPriceLower == null) {
-            return saleItemRepository.findAllByStorageGb(filterStorages, includeNull, pageable);
-        } else if (filterBrands != null && filterStorages == null) {
-            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands, filterPriceLower, filterPriceUpper, pageable);
-        } else if (filterBrands == null) {
-            return saleItemRepository.findAllByStorageGbAndPrice(filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
-        } else if (filterPriceLower == null) {
-            return saleItemRepository.findAllByBrandNameAndStorageGb(filterBrands, filterStorages, includeNull, pageable);
-        } else {
-            return saleItemRepository.findAllByBrandNameAndStorageGbAndPrice(filterBrands, filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
-        }
+        Specification<SaleItem> searchSpec = Specification.where(SaleItemSpecification.hasColor(searchContent)).or(SaleItemSpecification.hasDescription(searchContent)).or(SaleItemSpecification.hasModel(searchContent));
+        Specification<SaleItem> filterSpec = Specification.where(SaleItemSpecification.hasFilterBrands(filterBrands)).and(SaleItemSpecification.hasFilterStorages(filterStorages)).and(SaleItemSpecification.hasPrices(filterPriceLower, filterPriceUpper)).and(searchSpec);
+        return saleItemRepository.findAll(filterSpec, pageable);
+
+//        if (filterBrands == null && filterStorages == null && filterPriceLower == null) {
+//            return saleItemRepository.findAllWithPage(pageable);
+//        } else if (filterBrands == null && filterStorages == null) {
+//            return saleItemRepository.findAllByPriceBetween(filterPriceLower, filterPriceUpper, pageable);
+//        } else if (filterBrands != null && filterStorages == null && filterPriceLower == null) {
+//            return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
+//        } else if (filterBrands == null && filterPriceLower == null) {
+//            return saleItemRepository.findAllByStorageGb(filterStorages, includeNull, pageable);
+//        } else if (filterBrands != null && filterStorages == null) {
+//            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands, filterPriceLower, filterPriceUpper, pageable);
+//        } else if (filterBrands == null) {
+//            return saleItemRepository.findAllByStorageGbAndPrice(filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
+//        } else if (filterPriceLower == null) {
+//            return saleItemRepository.findAllByBrandNameAndStorageGb(filterBrands, filterStorages, includeNull, pageable);
+//        } else {
+//
+//          return saleItemRepository.findAllByBrandNameAndStorageGbAndPrice(filterBrands, filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
+//    }
+
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -180,11 +194,9 @@ public class SaleItemService {
     }
 
     public void deleteSaleItemByIdWImage(int id) {
-    // ลบสินค้า พร้อมลบไฟล์รูปภาพบนดิสก์ทั้งหมดที่เกี่ยวข้องเพื่อไม่ให้เหลือไฟล์ขยะ
+        // ลบสินค้า พร้อมลบไฟล์รูปภาพบนดิสก์ทั้งหมดที่เกี่ยวข้องเพื่อไม่ให้เหลือไฟล์ขยะ
         SaleItem existingItem = getSaleItemById(id);
-        List<String> filenames = existingItem.getSaleItemImages().stream()
-                .map(SaleItemImage::getFileName)
-                .toList();
+        List<String> filenames = existingItem.getSaleItemImages().stream().map(SaleItemImage::getFileName).toList();
         for (String filename : filenames) {
             fileService.removeFile(filename);
         }
@@ -204,34 +216,29 @@ public class SaleItemService {
             return saleItemRepository.save(saleItem);
         }
 
-    // 1) ทำ DELETE ก่อน เพื่อให้การรีเรียงลำดับที่เหลือทำได้ถูกต้อง
-        imageRequests.stream()
-                .filter(req -> req.getState() == SaleItemImageRequest.ImageState.DELETE)
-                .forEach(req -> {
-                    saleItem.getSaleItemImages().removeIf(img -> {
-                        if (img.getFileName().equals(req.getFileName())) {
-                            fileService.removeFile(img.getFileName());
-                            return true;
-                        }
-                        return false;
-                    });
-                });
+        // 1) ทำ DELETE ก่อน เพื่อให้การรีเรียงลำดับที่เหลือทำได้ถูกต้อง
+        imageRequests.stream().filter(req -> req.getState() == SaleItemImageRequest.ImageState.DELETE).forEach(req -> {
+            saleItem.getSaleItemImages().removeIf(img -> {
+                if (img.getFileName().equals(req.getFileName())) {
+                    fileService.removeFile(img.getFileName());
+                    return true;
+                }
+                return false;
+            });
+        });
 
         // รีเรียงลำดับหลังลบ
-        List<SaleItemImage> currentImages = saleItem.getSaleItemImages()
-                .stream()
-                .sorted(Comparator.comparing(SaleItemImage::getImageViewOrder))
-                .collect(Collectors.toList());
+        List<SaleItemImage> currentImages = saleItem.getSaleItemImages().stream().sorted(Comparator.comparing(SaleItemImage::getImageViewOrder)).collect(Collectors.toList());
 
         for (int i = 0; i < currentImages.size(); i++) {
             currentImages.get(i).setImageViewOrder(i + 1);
         }
 
-    // 2) จัดการคำสั่ง UPDATE / REPLACE / CREATE ตามลำดับคำขอ
+        // 2) จัดการคำสั่ง UPDATE / REPLACE / CREATE ตามลำดับคำขอ
         for (SaleItemImageRequest req : imageRequests) {
             switch (req.getState()) {
                 case CREATE -> {
-            // เพิ่มรูปใหม่: ต้องมี imageFile และกำหนด order (imageViewOrder)
+                    // เพิ่มรูปใหม่: ต้องมี imageFile และกำหนด order (imageViewOrder)
                     String newFileName = fileService.store(req.getImageFile());
                     SaleItemImage newImage = new SaleItemImage();
                     newImage.setSaleItem(saleItem);
@@ -241,34 +248,28 @@ public class SaleItemService {
                     saleItem.getSaleItemImages().add(newImage);
                 }
                 case UPDATE -> {
-            // เปลี่ยนลำดับของรูปเดิม: อ้างอิงจาก fileName ที่อยู่ในระบบ
-                    saleItem.getSaleItemImages().stream()
-                            .filter(img -> img.getFileName().equals(req.getFileName()))
-                            .findFirst()
-                            .ifPresent(img -> img.setImageViewOrder(req.getImageViewOrder()));
+                    // เปลี่ยนลำดับของรูปเดิม: อ้างอิงจาก fileName ที่อยู่ในระบบ
+                    saleItem.getSaleItemImages().stream().filter(img -> img.getFileName().equals(req.getFileName())).findFirst().ifPresent(img -> img.setImageViewOrder(req.getImageViewOrder()));
                 }
                 case REPLACE -> {
-            // แทนที่ไฟล์เดิมด้วยไฟล์ใหม่: ต้องมี fileName ของรูปเดิม + imageFile ใหม่
-                    saleItem.getSaleItemImages().stream()
-                            .filter(img -> img.getFileName().equals(req.getFileName()))
-                            .findFirst()
-                            .ifPresent(img -> {
-                                fileService.removeFile(img.getFileName());
-                                String newFileName = fileService.store(req.getImageFile());
-                                img.setFileName(newFileName);
-                                img.setOgFileName(req.getImageFile().getOriginalFilename());
-                            });
+                    // แทนที่ไฟล์เดิมด้วยไฟล์ใหม่: ต้องมี fileName ของรูปเดิม + imageFile ใหม่
+                    saleItem.getSaleItemImages().stream().filter(img -> img.getFileName().equals(req.getFileName())).findFirst().ifPresent(img -> {
+                        fileService.removeFile(img.getFileName());
+                        String newFileName = fileService.store(req.getImageFile());
+                        img.setFileName(newFileName);
+                        img.setOgFileName(req.getImageFile().getOriginalFilename());
+                    });
                 }
                 case DELETE -> {
-            // ทำการลบไปแล้วในขั้นตอนที่ 1 (ด้านบน) ตรงนี้จึงไม่ต้องทำอะไรเพิ่ม
+                    // ทำการลบไปแล้วในขั้นตอนที่ 1 (ด้านบน) ตรงนี้จึงไม่ต้องทำอะไรเพิ่ม
                 }
                 case KEEP -> {
-            // ไม่ต้องเปลี่ยนแปลงรูป
+                    // ไม่ต้องเปลี่ยนแปลงรูป
                 }
             }
         }
 
-    // 3) เรียงลำดับรูปภาพอีกรอบเพื่อความชัดเจน (1..n)
+        // 3) เรียงลำดับรูปภาพอีกรอบเพื่อความชัดเจน (1..n)
         saleItem.getSaleItemImages().sort(Comparator.comparing(SaleItemImage::getImageViewOrder));
 
         return saleItemRepository.save(saleItem);

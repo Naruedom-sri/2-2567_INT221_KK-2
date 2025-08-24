@@ -48,6 +48,12 @@ public class Brand {
     @OneToMany(mappedBy = "brand")
     private Set<SaleItem> saleItems = new LinkedHashSet<>();
 
+    public String getBrandName() {
+        return this.name;
+    };
 
+    public Integer getNoOfSaleItems() {
+        return saleItems.size();
+    }
 
 }

@@ -3,9 +3,9 @@ import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, onMounted } from "vue";
 import { getAllData, deleteData, getDataById } from "@/libs/api";
-import AlertMessageBrand from "@/components/AlertMessageBrand.vue";
-import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import AlertMessageBrand from "@/components/AlertMessageBrand.vue";
+import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
 const statusStore = useSaleItemStatusStore();
 const brands = ref([]);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
@@ -20,8 +20,10 @@ const checkHaveSaleItem = async () => {
       `${BASE_API_DOMAIN}/v1/brands`,
       brandId.value
     );
+    console.log(brand);
     if (brand) {
       haveSaleItem.value = brand.noOfSaleItems !== 0 ? true : false;
+      console.log(haveSaleItem.value);
     }
   } catch (error) {
     console.log(error);
@@ -139,8 +141,8 @@ onMounted(() => {
       </h1>
     </div>
   </div>
-  <ConfirmDialog
-    :visible="showDialog"
+  <AlertErrorMessage
+    v-if="showDialog"
     :title="haveSaleItem ? 'Warning!' : 'Are you sure?'"
     :message="
       haveSaleItem

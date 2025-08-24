@@ -3,12 +3,12 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { getDataById, getImageOfData } from "@/libs/api";
 import { deleteData } from "@/libs/api";
-import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
+import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
 
 const {
   params: { itemId },
@@ -68,11 +68,9 @@ onUnmounted(() => {
   <NavBar />
   <AlertMessageSaleItem v-show="statusStore.getStatus() !== null" />
   <SaleItemNotFound v-if="item === null" />
-  <div v-else class="detail-container">
-    <div class="itbms-row grid grid-cols-2 mb-10 text-white text-lg">
-      <div
-        class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white text-base"
-      >
+  <div v-else class="detail-container text-sm text-white">
+    <div class="itbms-row grid grid-cols-2 mb-10">
+      <div class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white">
         <RouterLink
           @click="statusStore.clearStatusAndMethod()"
           :to="{ name: 'SaleItemsGallery' }"
@@ -87,10 +85,10 @@ onUnmounted(() => {
         </h1>
       </div>
       <div class="model-price mx-20 space-y-4">
-        <h1 class="itbms-model text-5xl font-semibold">
+        <h1 class="itbms-model text-4xl font-semibold">
           <span class="itbms-brand">{{ item.brandName }}</span> {{ item.model }}
         </h1>
-        <p class="itbms-price text-white/80 text-lg">
+        <p class="itbms-price text-white/80 text-base">
           From
           <span class="itbms-price-unit">฿</span>
           {{ item.price?.toLocaleString() }}
@@ -111,7 +109,7 @@ onUnmounted(() => {
             alt="truck"
             class="object-cover"
           />
-          <p class="text-sm self-center">Free shipping</p>
+          <p class="self-center">Free shipping</p>
         </div>
         <p>|</p>
         <div class="flex gap-2">
@@ -120,25 +118,40 @@ onUnmounted(() => {
             alt="bag"
             class="object-cover"
           />
-          <p class="text-sm self-center">Pick up from Store</p>
+          <p class="self-center">Pick up from Store</p>
         </div>
       </div>
-      <div class="detail-content-left self-center">
-        <img :src="mainImage" class="mx-auto" />
-        <div class="w-52 mx-14 flex gap-2">
+      <div class="detail-content-left">
+        <div class="w-xl mx-auto my-10 py-10 rounded-xl bg-[rgba(22,22,23,255)]">
           <img
-            @click="mainImage = url"
-            v-for="(url, index) in imageUrlList"
-            :src="url"
-            :key="index"
-            class="object-cover border rounded-xl"
+            v-if="mainImage !== null"
+            :src="mainImage"
+            class="w-72 h-96 mx-auto object-cover rounded-xl"
+          />
+          <img
+            v-else="mainImage !== null"
+            src="../assets/imgs/no-image.png"
+            class="w-72  mx-auto object-cover"
           />
         </div>
+        <div class="w-full flex justify-center gap-2">
+          <div
+            v-for="(url, index) in imageUrlList"
+            :key="index"
+            class="p-3 rounded-xl bg-[rgba(22,22,23,255)]"
+          >
+            <img
+              @click="mainImage = url"
+              :src="url"
+              class="w-28 h-28 object-cover rounded-xl"
+            />
+          </div>
+        </div>
       </div>
-      <div class="detail-content-right self-center mr-20 space-y-5">
-        <h1 class="text-3xl">Overview</h1>
+      <div class="detail-content-right self-center mr-20">
+        <h1 class="text-2xl mb-5">Overview</h1>
         <p class="itbms-description">{{ item.description }}</p>
-        <h1 class="text-3xl mt-10">
+        <h1 class="text-2xl my-5">
           Model. <span class="text-white/80">Which is best for you?</span>
         </h1>
         <div
@@ -148,7 +161,7 @@ onUnmounted(() => {
             <p class="itbms-model">
               {{ item.model }}
             </p>
-            <p class="itbms-screenSizeInch text-white/80 text-base">
+            <p class="itbms-screenSizeInch text-white/80">
               {{
                 item.screenSizeInch === null || item.screenSizeInch === ""
                   ? "-"
@@ -168,12 +181,12 @@ onUnmounted(() => {
             From ฿ {{ item.price?.toLocaleString() }}
           </p>
         </div>
-        <h1 class="text-3xl mt-10">
+        <h1 class="text-2xl my-5">
           Finish. <span class="text-white/80">Pick your favorite.</span>
         </h1>
-        <h1>
+        <h1 class="mb-5">
           Color -
-          <span class="itbms-color w-fit text-lg">{{
+          <span class="itbms-color w-fit">{{
             item.color === null || item.color === "" ? "-" : item.color
           }}</span>
         </h1>
@@ -184,7 +197,7 @@ onUnmounted(() => {
           <p class="w-8 h-8 border-4 bg-blue-300 rounded-full"></p>
         </div>
 
-        <h1 class="text-3xl mt-10">
+        <h1 class="text-2xl my-5">
           Storage.
           <span class="text-white/80">How much space do you need?</span>
         </h1>
@@ -221,7 +234,7 @@ onUnmounted(() => {
           </p>
         </div>
         <div class="quantity">
-          <h1 class="text-3xl mt-10 mb-5">
+          <h1 class="text-2xl my-5">
             Quantity. <span class="text-white/80">How many do you want?</span>
           </h1>
           <button
@@ -246,7 +259,7 @@ onUnmounted(() => {
           <div class="flex justify-between gap-4 space-y-5">
             <button
               @click="showDialog = true"
-              class="itbms-delete-button flex-1 py-3 bg-red-500 rounded-4xl text-3xl text-white hover:bg-red-500/80 hover:cursor-pointer duration-200"
+              class="itbms-delete-button w-full flex-1 py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
             >
               Delete
             </button>
@@ -257,22 +270,22 @@ onUnmounted(() => {
               }"
               class="itbms-edit-button flex-1"
               ><button
-                class="w-full py-3 rounded-4xl bg-yellow-500 text-3xl hover:bg-yellow-500/80 hover:cursor-pointer duration-200"
+                class="w-full py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
               >
                 Edit
               </button></RouterLink
             >
           </div>
           <button
-            class="w-full py-3 rounded-4xl bg-blue-500 text-3xl hover:cursor-pointer hover:bg-blue-500/80"
+            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-[#0d47a1] hover:text-white duration-200"
           >
             Add to Cart
           </button>
         </div>
       </div>
     </div>
-    <ConfirmDialog
-      :visible="showDialog"
+    <AlertErrorMessage
+      v-if="showDialog"
       title="Are you sure?"
       message="Do you want to delete this sale item?"
       @confirm="deleteSaleItem"

@@ -84,13 +84,28 @@ const createDataWithFile = async (url, formData) => {
   return data;
 };
 
-const getImageOfData = async (url,itemId,imgViewOrder) => {
+const getImageOfData = async (url, itemId, imgViewOrder) => {
   const response = await fetch(`${url}/${itemId}/images/${imgViewOrder}`);
-  if (!response.ok)
-    throw new Error(`Can't fetch data with status : ${response.status}`);
+  if (!response.ok) {
+    return null;
+  }
   const blob = await response.blob();
-  const urlImg = window.URL.createObjectURL(blob)
-  return urlImg;  
+  const urlImg = window.URL.createObjectURL(blob);
+  return urlImg;
+};
+
+const updateDataWithFile = async (url, id, formData) => {
+  const statusStore = useSaleItemStatusStore();
+  const response = await fetch(`${url}/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  if (!response.ok) {
+    statusStore.setStatusAndMethod("update", response.status);
+    throw new Error(`Can't update data with status : ${response.status}`);
+  }
+  const data = await response.json();
+  return data;
 };
 
 export {
@@ -101,5 +116,6 @@ export {
   createData,
   createDataWithFile,
   getAllDataWithParam,
-  getImageOfData
+  getImageOfData,
+  updateDataWithFile
 };

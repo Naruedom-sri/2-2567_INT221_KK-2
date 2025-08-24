@@ -4,6 +4,7 @@ import AddEditSaleItems from "@/views/AddEditSaleItems.vue";
 import BrandList from "@/views/BrandList.vue";
 import Home from "@/views/Home.vue";
 import LandingPage from "@/views/LandingPage.vue";
+import NotFoundPage from "@/views/NotFoundPage.vue";
 import SaleItemsDetail from "@/views/SaleItemsDetail.vue";
 import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
 import SaleItemsList from "@/views/SaleItemsList.vue";
@@ -75,6 +76,11 @@ const routes = [
     name: "AboutUs",
     component: AboutUs,
   },
+  {
+    path: "/not-found",
+    name: "NotFoundPage",
+    component: NotFoundPage,
+  },
 ];
 
 const router = createRouter({
@@ -83,7 +89,7 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 };
   },
-  linkExactActiveClass: "border-b-blue-500",
+  linkExactActiveClass: "opacity-100",
 });
 
 export default router;

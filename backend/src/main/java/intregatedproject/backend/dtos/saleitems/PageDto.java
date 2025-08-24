@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ResponseSaleItemDtoV2 {
+public class PageDto {
     private List<ResponseSaleItemDetailDto> content;
     private boolean last;
     private boolean first;

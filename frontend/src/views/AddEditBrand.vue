@@ -1,4 +1,3 @@
-DeletCan
 <script setup>
 import NavBar from "@/components/NavBar.vue";
 import { ref, onMounted, watch } from "vue";
@@ -7,7 +6,6 @@ import { useRouter, useRoute } from "vue-router";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 import BrandNotFound from "@/components/BrandNotFound.vue";
-
 const {
   params: { brandId },
 } = useRoute();

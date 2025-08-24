@@ -2,10 +2,10 @@
 import { onMounted, ref } from "vue";
 import { getAllData, deleteData } from "@/libs/api";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
-import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
+import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
 const statusStore = useSaleItemStatusStore();
 const items = ref([]);
 const brands = ref([]);
@@ -54,7 +54,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <NavBar />
+  <NavBar
+    :search="searchContent"
+    @search-sale-item="getAllSaleItemBySortAndFilter"
+  />
   <div class="list-container text-white">
     <div class="promote h-96 flex flex-col justify-center items-center gap-8">
       <h1 class="text-6xl">It's your lifestyle</h1>
@@ -153,8 +156,8 @@ onMounted(() => {
       </h1>
     </div>
   </div>
-  <ConfirmDialog
-    :visible="showDialog"
+  <AlertErrorMessage
+    v-if="showDialog"
     title="Delete Confirmation"
     message="Do you want to delete this sale item?"
     @confirm="deleteSaleItem(itemId)"
