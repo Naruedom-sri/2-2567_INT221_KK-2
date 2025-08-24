@@ -4,15 +4,15 @@ import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import { ref, onMounted, watch, onBeforeUnmount, computed } from "vue";
 import {
   getAllData,
-  createData,
-  updateData,
+  updateDataWithFile,
   createDataWithFile,
   getDataById,
+  getImageOfData,
 } from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
-import iphoneItem from "@/assets/imgs/iphone-item.png";
+import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
@@ -22,6 +22,7 @@ const {
   params: { itemId },
 } = useRoute();
 const statusStore = useSaleItemStatusStore();
+const imageEditList = ref([]);
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
@@ -63,6 +64,7 @@ const fileInputRef = ref(null);
 // Single source of truth for images in UI: [{ name, url, file, size }]
 const imageItems = ref([]);
 const uploadError = ref("");
+const priority = ref(0);
 
 const openFileDialog = () => fileInputRef.value?.click();
 const onFilesSelected = (e) => {
@@ -86,8 +88,13 @@ const onFilesSelected = (e) => {
     return;
   }
 
-  // Take up to available slots
-  const candidates = files.slice(0, availableSlots);
+  let candidates = files;
+
+  // ถ้าเลือกไฟล์เกิน availableSlots → ตัดออก
+  if (files.length > availableSlots) {
+    candidates = files.slice(0, availableSlots);
+    uploadError.value = `Only ${availableSlots} more image(s) allowed.`;
+  }
 
   // Per-file size check
   const tooLarge = candidates.find((f) => f.size > MAX_PER_FILE);
@@ -115,16 +122,18 @@ const onFilesSelected = (e) => {
   // Append new selections
   candidates.forEach((f, index) => {
     const url = URL.createObjectURL(f);
+
     imageItems.value.push({
       name: f.name,
       url,
       file: f,
       size: f.size,
-      order: index + 1,
+      state: "CREATE",
+      order: existingCount + index + 1,
     });
-  });
 
-  uploadError.value = "";
+    handleUpdateImage({ name: f.name, file: f }, "CREATE");
+  });
   // reset so selecting the same file again retriggers change
   e.target.value = "";
 };
@@ -135,12 +144,15 @@ const removeImageAt = (index) => {
   if (it?.url && typeof it.url === "string" && it.url.startsWith("blob:")) {
     URL.revokeObjectURL(it.url);
   }
-  imageItems.value.splice(index, 1);
+  const imgRm = imageItems.value.splice(index, 1);
   // Adjust selected preview index if needed
   if (selectedMainIndex.value >= imageItems.value.length) {
     selectedMainIndex.value = Math.max(0, imageItems.value.length - 1);
   } else if (index <= selectedMainIndex.value) {
     selectedMainIndex.value = Math.max(0, selectedMainIndex.value - 1);
+  }
+  if (imgRm[0].state !== "CREATE") {
+    handleUpdateImage(imgRm[0], "DELETE");
   }
 };
 
@@ -167,6 +179,24 @@ const selectedMainIndex = ref(0);
 const setPreview = (idx) => {
   if (idx >= 0 && idx < imageItems.value.length) {
     selectedMainIndex.value = idx;
+  }
+};
+
+const handleUpdateImage = (img, state) => {
+  if (state === "DELETE") {
+    imageEditList.value.push({
+      priority: priority.value++,
+      fileName: img.fileName,
+      state,
+      imageViewOrder: img.imageViewOrder,
+    });
+  } else if (state === "CREATE") {
+    imageEditList.value.push({
+      priority: priority.value++,
+      fileName: img.name,
+      state,
+      imageFile: img.file,
+    });
   }
 };
 
@@ -214,7 +244,7 @@ const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
       item.value = await getDataById(
-        `${BASE_API_DOMAIN}/v1/sale-items/edit`,
+        `${BASE_API_DOMAIN}/v2/sale-items/edit`,
         itemId
       );
       model.value = item.value.model;
@@ -230,6 +260,20 @@ const checkIsEditing = async () => {
       modelPass.value = true;
       descriptionPass.value = true;
       pricePass.value = true;
+
+      item.value.saleItemImages.forEach(async (img) => {
+        const url = await getImageOfData(
+          `${BASE_API_DOMAIN}/v2/sale-items`,
+          item.value.id,
+          img.imageViewOrder
+        );
+        imageItems.value.push({
+          fileName: img.fileName,
+          url: url,
+          name: img.ogFileName,
+          imageViewOrder: img.imageViewOrder,
+        });
+      });
     }
   } catch (error) {
     console.log(error);
@@ -264,7 +308,8 @@ const checkUpdatedFiled = () => {
     screenSizeInch.value !== item.value.screenSizeInch ||
     quantity.value !== item.value.quantity ||
     storageGb.value !== item.value.storageGb ||
-    color.value !== item.value.color
+    color.value !== item.value.color ||
+    imageItems.value.length !== item.value.saleItemImages?.length
   ) {
     isUpdatedFiled.value = true;
   } else {
@@ -293,67 +338,58 @@ const addUpdateNewSaleItem = async () => {
       storageGb.value !== undefined ? storageGb.value : ""
     );
     formData.append("color", color.value !== undefined ? color.value : "");
-    imageItems.value.forEach((image) => {
-      formData.append("images", image.file);
-    });
     if (!props.isEditing) {
-      const data = await createDataWithFile(
-        `${BASE_API_DOMAIN}/v2/sale-items`,
-        formData
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("add", 201);
-      }
+      imageItems.value.forEach((image) => {
+        formData.append("images", image.file);
+      });
     } else {
-      const data = await updateData(
-        `${BASE_API_DOMAIN}/v1/sale-items`,
-        itemId,
-        newItem
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("update", 200);
+      console.log("main", imageItems.value);
+      console.log("Edit", imageEditList.value);
+      for (const img of imageItems.value) {
+        const res = await fetch(img.url);
+        const blob = await res.blob();
+        const file = new File([blob], img.name, { type: blob.type });
+        if (img.state !== "CREATE") {
+          handleUpdateImage(img, "DELETE");
+          handleUpdateImage({ name: img.name, file: file }, "CREATE");
+        }
       }
     }
-    goBackToPreviousPage();
+    const stateOrder = { DELETE: 0, CREATE: 1 };
+    imageEditList.value.sort((a, b) => {
+      // เปรียบเทียบ state ก่อน
+      const stateDiff = stateOrder[a.state] - stateOrder[b.state];
+      if (stateDiff !== 0) return stateDiff;
+
+      // ถ้า state เท่ากัน → ใช้ priority ต่อ
+      return a.priority - b.priority;
+    });
+    console.log("after sort: ", imageEditList.value);
+
+    // if (!props.isEditing) {
+    //   const data = await createDataWithFile(
+    //     `${BASE_API_DOMAIN}/v2/sale-items`,
+    //     formData
+    //   );
+    //   if (data) {
+    //     statusStore.setStatusAndMethod("add", 201);
+    //   }
+    // } else {
+    //   const data = await updateDataWithFile(
+    //     `${BASE_API_DOMAIN}/v2/sale-items`,
+    //     itemId,
+    //     formData
+    //   );
+    //   if (data) {
+    //     statusStore.setStatusAndMethod("update", 200);
+    //   }
+    // }
+    // goBackToPreviousPage();
   } catch (error) {
     console.log(error);
   }
-  // try {
-  //   const newItem = {
-  //     model: model.value,
-  //     brand: brandItem.value,
-  //     description: description.value,
-  //     price: price.value,
-  //     ramGb: ramGb.value,
-  //     screenSizeInch: screenSizeInch.value,
-  //     quantity: quantity.value === undefined ? null : quantity.value,
-  //     storageGb: storageGb.value,
-  //     color: color.value,
-  //   };
-
-  //   if (!props.isEditing) {
-  //     const data = await createData(
-  //       `${BASE_API_DOMAIN}/v1/sale-items`,
-  //       newItem
-  //     );
-  //     if (data) {
-  //       statusStore.setStatusAndMethod("add", 201);
-  //     }
-  //   } else {
-  //     const data = await updateData(
-  //       `${BASE_API_DOMAIN}/v1/sale-items`,
-  //       itemId,
-  //       newItem
-  //     );
-  //     if (data) {
-  //       statusStore.setStatusAndMethod("update", 200);
-  //     }
-  //   }
-  //   goBackToPreviousPage();
-  // } catch (error) {
-  //   console.log(error);
-  // }
 };
+
 const checkDisabled = () => {
   if (
     !isContainAllNonOptionalFiled.value &&
@@ -430,6 +466,7 @@ const focusNext = (refName) => {
       break;
   }
 };
+
 onMounted(() => {
   checkIsEditing();
   getAllBrand();
@@ -458,6 +495,16 @@ watch(
   () => {
     checkAllNonOptionalFiled();
     checkUpdatedFiled();
+  },
+  { immediate: true }
+);
+watch(
+  imageItems.value,
+  () => {
+    checkAllNonOptionalFiled();
+    checkUpdatedFiled();
+    checkValidateInput();
+    checkDisabled();
   },
   { immediate: true }
 );
@@ -493,7 +540,11 @@ watch(
     <h1
       class="w-fit mx-20 mt-5 text-5xl font-semibold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
     >
-      {{ isEditing ? `Edit ${item.model} ${item.color}` : "Add New Sale Item" }}
+      {{
+        isEditing
+          ? `Edit ${item.model} ${item.color === null ? "" : item.color}`
+          : "Add New Sale Item"
+      }}
     </h1>
     <p class="mx-20 mt-3 text-white/80">
       {{
@@ -525,15 +576,18 @@ watch(
           </div>
           <div
             v-else
-            class="mx-auto w-150 h-100 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/60"
+            class="mx-auto w-150 h-100 border-2 border-dashed border-white/40 rounded-xl flex flex-col gap-2 items-center justify-center text-white/60"
           >
-            No images uploaded
+            <p>No images uploaded</p>
+            <p class="mt-1 text-xs text-white/60">
+              Max 4 images • ≤ 2MB each • ≤ 5MB total
+            </p>
           </div>
           <div class="w-fit mx-3 my-4">
             <button
               type="button"
-              @click="openFileDialog"
-              class="py-1 px-2 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+              @click="openFileDialog()"
+              class="py-1 px-2 border rounded text-sm hover:bg-white hover:text-black hover:cursor-pointer duration-200"
             >
               Upload Images
             </button>
@@ -545,15 +599,13 @@ watch(
               accept="image/*"
               @change="onFilesSelected"
             />
-            <p v-if="uploadError" class="mt-2 text-sm text-red-400">
-              {{ uploadError }}
-            </p>
-            <p
-              v-if="imageItems.length !== 0"
-              class="mt-1 text-sm text-white/60"
-            >
-              Max 4 images • ≤ 2MB each • ≤ 5MB total
-            </p>
+            <AlertErrorMessage
+              v-if="uploadError"
+              title="Warning"
+              :message="uploadError"
+              :over-image="uploadError ? true : false"
+              @toggleUploadError="uploadError = ''"
+            />
           </div>
           <div v-if="imageItems.length" class="mx-3 w-[360px] space-y-2">
             <div

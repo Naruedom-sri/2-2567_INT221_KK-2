@@ -1,8 +1,4 @@
 package intregatedproject.backend;
-
-
-import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
-import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.utils.FileStorageProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;

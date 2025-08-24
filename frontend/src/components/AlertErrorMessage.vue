@@ -1,31 +1,30 @@
 <script setup>
 defineProps({
   haveSaleItem: { type: Boolean, default: false },
-  visible: Boolean,
-  title: { type: String, default: "Are you sure?  " },
-  message: { type: String, default: "Do you want to delete this sale item?" },
+  overImage: { type: Boolean, default: false },
+  visible: { type: Boolean, default: false },
+  title: { type: String },
+  message: { type: String },
 });
 
-const emit = defineEmits(["confirm", "cancel"]);
-
+const emit = defineEmits(["confirm", "cancel", "toggleUploadError"]);
 const confirm = () => emit("confirm");
 const cancel = () => emit("cancel");
 </script>
 
 <template>
-  <div
-    v-if="visible"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-  >
-    <div class="animation-slide-up bg-white p-6 space-y-4 rounded-lg shadow w-md text-center">
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div
+      class="animation-slide-up bg-white p-6 space-y-4 rounded-lg shadow w-md text-center"
+    >
       <img
         src="/src/assets/imgs/alert-symbol.png"
         alt="alert-symbol"
         class="w-12 mx-auto"
       />
-      <h2 class="font-bold mb-4 text-xl">{{ title }}</h2>
+      <h2 class="font-bold text-black mb-4 text-xl">{{ title }}</h2>
       <p class="itbms-message mb-6 text-gray-600">{{ message }}</p>
-      <div class="flex flex-col gap-4">
+      <div v-if="!overImage" class="flex flex-col gap-4">
         <button
           v-if="!haveSaleItem"
           class="itbms-confirm-button bg-red-500 text-white px-4 py-2 rounded hover:cursor-pointer hover:bg-red-500/80"
@@ -38,6 +37,14 @@ const cancel = () => emit("cancel");
           @click="cancel"
         >
           Cancel
+        </button>
+      </div>
+      <div v-else>
+        <button
+          @click="$emit('toggleUploadError')"
+          class="itbms-ok-button bg-gray-300 px-4 py-2 rounded hover:cursor-pointer hover:bg-gray-300/80"
+        >
+          Ok
         </button>
       </div>
     </div>
