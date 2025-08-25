@@ -27,6 +27,15 @@ CREATE TABLE sale_items (
     CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId)
 );
 
+CREATE TABLE IF NOT EXISTS sale_item_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
+    imageViewOrder INT ,
+    ogFileName VARCHAR(50),
+    saleItemId int not null,
+	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
+);
+
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),
 (2, 'Apple', 'United States', 'https://www.apple.com', 1),

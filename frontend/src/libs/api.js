@@ -70,4 +70,52 @@ const createData = async (url, newData) => {
   return data;
 };
 
-export { updateData, getDataById, deleteData, getAllData, createData,getAllDataWithParam };
+const createDataWithFile = async (url, formData) => {
+  const statusStore = useSaleItemStatusStore();
+  const response = await fetch(`${url}`, {
+    method: "POST",
+    body: formData,
+  });
+  if (response.status !== 201) {
+    statusStore.setStatusAndMethod("add", response.status);
+    throw new Error(`Can't create data with status :  ${response.status}`);
+  }
+  const data = await response.json();
+  return data;
+};
+
+const getImageOfData = async (url, itemId, imgViewOrder) => {
+  const response = await fetch(`${url}/${itemId}/images/${imgViewOrder}`);
+  if (!response.ok) {
+    return null;
+  }
+  const blob = await response.blob();
+  const urlImg = window.URL.createObjectURL(blob);
+  return urlImg;
+};
+
+const updateDataWithFile = async (url, id, formData) => {
+  const statusStore = useSaleItemStatusStore();
+  const response = await fetch(`${url}/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  if (!response.ok) {
+    statusStore.setStatusAndMethod("update", response.status);
+    throw new Error(`Can't update data with status : ${response.status}`);
+  }
+  const data = await response.json();
+  return data;
+};
+
+export {
+  updateData,
+  getDataById,
+  deleteData,
+  getAllData,
+  createData,
+  createDataWithFile,
+  getAllDataWithParam,
+  getImageOfData,
+  updateDataWithFile
+};

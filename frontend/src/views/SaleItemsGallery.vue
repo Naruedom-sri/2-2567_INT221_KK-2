@@ -1,8 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { getAllData, getAllDataWithParam } from "@/libs/api";
+import { onMounted, onUnmounted, ref } from "vue";
+import {
+  getAllData,
+  getAllDataWithParam,
+  getImageOfData,
+  getDataById,
+} from "@/libs/api";
 import NavBar from "@/components/NavBar.vue";
 import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
+import AlertMessageRegister from "@/components/AlertMessageRegister.vue";
 import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 import FilterItem from "@/components/FilterItem.vue";
@@ -36,13 +42,14 @@ const isFirstPage = ref();
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const params = new URLSearchParams();
-const onHover = ref(null);
 const itemAnimations = ref([]);
 const minPrice = ref("");
 const maxPrice = ref("");
+const searchContent = ref("");
 
-const getAllSaleItemBySortAndFilter = async () => {
+const getAllSaleItemBySortAndFilter = async (search = null) => {
   try {
+    if (search !== null) searchContent.value = search;
     params.delete("page");
     params.delete("size");
     params.delete("sortField");
@@ -51,14 +58,14 @@ const getAllSaleItemBySortAndFilter = async () => {
     params.delete("filterStorages");
     params.delete("filterPriceLower");
     params.delete("filterPriceUpper");
+    params.delete("searchContent");
 
     brandFilterList.value.forEach((brand) =>
       params.append("filterBrands", brand)
     );
     storageFilterList.value.forEach((size) =>
-      params.append("filterStorages", size === "Not specified" ? -1 : size)
+      params.append("filterStorages", size === "Not specified" ? null : size)
     );
-
     params.append(
       "page",
       indexPage.value === 9 || indexPage.value === 0
@@ -70,6 +77,8 @@ const getAllSaleItemBySortAndFilter = async () => {
     params.append("sortDirection", isSort.value.sortDirection);
     params.append("filterPriceLower", minPrice.value);
     params.append("filterPriceUpper", maxPrice.value);
+    params.append("searchContent", searchContent.value);
+    
     sessionStorage.setItem(
       "filterBrands",
       JSON.stringify(brandFilterList.value)
@@ -91,6 +100,7 @@ const getAllSaleItemBySortAndFilter = async () => {
     sessionStorage.setItem("pageList", JSON.stringify(pageList.value));
     sessionStorage.setItem("minPrice", String(minPrice.value));
     sessionStorage.setItem("maxPrice", String(maxPrice.value));
+    sessionStorage.setItem("searchContent", searchContent.value);
 
     const data = await getAllDataWithParam(
       `${BASE_API_DOMAIN}/v2/sale-items`,
@@ -100,6 +110,8 @@ const getAllSaleItemBySortAndFilter = async () => {
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
+    imageUrlList.value = [];
+    getImageOfAllItem();
     setAnimationItems();
   } catch (error) {
     console.log(error);
@@ -200,6 +212,7 @@ const lastPage = () => {
 const addToFilterList = (item, className) => {
   if (!brandFilterList.value.includes(item.name) && className === "brand") {
     brandFilterList.value.push(item.name);
+    brandFilterList.value.sort();
   } else if (className === "price") {
     priceFilterList.value.splice(0, 1, item);
     const splitArr = priceFilterList.value[0].split(" ");
@@ -326,6 +339,28 @@ const setAnimation = () => {
     }, index * 200);
   });
 };
+const imageUrlList = ref([]);
+
+const getImageOfAllItem = async () => {
+  for (const item of items.value) {
+    try {
+      const data = await getDataById(
+        `${BASE_API_DOMAIN}/v2/sale-items`,
+        item.id
+      );
+      if (data.saleItemImages.length !== 0) {
+        const imgUrl = await getImageOfData(
+          `${BASE_API_DOMAIN}/v2/sale-items`,
+          item.id,
+          1
+        );
+        imageUrlList.value.push(imgUrl);
+      }
+    } catch (error) {
+      imageUrlList.value.push(null);
+    }
+  }
+};
 
 onMounted(() => {
   const savedBrands = sessionStorage.getItem("filterBrands");
@@ -339,6 +374,7 @@ onMounted(() => {
   const savedPageList = sessionStorage.getItem("pageList");
   const savedMinPrice = sessionStorage.getItem("minPrice");
   const savedMaxPrice = sessionStorage.getItem("maxPrice");
+  const savedSearchContent = sessionStorage.getItem("searchContent");
 
   if (savedBrands) {
     try {
@@ -370,16 +406,20 @@ onMounted(() => {
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
   if (savedMinPrice) minPrice.value = parseInt(savedMinPrice);
   if (savedMaxPrice) maxPrice.value = parseInt(savedMaxPrice);
+  if (savedSearchContent) searchContent.value = savedSearchContent;
   getAllBrand();
   getAllSaleItemBySortAndFilter();
   setAnimation();
 });
+onUnmounted(() => {
+  imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
+});
 </script>
 
 <template>
-  <NavBar />
-  <div class="gallery-container text-white">
-    <div class="promote text-lg">
+  <NavBar @search-sale-item="getAllSaleItemBySortAndFilter" />
+  <div class="gallery-container text-white text-sm">
+    <div class="promote">
       <div
         class="w-full absolute duration-500"
         :class="countImg === 2 || countImg === 4 ? 'text-black' : 'text-white'"
@@ -438,8 +478,10 @@ onMounted(() => {
       />
     </div>
 
-    <div class="filter-container mx-7 pt-7 flex justify-between">
-      <div class="brand-price-filter-container gap-2 flex">
+    <div class="filter-container mx-28 py-7 flex justify-between border-b">
+      <div
+        class="brand-price-filter-container gap-2 p-2 flex bg-gray-300 rounded"
+      >
         <FilterItem
           label="Filter by brand (s)"
           class="brand"
@@ -461,33 +503,33 @@ onMounted(() => {
             @removeFromFilterList="removeFromFilterList"
             @toggleIsShow="toggleIsShow"
           />
-          <div v-if="isShowAllPrice" class="flex border">
+          <div v-if="isShowAllPrice" class="flex border-y border-gray-300">
             <input
               type="number"
               placeholder="Min Price"
               v-model="minPrice"
               min="0"
-              class="itbms-price-item-min w-40 pl-4 py-0.5 border-r outline-none bg-[rgba(22,22,23,255)]"
+              class="itbms-price-item-min w-28 text-center py-0.5 outline-none bg-[rgba(22,22,23,255)]"
             />
             <input
               type="number"
               placeholder="Max Price"
               v-model="maxPrice"
               min="0"
-              class="itbms-price-item-max w-[159px] pl-4 py-0.5 border-r outline-none bg-[rgba(22,22,23,255)]"
+              class="itbms-price-item-max w-28 text-center py-0.5 outline-none bg-[rgba(22,22,23,255)]"
             />
           </div>
           <button
             v-if="isShowAllPrice"
             @click="applyMinMaxPriceToFilterList"
-            class="w-80 bg-[rgba(22,22,23,255)] border-b border-x rounded-b duration-200"
+            class="w-56 py-1 rounded-b duration-200"
             :class="[
               (minPrice > maxPrice && maxPrice !== '') ||
               (minPrice === '' &&
                 maxPrice === '' &&
                 priceFilterList.length === 0)
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-blue-500 cursor-pointer',
+                ? 'opacity-50 bg-[rgba(22,22,23,255)] cursor-not-allowed'
+                : 'bg-blue-300 border-[#0d47a1] text-[#0d47a1]  hover:bg-[#0d47a1] hover:text-white cursor-pointer',
             ]"
             :disabled="
               (minPrice > maxPrice && maxPrice !== '') ||
@@ -500,7 +542,7 @@ onMounted(() => {
           </button>
           <p
             v-if="minPrice > maxPrice && maxPrice !== ''"
-            class="max-w-80 mt-2 text-red-500 text-xs"
+            class="max-w-56 mt-2 text-red-500 text-xs"
           >
             The maximum price should greater than or equal minimum.
           </p>
@@ -515,28 +557,17 @@ onMounted(() => {
           @removeFromFilterList="removeFromFilterList"
           @toggleIsShow="toggleIsShow"
         />
-        <div class="max-h-8 flex gap-2">
-          <img
-            @mouseenter="onHover = 'filter'"
-            @mouseleave="onHover = null"
-            @click="isShowAllBrand = !isShowAllBrand"
-            :src="`/kk2/imgs/${
-              isShowAllBrand || onHover === 'filter' ? 'filter-black' : 'filter'
-            }.png`"
-            alt="filter"
-            class="itbms-brand-filter-button w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
-            :class="isShowAllBrand ? 'bg-white' : ''"
-          />
+        <div class="max-h-9 flex gap-2">
           <button
             @click="clearFilter"
-            class="itbms-brand-filter-clear px-7 border rounded hover:bg-white hover:text-black hover:cursor-pointer duration-200"
+            class="itbms-brand-filter-clear px-7 h-10 text-black rounded bg-white hover:bg-[#0d47a1] hover:text-white cursor-pointer duration-200"
           >
             Clear
           </button>
         </div>
       </div>
-      <div class="sort-page max-h-8 flex gap-2">
-        <div class="page self-center space-x-3 mx-2">
+      <div class="sort-page p-2 flex items-center gap-1 bg-gray-200 rounded">
+        <div class="page space-x-3 text-black">
           <label>show</label>
           <select
             @change="
@@ -545,62 +576,64 @@ onMounted(() => {
                 getAllSaleItemBySortAndFilter()
             "
             v-model="pageSize"
-            class="itbms-page-size border rounded bg-black"
+            class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300"
           >
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
           </select>
         </div>
-        <img
-          @mouseenter="onHover = 'asc'"
-          @mouseleave="onHover = null"
-          @click="sortAsc"
-          :src="`/kk2/imgs/${
-            isSort.sortDirection === 'asc' || onHover === 'asc'
-              ? 'asc-sort-black'
-              : 'asc-sort'
-          }.png`"
-          alt="asc"
-          class="itbms-brand-asc w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
-          :class="isSort.sortDirection === 'asc' ? 'bg-white' : ''"
-        />
-        <img
-          @mouseenter="onHover = 'none'"
-          @mouseleave="onHover = null"
-          @click="clearSort"
-          :src="`/kk2/imgs/${
-            isSort.sortDirection === 'none' || onHover === 'none'
-              ? 'none-sort-black'
-              : 'none-sort'
-          }.png`"
-          alt="none"
-          class="itbms-brand-none w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
-          :class="isSort.sortDirection === 'none' ? 'bg-white' : ''"
-        />
-        <img
-          @mouseenter="onHover = 'desc'"
-          @mouseleave="onHover = null"
-          @click="sortDesc"
-          :src="`/kk2/imgs/${
-            isSort.sortDirection === 'desc' || onHover === 'desc'
-              ? 'desc-sort-black'
-              : 'desc-sort'
-          }.png`"
-          alt="desc"
-          class="itbms-brand-desc w-8 object-cover border rounded hover:cursor-pointer hover:bg-white"
-          :class="isSort.sortDirection === 'desc' ? 'bg-white' : ''"
-        />
-        <RouterLink
-          :to="{ name: 'AddSaleItems' }"
-          class="itbms-sale-item-add flex items-center justify-center w-8 text-2xl border rounded duration-200 over:cursor-pointer hover:bg-white hover:text-black"
-        >
-          +
-        </RouterLink>
+        <div>
+          <button
+            @click="sortAsc"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'asc'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)] '
+            "
+          >
+            ↑ A-Z
+          </button>
+        </div>
+        <div>
+          <button
+            @click="clearSort"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'none'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)]'
+            "
+          >
+            Default
+          </button>
+        </div>
+        <div>
+          <button
+            @click="sortDesc"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'desc'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)]'
+            "
+          >
+            ↓ Z-A
+          </button>
+        </div>
+        <div>
+          <RouterLink
+            :to="{ name: 'AddSaleItems' }"
+            class="itbms-sale-item-add py-1.5 px-3 flex items-center justify-center bg-[rgba(22,22,23,255)] rounded duration-200 over:cursor-pointer hover:bg-[#0d47a1] hover:text-white"
+          >
+            +
+          </RouterLink>
+        </div>
       </div>
     </div>
     <div
-      class="item-container grid grid-cols-5 gap-x-5 gap-y-10 py-10 border-t mt-7 mx-7"
+      class="item-container grid grid-cols-5 gap-x-5 gap-y-10 pb-10 mt-7 mx-35"
     >
       <h1
         v-show="items.length === 0"
@@ -617,24 +650,33 @@ onMounted(() => {
           params: { itemId: item.id },
         }"
         :key="index"
-        class="itbms-row w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[5%] hover:shadow-sm duration-300"
+        class="itbms-row w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[2%] hover:shadow-sm duration-300"
         :class="itemAnimations[index] ? 'animation-slide-up' : 'opacity-0'"
-      >
-        <img
-          src="/src/assets/imgs/iphone-item.png"
-          alt="sale-item"
-          class="w-60 mx-auto rounded-4xl"
-        />
+        ><div
+          class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
+        >
+          <img
+            v-if="imageUrlList[index]"
+            :src="imageUrlList[index]"
+            class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+          />
+          <img
+            v-else
+            src="../assets/imgs/no-image.png"
+            class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+          />
+        </div>
+
         <div
-          class="item-detail flex flex-col items-center space-y-3 text-white text-lg"
+          class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
         >
           <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
-          <p class="itbms-model">{{ item.model }}</p>
+          <p class="itbms-model text-base">{{ item.model }}</p>
           <div class="ram-storage flex items-center gap-4 text-xs">
             <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
               {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
               <span
-                v-show="item.storageGb !== null && item.storageGb !== ''"
+                v-show="item.ramGb !== null && item.ramGb !== ''"
                 class="itbms-storageGb-unit"
               >
                 GB</span
@@ -656,13 +698,13 @@ onMounted(() => {
             </p>
           </div>
 
-          <p class="itbms-price text-sm text-white/80">
+          <p class="itbms-price text-white/80">
             From ฿<span class="itbms-price-unit mx-0.5">{{
               item.price.toLocaleString()
             }}</span>
           </p>
           <button
-            class="w-60 py-2 mb-5 rounded-2xl bg-blue-500 text-sm hover:cursor-pointer hover:bg-blue-500/90"
+            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-[#0d47a1] hover:text-white hover:cursor-pointer duration-200"
           >
             Add to Cart
           </button>
@@ -739,7 +781,8 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
+  <AlertMessageRegister v-if="statusStore.getStatus() !== null && statusStore.getMethod() === 'register'" />
+  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null && statusStore.getMethod() !== 'register'" />
   <Footer />
 </template>
 
