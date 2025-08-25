@@ -28,7 +28,7 @@ onMounted(() => {
     <div class="w-full flex flex-col">
       <div class="title flex justify-between">
         <h1 class="text-2xl font-bold">
-          {{ status === 201 ? 'Success!' : 'Error!' }}
+          {{ status === 201 ? "Success!" : "Error!" }}
         </h1>
         <button
           @click="(showMessage = false), statusStore.clearStatusAndMethod()"
@@ -45,10 +45,20 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  
 </template>
 
 <style scoped>
-.message-container { animation: slide 0.8s ease; }
-@keyframes slide { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.message-container {
+  animation: slide 0.8s ease;
+}
+@keyframes slide {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 </style>

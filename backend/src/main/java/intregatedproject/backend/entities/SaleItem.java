@@ -6,16 +6,20 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "sale_items")
+@Table(name = "saleitems")
 public class SaleItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,40 +36,40 @@ public class SaleItem {
     @Column(name = "model", nullable = false, length = 60)
     private String model;
 
-    @Lob
     @NotNull
+    @Lob
     @Column(name = "description", nullable = false)
     private String description;
-
-    @NotNull
-    @Column(name = "price", nullable = false)
-    private Integer price;
-
-    @Column(name = "ramGb")
-    private Integer ramGb;
-
-    @Column(name = "screenSizeInch", precision = 3, scale = 1)
-    private BigDecimal screenSizeInch;
-
-    @Column(name = "storageGb")
-    private Integer storageGb;
-
-    @Size(max = 40)
-    @Column(name = "color", length = 50)
-    private String color;
 
     @NotNull
     @ColumnDefault("1")
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SaleItemImage> saleItemImages = new ArrayList<>();
+    @NotNull
+    @Column(name = "price", nullable = false)
+    private Integer price;
+
+    @Column(name = "screenSizeInch", precision = 4, scale = 2)
+    private BigDecimal screenSizeInch;
+
+    @Column(name = "ramGb")
+    private Integer ramGb;
+
+    @Column(name = "storageGb")
+    private Integer storageGb;
+
+    @Size(max = 40)
+    @Column(name = "color", length = 40)
+    private String color;
 
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false, updatable = false)
+    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant updatedOn;
+
+    @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleItemImage> saleItemImages = new ArrayList<>();
 
 }

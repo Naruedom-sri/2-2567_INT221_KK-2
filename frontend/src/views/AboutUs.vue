@@ -12,7 +12,7 @@ import Footer from "@/components/Footer.vue";
         alt="consulter"
         class="object-cover w-72 h-72 rounded-full"
       />
-      <h1 class="text-xl font-black">Consulter</h1>
+      <h1 class="text-xl font-semibold">Consulter</h1>
       <p>Asst. Prof. Dr. Kriengkrai Porkaew</p>
       <p>porkaew@sit.kmutt.ac.th</p>
       <p>0-2470-9868</p>
@@ -25,7 +25,7 @@ import Footer from "@/components/Footer.vue";
           alt="consulter"
           class="object-cover w-60 h-60 mx-auto rounded-full"
         />
-        <h1 class="text-xl font-black">Member</h1>
+        <h1 class="text-xl font-semibold">Member</h1>
         <p>66130500040</p>
         <p>Mr. Thanarat Pudpoh</p>
         <p>66130500040@ad.sit.kmutt.ac.th</p>
@@ -37,7 +37,7 @@ import Footer from "@/components/Footer.vue";
           alt="consulter"
           class="object-cover w-60 h-60 mx-auto rounded-full"
         />
-        <h1 class="text-xl font-black">Member</h1>
+        <h1 class="text-xl font-semibold">Member</h1>
         <p>66130500051</p>
         <p>Mr. Naruedom Srirukkaew</p>
         <p>66130500051@ad.sit.kmutt.ac.th</p>
@@ -49,7 +49,7 @@ import Footer from "@/components/Footer.vue";
           alt="consulter"
           class="object-cover w-60 h-60 mx-auto rounded-full"
         />
-        <h1 class="text-xl font-black">Member</h1>
+        <h1 class="text-xl font-semibold">Member</h1>
         <p>66130500114</p>
         <p>Mr. Noppawut Phomchana</p>
         <p>66130500114@ad.sit.kmutt.ac.th</p>

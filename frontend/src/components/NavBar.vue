@@ -78,7 +78,7 @@ onMounted(() => {
           <img
             src="/src/assets/imgs/account-symbol4.png"
             alt="account"
-            class="itbms-register w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+            class="itbms-register-button w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
           />
         </RouterLink>
         <img

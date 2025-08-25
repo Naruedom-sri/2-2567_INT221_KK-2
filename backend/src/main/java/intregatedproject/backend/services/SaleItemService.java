@@ -238,15 +238,25 @@ public class SaleItemService {
         for (SaleItemImageRequest req : imageRequests) {
             switch (req.getState()) {
                 case CREATE -> {
-                    // เพิ่มรูปใหม่: ต้องมี imageFile และกำหนด order (imageViewOrder)
+                    // เพิ่มรูปใหม่: ไม่ต้องส่ง order มาก็ได้ → ถ้าไม่มีจะต่อท้าย
                     String newFileName = fileService.store(req.getImageFile());
                     SaleItemImage newImage = new SaleItemImage();
                     newImage.setSaleItem(saleItem);
                     newImage.setFileName(newFileName);
                     newImage.setOgFileName(req.getImageFile().getOriginalFilename());
-                    newImage.setImageViewOrder(req.getImageViewOrder());
+
+                    // ถ้า request ไม่ได้ส่ง imageViewOrder → ให้ต่อท้าย
+                    int nextOrder;
+                    if (req.getImageViewOrder() == null || req.getImageViewOrder() <= 0) {
+                        nextOrder = saleItem.getSaleItemImages().size() + 1;
+                    } else {
+                        nextOrder = req.getImageViewOrder();
+                    }
+                    newImage.setImageViewOrder(nextOrder);
+
                     saleItem.getSaleItemImages().add(newImage);
                 }
+
                 case UPDATE -> {
                     // เปลี่ยนลำดับของรูปเดิม: อ้างอิงจาก fileName ที่อยู่ในระบบ
                     saleItem.getSaleItemImages().stream().filter(img -> img.getFileName().equals(req.getFileName())).findFirst().ifPresent(img -> img.setImageViewOrder(req.getImageViewOrder()));
@@ -276,8 +286,6 @@ public class SaleItemService {
     }
 
 }
-
-
 
 
 
