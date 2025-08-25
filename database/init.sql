@@ -134,3 +134,40 @@ INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VA
 
 INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
 ('img6.jpg', 1, '3_original_main.jpg', 3);
+
+
+CREATE TABLE users (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    nickname VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,  -- จะเก็บ hash
+    fullname VARCHAR(40) NOT NULL,
+    role ENUM('BUYER', 'SELLER') NOT NULL,
+    status ENUM('INACTIVE', 'ACTIVE') DEFAULT 'INACTIVE',
+    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sellers (
+    user_id int PRIMARY KEY, -- ใช้ user_id เป็น PK + FK
+    mobile_number VARCHAR(20) NOT NULL,
+    bank_account_number VARCHAR(50) NOT NULL,
+    bank_name VARCHAR(50) NOT NULL,
+    national_id_number VARCHAR(20) NOT NULL,
+    national_id_photo_front VARCHAR(255) NOT NULL,
+    national_id_photo_back VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_seller_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE email_verification_tokens (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    user_id int NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expiry_time TIMESTAMP NOT NULL,
+    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_tokens_userid ON email_verification_tokens(user_id);
+CREATE INDEX idx_tokens_expiry ON email_verification_tokens(expiry_time);
