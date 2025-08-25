@@ -27,10 +27,6 @@ const isValid = computed(() => {
   );
 });
 
-function test(){
-  console.log("Test function");
-}
-
 // Emits to parent
 const emit = defineEmits(["submit", "cancel"]);
 
@@ -91,7 +87,6 @@ function onSubmit() {
         type="submit"
         class="mt-2 px-4 py-2 rounded bg-green-500 text-white hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="!isValid || props.submitting"
-      @click="test()"
       >
         {{ props.submitting ? 'Submitting...' : 'Submit' }}
       </button>
