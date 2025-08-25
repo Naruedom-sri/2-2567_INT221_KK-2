@@ -27,15 +27,6 @@ CREATE TABLE sale_items (
     CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId)
 );
 
-CREATE TABLE IF NOT EXISTS sale_item_images (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
-    imageViewOrder INT ,
-    ogFileName VARCHAR(50),
-    saleItemId int not null,
-	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
-);
-
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),
 (2, 'Apple', 'United States', 'https://www.apple.com', 1),
@@ -131,15 +122,47 @@ CREATE TABLE IF NOT EXISTS saleItemImage (
 	FOREIGN KEY (saleItem_id) REFERENCES sale_items(id)
 );
 
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
-('img1.jpg', 1, 'org1.jpg', 1),
-('img0.jpg', 0, 'org0.jpg', 1),
-('img3.jpg', 2, 'org3.jpg', 1),
-('img2.jpg', 3, 'org2.jpg', 1);
+CREATE TABLE users (
+    userId int AUTO_INCREMENT PRIMARY KEY,
+    nickname VARCHAR(50) NOT NULL UNIQUE,
+    fullname VARCHAR(40) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('BUYER', 'SELLER') DEFAULT 'BUYER',
+    status ENUM('INACTIVE', 'ACTIVE') DEFAULT 'INACTIVE',
+    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updatedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
-('img4.jpg', 1, '2_original_main.jpeg', 2),
-('img5.jpg', 2, '2_original_package.jpg', 2);
+CREATE TABLE buyers (
+	buyerId INT AUTO_INCREMENT PRIMARY KEY,
+	userId int NOT NULL UNIQUE,
+    CONSTRAINT fk_buyer_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+);
 
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItem_id) VALUES
-('img6.jpg', 1, '3_original_main.jpg', 3);
+CREATE TABLE sellers (
+	sellerId INT AUTO_INCREMENT PRIMARY KEY AUTO_INCREMENT,
+    userId int NOT NULL UNIQUE, 
+    mobile_number VARCHAR(20) NOT NULL,
+    bank_account_number VARCHAR(50) NOT NULL,
+    bank_name VARCHAR(50) NOT NULL,
+    national_id_number VARCHAR(20) NOT NULL,
+    national_id_photo_front VARCHAR(255) NOT NULL,
+    national_id_photo_back VARCHAR(255) NOT NULL,
+    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updatedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,	
+    CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+);
+
+CREATE TABLE email_verification_tokens (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    userId int NOT NULL UNIQUE,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expiry_time TIMESTAMP NOT NULL,
+    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_token_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_tokens_userid ON email_verification_tokens(userId);
+CREATE INDEX idx_tokens_expiry ON email_verification_tokens(expiry_time);

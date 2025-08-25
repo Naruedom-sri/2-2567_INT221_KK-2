@@ -1,7 +1,10 @@
 <script setup>
-import { ref } from "vue";
+import { computed, onBeforeUnmount, ref } from "vue";
 
-// Emits for parent consumers
+// Props + Emits for parent consumers
+const props = defineProps({
+  submitting: { type: Boolean, default: false },
+});
 const emit = defineEmits(["submit", "cancel"]);
 
 // Seller form state
@@ -24,31 +27,59 @@ const cardPhotos = ref({
   backPreview: "",
 });
 
+// basic validation per requirement
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+const isValid = computed(() => {
+  const s = seller.value;
+  return (
+    s.nickname.trim() &&
+    s.contactEmail.trim() &&
+    passwordPattern.test(s.password) &&
+    s.fullname.trim().length >= 4 && s.fullname.trim().length <= 40 &&
+    s.mobile.trim() &&
+    s.bankAccount.trim() &&
+    s.bankName.trim() &&
+    s.nationalCard.trim() &&
+    cardPhotos.value.frontFile &&
+    cardPhotos.value.backFile
+  );
+});
+
 function onFrontChange(e) {
   const file = e?.target?.files?.[0];
   if (!file) return;
-  cardPhotos.frontFile = file;
-  cardPhotos.frontPreview = URL.createObjectURL(file);
+  // Revoke previous preview to avoid memory leaks
+  if (cardPhotos.value.frontPreview) URL.revokeObjectURL(cardPhotos.value.frontPreview);
+  cardPhotos.value.frontFile = file;
+  cardPhotos.value.frontPreview = URL.createObjectURL(file);
 }
 
 function onBackChange(e) {
   const file = e?.target?.files?.[0];
   if (!file) return;
-  cardPhotos.backFile = file;
-  cardPhotos.backPreview = URL.createObjectURL(file);
+  // Revoke previous preview to avoid memory leaks
+  if (cardPhotos.value.backPreview) URL.revokeObjectURL(cardPhotos.value.backPreview);
+  cardPhotos.value.backFile = file;
+  cardPhotos.value.backPreview = URL.createObjectURL(file);
 }
 
+onBeforeUnmount(() => {
+  if (cardPhotos.value.frontPreview) URL.revokeObjectURL(cardPhotos.value.frontPreview);
+  if (cardPhotos.value.backPreview) URL.revokeObjectURL(cardPhotos.value.backPreview);
+});
+
 function onSubmit() {
+  if (!isValid.value || props.submitting) return;
   // Minimal emit with current form values and files
   emit("submit", {
-    seller,
-    files: { front: cardPhotos.frontFile, back: cardPhotos.backFile },
+  seller: { ...seller.value },
+  files: { front: cardPhotos.value.frontFile, back: cardPhotos.value.backFile },
   });
 }
 </script>
 
 <template>
-  <form class="space-y-4">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <div class="flex flex-col">
       <label for="nickname" class="mb-1">Nickname</label>
       <input
@@ -75,6 +106,9 @@ function onSubmit() {
         id="sellerPassword"
         v-model="seller.password"
       />
+      <small class="text-xs text-gray-500 mt-1">
+        Minimum 8 chars, including upper, lower, number, and special character
+      </small>
     </div>
     <div class="flex flex-col">
       <label for="sellerFullname" class="mb-1">Fullname</label>
@@ -166,11 +200,11 @@ function onSubmit() {
     </div>
     <div class="flex justify-center gap-10">
       <button
-        type="button"
-        class="mt-2 px-4 py-2 rounded bg-green-500 text-white hover:cursor-pointer"
-        @click="onSubmit"
+        type="submit"
+        class="mt-2 px-4 py-2 rounded bg-green-500 text-white hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="!isValid || props.submitting"
       >
-        Submit
+        {{ props.submitting ? 'Submitting...' : 'Submit' }}
       </button>
       <button
         type="button"

@@ -1,9 +1,70 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
+import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 
-const accountType = ref("buyer"); 
+const accountType = ref("buyer");
+const isSubmitting = ref(false);
+const router = useRouter();
+const statusStore = useSaleItemStatusStore();
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+
+const handleSubmit = async (payload) => {
+  // payload shape differs buyer vs seller; build body accordingly per requirement
+  try {
+    isSubmitting.value = true;
+    statusStore.clearStatusAndMethod();
+
+    if (accountType.value === "buyer") {
+      const body = {
+        accountType: "BUYER",
+        nickname: payload.nickname,
+        email: payload.email,
+        password: payload.password,
+        fullname: payload.fullname,
+      };
+      const res = await fetch(`${BASE_API_DOMAIN}/v1/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+  statusStore.setStatusAndMethod("register", res.status);
+      if (res.status !== 201) throw new Error("Register failed");
+    } else {
+      // seller: include additional fields and photos
+      const form = new FormData();
+      form.append("accountType", "SELLER");
+      form.append("nickname", payload.seller.value.nickname);
+      form.append("email", payload.seller.value.contactEmail);
+      form.append("password", payload.seller.value.password);
+      form.append("fullname", payload.seller.value.fullname);
+      form.append("mobile", payload.seller.value.mobile);
+      form.append("bankAccount", payload.seller.value.bankAccount);
+      form.append("bankName", payload.seller.value.bankName);
+      form.append("nationalId", payload.seller.value.nationalCard);
+      if (payload.files?.front) form.append("nationalIdFront", payload.files.front);
+      if (payload.files?.back) form.append("nationalIdBack", payload.files.back);
+
+      const res = await fetch(`${BASE_API_DOMAIN}/v1/register`, {
+        method: "POST",
+        body: form,
+      });
+  statusStore.setStatusAndMethod("register", res.status);
+      if (res.status !== 201) throw new Error("Register failed");
+    }
+    // success: redirect to sale item gallery
+    router.push({ name: "SaleItemsGallery" });
+  } catch (e) {
+    // stay on page; message shown via status store consumer globally
+    console.error(e);
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const handleCancel = () => router.push({ name: "SaleItemsGallery" });
 </script>
 
 <template>
@@ -46,7 +107,12 @@ const accountType = ref("buyer");
         </button>
       </div>
 
-  <component :is="accountType === 'buyer' ? BuyerForm : SellerForm" />
+  <component
+    :is="accountType === 'buyer' ? BuyerForm : SellerForm"
+    :submitting="isSubmitting"
+    @submit="handleSubmit"
+    @cancel="handleCancel"
+  />
     </div>
   </div>
 </template>
