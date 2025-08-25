@@ -151,9 +151,11 @@ const removeImageAt = (index) => {
   } else if (index <= selectedMainIndex.value) {
     selectedMainIndex.value = Math.max(0, selectedMainIndex.value - 1);
   }
-  if (imgRm[0].state !== "CREATE") {
-    handleUpdateImage(imgRm[0], "DELETE");
-  }
+  console.log(imgRm[0]);
+  handleUpdateImage(
+    imgRm[0],
+    imgRm[0].state !== "CREATE" ? "DELETE" : "CREATE"
+  );
 };
 
 const swap = (arr, i, j) => {
@@ -191,12 +193,19 @@ const handleUpdateImage = (img, state) => {
       imageViewOrder: img.imageViewOrder,
     });
   } else if (state === "CREATE") {
-    imageEditList.value.push({
-      priority: priority.value++,
-      fileName: img.name,
-      state,
-      imageFile: img.file,
-    });
+    const index = imageEditList.value.findIndex(
+      (i) => i.fileName === img.name && i.state === img.state
+    );
+    if (index !== -1) {
+      imageEditList.value.splice(index, 1);
+    } else {
+      imageEditList.value.push({
+        priority: priority.value++,
+        fileName: img.name,
+        state,
+        imageFile: img.file,
+      });
+    }
   }
 };
 
@@ -354,17 +363,18 @@ const addUpdateNewSaleItem = async () => {
           handleUpdateImage({ name: img.name, file: file }, "CREATE");
         }
       }
-    }
-    const stateOrder = { DELETE: 0, CREATE: 1 };
-    imageEditList.value.sort((a, b) => {
-      // เปรียบเทียบ state ก่อน
-      const stateDiff = stateOrder[a.state] - stateOrder[b.state];
-      if (stateDiff !== 0) return stateDiff;
+      const stateOrder = { DELETE: 0, CREATE: 1 };
+      imageEditList.value.sort((a, b) => {
+        // เปรียบเทียบ state ก่อน
+        const stateDiff = stateOrder[a.state] - stateOrder[b.state];
+        if (stateDiff !== 0) return stateDiff;
 
-      // ถ้า state เท่ากัน → ใช้ priority ต่อ
-      return a.priority - b.priority;
-    });
-    console.log("after sort: ", imageEditList.value);
+        // ถ้า state เท่ากัน → ใช้ priority ต่อ
+        return a.priority - b.priority;
+      });
+      console.log("after sort: ", imageEditList.value);
+      formData.append("imageInfos".imageEditList.value);
+    }
 
     // if (!props.isEditing) {
     //   const data = await createDataWithFile(

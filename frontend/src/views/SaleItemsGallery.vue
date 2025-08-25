@@ -418,13 +418,13 @@ onUnmounted(() => {
 
 <template>
   <NavBar @search-sale-item="getAllSaleItemBySortAndFilter" />
-  <div class="gallery-container text-white text-sm">
+  <div class="gallery-container text-white text-sm ">
     <div class="promote">
       <div
         class="w-full absolute duration-500"
         :class="countImg === 2 || countImg === 4 ? 'text-black' : 'text-white'"
       >
-        <div class="my-8 flex justify-center gap-15">
+        <div class="mt-10 flex justify-center gap-15">
           <h1
             v-for="(phoneName, index) in phoneLabels"
             :key="index"
@@ -443,7 +443,7 @@ onUnmounted(() => {
           </h1>
         </div>
         <div
-          class="animation-slide-up relative flex flex-col items-center gap-4 top-128"
+          class="animation-slide-up relative flex flex-col items-center gap-4 top-132"
         >
           <h1 v-if="countImg === 1" class="font-black text-3xl">
             Galaxy S25 Ultra

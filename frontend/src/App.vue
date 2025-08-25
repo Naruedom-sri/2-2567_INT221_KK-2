@@ -10,6 +10,7 @@
 
 <style scoped>
 .container-system {
-  font-family: "Prompt", sans-serif;
+  /* font-family: "Prompt", sans-serif; */
+   font-family: "Montserrat", sans-serif;
 }
 </style>

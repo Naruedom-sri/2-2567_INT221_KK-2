@@ -93,40 +93,8 @@ const emit = defineEmits([
       class="w-4 pt-0.5  bg-[rgba(22,22,23,255)]"
       :class="[props.isShow ? 'h-[240.5px] pt-3' : 'h-10'], props.isShow && props.class === 'price'  ? 'rounded-tr':'rounded-r'"
     >
-<<<<<<< HEAD
-      <button
-        @click="$emit('addToFilterList', option, props.class)"
-        v-for="(option, index) in props.optionList"
-        :key="index"
-        class="py-2 border-x text-white duration-200"
-        :class="[
-          index === props.optionList.length - 1 && props.class !== 'price'
-            ? 'border-b'
-            : '',
-          `itbms-${props.class}-item`,
-          props.filterList.includes(option) ||
-          props.filterList.includes(option.name) 
-            ? 'opacity-50 cursor-not-allowed'
-            : 'hover:bg-blue-500 cursor-pointer',
-        ]"
-        :disabled="
-          props.filterList.includes(option) ||
-          props.filterList.includes(option.name) 
-        "
-      >
-        {{ props.class === "brand" ? option.name : option }}
-        <span v-if="props.class === 'price'" class="unit">Baht</span>
-        <span
-          v-if="props.class === 'storage-size' && option !== 'Not specified'"
-          class="unit"
-          >{{ option !== 1 ? "Gb" : "Tb" }}</span
-        >
-      </button>
-    </div>
-=======
       {{ props.isShow ? "&#8963" : '&#8964' }}
     </p>
->>>>>>> cd5820a0c4ce861466b8c65ab9051713d0eb654d
   </div>
 </template>
 
