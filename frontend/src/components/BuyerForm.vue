@@ -14,6 +14,7 @@ const emit = defineEmits(["submit", "cancel"]);
 // const onSubmit = () => emit('submit', { ...buyer })
 
 function onSubmit() {
+  console.log("Monkey")
   emit("submit", { ...buyer });
 }
 </script>
