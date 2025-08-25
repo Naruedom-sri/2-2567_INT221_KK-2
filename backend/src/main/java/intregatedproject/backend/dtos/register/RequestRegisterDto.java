@@ -1,8 +1,6 @@
 package intregatedproject.backend.dtos.register;
 
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
-
 
 @Data
 public class RequestRegisterDto {
