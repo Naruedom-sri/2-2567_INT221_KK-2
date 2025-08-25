@@ -49,21 +49,19 @@ public class User {
     @Column(name = "status")
     private String status;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "createdOn")
+    @Column(name = "createdOn",insertable = false, updatable = false)
     private Instant createdOn;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updatedOn")
+    @Column(name = "updatedOn",insertable = false, updatable = false)
     private Instant updatedOn;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Buyer buyer;
 
     @OneToOne(mappedBy = "user")
-    private EmailVerificationToken emailVerificationToken;
+    private EmailVerificationToken emailverificationtoken;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Seller seller;
 
 }

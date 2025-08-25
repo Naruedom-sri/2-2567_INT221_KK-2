@@ -27,42 +27,34 @@ public class Seller {
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @Size(max = 20)
+    @Size(max = 10)
     @NotNull
-    @Column(name = "mobile_number", nullable = false, length = 20)
+    @Column(name = "mobileNumber", nullable = false, length = 10)
     private String mobileNumber;
 
     @Size(max = 50)
     @NotNull
-    @Column(name = "bank_account_number", nullable = false, length = 50)
+    @Column(name = "bankAccountNumber", nullable = false, length = 50)
     private String bankAccountNumber;
 
     @Size(max = 50)
     @NotNull
-    @Column(name = "bank_name", nullable = false, length = 50)
+    @Column(name = "bankName", nullable = false, length = 50)
     private String bankName;
 
-    @Size(max = 20)
+    @Size(max = 13)
     @NotNull
-    @Column(name = "national_id_number", nullable = false, length = 20)
+    @Column(name = "nationalIdNumber", nullable = false, length = 13)
     private String nationalIdNumber;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "national_id_photo_front", nullable = false)
+    @Column(name = "nationalIdPhotoFront", nullable = false)
     private String nationalIdPhotoFront;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "national_id_photo_back", nullable = false)
+    @Column(name = "nationalIdPhotoBack", nullable = false)
     private String nationalIdPhotoBack;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "createdOn")
-    private Instant createdOn;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updatedOn")
-    private Instant updatedOn;
 
 }
