@@ -11,7 +11,7 @@ CREATE TABLE brands (
     updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE saleItems (
+CREATE TABLE sale_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     brandId INT NOT NULL,
     model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
@@ -113,7 +113,7 @@ INSERT INTO saleItems (id, brandId, model, description, quantity, price, screenS
 (85, 10, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
 
 
-CREATE TABLE IF NOT EXISTS saleItemImage (
+CREATE TABLE IF NOT EXISTS sale_item_images (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
     imageViewOrder INT ,
@@ -152,7 +152,7 @@ CREATE TABLE sellers (
     CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
-CREATE TABLE emailVerificationTokens (
+CREATE TABLE email_verification_tokens (
     id int AUTO_INCREMENT PRIMARY KEY,
     userId int NOT NULL UNIQUE,
     token VARCHAR(255) NOT NULL UNIQUE,
