@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class PriceException extends RuntimeException {
-    public PriceException(String message) {
+public class PriceIsNotPresentException extends RuntimeException {
+    public PriceIsNotPresentException(String message) {
         super(message);
     }
 }

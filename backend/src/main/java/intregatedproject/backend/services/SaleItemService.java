@@ -6,7 +6,7 @@ import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
-import intregatedproject.backend.exceptions.PriceException;
+import intregatedproject.backend.exceptions.PriceIsNotPresentException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.utils.SaleItemSpecification;
@@ -99,9 +99,9 @@ public class SaleItemService {
         size = size <= 0 ? 10 : size;
         page = (page < 0 ? 0 : page);
         if (filterPriceLower == null && filterPriceUpper != null) {
-            throw new PriceException("Required parameter 'filterPriceLower' is not present.");
+            throw new PriceIsNotPresentException("Required parameter 'filterPriceLower' is not present.");
         } else if (filterPriceLower != null && filterPriceUpper == null) {
-            throw new PriceException("Required parameter 'filterPriceUpper' is not present.");
+            throw new PriceIsNotPresentException("Required parameter 'filterPriceUpper' is not present.");
         }
         Sort sort;
         if ("brand.name".equalsIgnoreCase(sortField) ||

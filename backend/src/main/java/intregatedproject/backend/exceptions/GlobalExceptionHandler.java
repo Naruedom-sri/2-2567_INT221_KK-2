@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 Map.of(
                         "timestamp",
-                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         "status", 404,
                         "error", "Not Found",
                         "message", ex.getMessage(),
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleBrandAlreadyExists(BrandAlreadyExistsException ex, HttpServletRequest request) {
         return new ResponseEntity<>(
                 Map.of("timestamp",
-                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         "status", 400,
                         "error", "Bad Request",
                         "message", ex.getMessage(),
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleBrandHasSaleItem(BrandHasSaleItemException ex, HttpServletRequest request) {
         return new ResponseEntity<>(
                 Map.of("timestamp",
-                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         "status", 400,
                         "error", "Bad Request",
                         "message", ex.getMessage(),
@@ -54,12 +55,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleGenericException(Exception ex, HttpServletRequest request) {
         return new ResponseEntity<>(
                 Map.of("timestamp",
-                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         "status", 500,
                         "error", "Internal Server Error",
                         "message", "Something went wrong: " + ex.getMessage(),
                         "path", request.getRequestURI()),
-
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

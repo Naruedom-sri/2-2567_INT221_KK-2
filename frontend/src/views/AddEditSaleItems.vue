@@ -84,7 +84,7 @@ const onFilesSelected = (e) => {
   const existingCount = imageItems.value.length;
   const availableSlots = Math.max(0, MAX_FILES - existingCount);
   if (availableSlots === 0) {
-    uploadError.value = `You already selected ${MAX_FILES} images.`;
+    uploadError.value = `Maximum 4 pictures are allowed.`;
     e.target.value = "";
     return;
   }
@@ -94,13 +94,13 @@ const onFilesSelected = (e) => {
   // ถ้าเลือกไฟล์เกิน availableSlots → ตัดออก
   if (files.length > availableSlots) {
     candidates = files.slice(0, availableSlots);
-    uploadError.value = `Only ${availableSlots} more image(s) allowed.`;
+    uploadError.value = `Maximum 4 pictures are allowed.`;
   }
 
   // Per-file size check
   const tooLarge = candidates.find((f) => f.size > MAX_PER_FILE);
   if (tooLarge) {
-    uploadError.value = `Each image must be ≤ 2MB. "${tooLarge.name}" is too large.`;
+    uploadError.value = `The picture file size cannot be larger than 2MB.`;
     e.target.value = "";
     return;
   }
