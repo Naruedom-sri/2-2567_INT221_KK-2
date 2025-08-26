@@ -398,7 +398,6 @@ const addUpdateNewSaleItem = async () => {
       }
       console.log(imageEditList.value);
       imageEditList.value.forEach((img, index) => {
-        // state map ผ่าน setStatus
         formData.append(`imageInfos[${index}].status`, img.state);
         if (img.fileName && img.state !== "CREATE") {
           formData.append(`imageInfos[${index}].fileName`, img.fileName);

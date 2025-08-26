@@ -233,7 +233,7 @@ public class SaleItemService {
         for (int i = 0; i < currentImages.size(); i++) {
             currentImages.get(i).setImageViewOrder(i + 1);
         }
-        
+
         // 2) จัดการคำสั่ง UPDATE / REPLACE / CREATE ตามลำดับคำขอ
         for (SaleItemImageRequest req : imageRequests) {
             switch (req.getState()) {
