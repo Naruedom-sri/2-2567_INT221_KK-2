@@ -14,11 +14,12 @@ const handleSearchClick = (isClear) => {
     emit("searchSaleItem", searchSaleItem.value);
     isSearch.value = !isSearch.value;
   } else if (route.name === "SaleItemsGallery") {
-    console.log(searchSaleItem.value);
-    emit("searchSaleItem", searchSaleItem.value);
+    emit("searchSaleItem", searchSaleItem.value, "SaleItemsGallery");
     isSearch.value = !isSearch.value;
   } else {
     sessionStorage.setItem("searchContent", searchSaleItem.value);
+    sessionStorage.setItem("indexPage", String(0));
+    sessionStorage.setItem("tempIndexPage", String(0));
     router.push({ name: "SaleItemsGallery" });
   }
 };
@@ -70,7 +71,7 @@ onMounted(() => {
           About Us
         </RouterLink>
       </div>
-      <div class="symbol w-56 flex items-center gap-3.5">
+      <div class="symbol w-56 flex items-center gap-7">
         <img
           @click="isSearch = !isSearch"
           src="/src/assets/imgs/search-symbol.png"

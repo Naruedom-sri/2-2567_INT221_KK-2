@@ -47,9 +47,13 @@ const minPrice = ref("");
 const maxPrice = ref("");
 const searchContent = ref("");
 
-const getAllSaleItemBySortAndFilter = async (search = null) => {
+const getAllSaleItemBySortAndFilter = async (search = null, from = "") => {
   try {
     if (search !== null) searchContent.value = search;
+    if (from === "SaleItemsGallery") {
+      indexPage.value = 0;
+      tempIndexPage.value = 0;
+    }
     params.delete("page");
     params.delete("size");
     params.delete("sortField");
