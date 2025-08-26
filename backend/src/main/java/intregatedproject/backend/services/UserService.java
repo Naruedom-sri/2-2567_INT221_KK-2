@@ -25,10 +25,10 @@ public class UserService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private FileService fileService;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private EmailVerificationTokenRepository emailVerificationTokenRepository;
+//    @Autowired
+//    private EmailService emailService;
+//    @Autowired
+//    private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
 
     public List<User> getAllUsers() {
