@@ -11,11 +11,9 @@ const router = useRouter();
 const statusStore = useSaleItemStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
-// helper to safely trim strings
 const safeTrim = (v) => (v ?? "").toString().trim();
 
 const handleSubmit = async (payload) => {
-  // payload shape differs buyer vs seller; build body accordingly per requirement
   try {
     isSubmitting.value = true;
     statusStore.clearStatusAndMethod();
@@ -25,24 +23,20 @@ const handleSubmit = async (payload) => {
       form.append("role", "buyer");
       form.append("nickname", safeTrim(payload.nickname));
       form.append("email", safeTrim(payload.email));
-      // keep password as entered (no trim); change if business requires
-      form.append("password", payload.password ?? "");
+      form.append("password", safeTrim(payload.password));
       form.append("fullname", safeTrim(payload.fullname));
       const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
         method: "POST",
         body: form,
       });
-  statusStore.setStatusAndMethod("register", res.status);
-  // Some backends may return 3xx after successful creation; treat <400 as success
-  if (res.status >= 400) throw new Error("Register failed");
+      statusStore.setStatusAndMethod("register", res.status);
+      if (res.status >= 400) throw new Error("Register failed");
     } else {
       const form = new FormData();
       form.append("role", "seller");
-      // payload.seller is a plain object from SellerForm, not a ref
       form.append("nickname", safeTrim(payload.seller.nickname));
       form.append("email", safeTrim(payload.seller.contactEmail));
-      // keep password as entered (no trim)
-      form.append("password", payload.seller.password ?? "");
+      form.append("password", safeTrim(payload.seller.password));
       form.append("fullname", safeTrim(payload.seller.fullname));
       const sanitizedMobile = safeTrim(payload.seller.mobile).replace(/-/g, "");
       form.append("mobileNumber", sanitizedMobile);
@@ -56,13 +50,11 @@ const handleSubmit = async (payload) => {
         method: "POST",
         body: form,
       });
-  statusStore.setStatusAndMethod("register", res.status);
-  if (res.status >= 400) throw new Error("Register failed");
+      statusStore.setStatusAndMethod("register", res.status);
+      if (res.status >= 400) throw new Error("Register failed");
     }
-    // success: redirect to sale item gallery
     router.push({ name: "SaleItemsGallery" });
   } catch (e) {
-    // stay on page; message shown via status store consumer globally
     console.error(e);
   } finally {
     isSubmitting.value = false;
