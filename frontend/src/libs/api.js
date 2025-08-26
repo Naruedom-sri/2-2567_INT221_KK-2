@@ -46,9 +46,16 @@ const getAllData = async (url) => {
 
 const getAllDataWithParam = async (url, params) => {
   const response = await fetch(`${url}?${params.toString()}`);
-  if (!response.ok)
-    throw new Error(`Can't fetch data with status : ${response.status}`);
-  const data = await response.json();
+  let data;
+  if (!response.ok) {
+    data = await response.text();
+    throw new Error(
+      `Can't update data with status: ${
+        response.status
+      } and with message: ${JSON.stringify(data)}`
+    );
+  }
+  data = await response.json();
   return data;
 };
 
