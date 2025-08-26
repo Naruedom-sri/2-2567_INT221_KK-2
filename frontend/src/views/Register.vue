@@ -11,6 +11,9 @@ const router = useRouter();
 const statusStore = useSaleItemStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
+// helper to safely trim strings
+const safeTrim = (v) => (v ?? "").toString().trim();
+
 const handleSubmit = async (payload) => {
   // payload shape differs buyer vs seller; build body accordingly per requirement
   try {
@@ -20,32 +23,32 @@ const handleSubmit = async (payload) => {
     if (accountType.value === "buyer") {
       const form = new FormData();
       form.append("role", "buyer");
-      form.append("nickname", payload.nickname);
-      form.append("email", payload.email);
-      form.append("password", payload.password);
-      form.append("fullname", payload.fullname);
+      form.append("nickname", safeTrim(payload.nickname));
+      form.append("email", safeTrim(payload.email));
+      // keep password as entered (no trim); change if business requires
+      form.append("password", payload.password ?? "");
+      form.append("fullname", safeTrim(payload.fullname));
       const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
         method: "POST",
         body: form,
       });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (!res.ok) throw new Error("Register failed");
+  statusStore.setStatusAndMethod("register", res.status);
+  // Some backends may return 3xx after successful creation; treat <400 as success
+  if (res.status >= 400) throw new Error("Register failed");
     } else {
       const form = new FormData();
       form.append("role", "seller");
       // payload.seller is a plain object from SellerForm, not a ref
-      form.append("nickname", payload.seller.nickname);
-      form.append("email", payload.seller.contactEmail);
-      form.append("password", payload.seller.password);
-      form.append("fullname", payload.seller.fullname);
-      // normalize mobile by removing hyphens before sending
-      const sanitizedMobile = (payload.seller.mobile ?? "")
-        .toString()
-        .replace(/-/g, "");
+      form.append("nickname", safeTrim(payload.seller.nickname));
+      form.append("email", safeTrim(payload.seller.contactEmail));
+      // keep password as entered (no trim)
+      form.append("password", payload.seller.password ?? "");
+      form.append("fullname", safeTrim(payload.seller.fullname));
+      const sanitizedMobile = safeTrim(payload.seller.mobile).replace(/-/g, "");
       form.append("mobileNumber", sanitizedMobile);
-      form.append("bankAccountNumber", payload.seller.bankAccount);
-      form.append("bankName", payload.seller.bankName);
-      form.append("nationalIdNumber", payload.seller.nationalCard);
+      form.append("bankAccountNumber", safeTrim(payload.seller.bankAccount));
+      form.append("bankName", safeTrim(payload.seller.bankName));
+      form.append("nationalIdNumber", safeTrim(payload.seller.nationalCard));
       if (payload.files?.front) form.append("front", payload.files.front);
       if (payload.files?.back) form.append("back", payload.files.back);
 
@@ -53,8 +56,8 @@ const handleSubmit = async (payload) => {
         method: "POST",
         body: form,
       });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (!res.ok) throw new Error("Register failed");
+  statusStore.setStatusAndMethod("register", res.status);
+  if (res.status >= 400) throw new Error("Register failed");
     }
     // success: redirect to sale item gallery
     router.push({ name: "SaleItemsGallery" });
