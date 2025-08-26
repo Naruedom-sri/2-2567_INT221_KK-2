@@ -11,7 +11,10 @@ const handleSearchClick = (isClear) => {
   if (isClear) {
     searchSaleItem.value = "";
     sessionStorage.setItem("searchContent", searchSaleItem.value);
+    emit("searchSaleItem", searchSaleItem.value);
+    isSearch.value = !isSearch.value; 
   } else if (route.name === "SaleItemsGallery") {
+    console.log(searchSaleItem.value)
     emit("searchSaleItem", searchSaleItem.value);
     isSearch.value = !isSearch.value;
   } else {
@@ -91,7 +94,7 @@ onMounted(() => {
   </div>
   <div
     v-if="isSearch"
-    class="box-search absolute w-full h-screen backdrop-blur-lg z-50"
+    class="box-search absolute w-full h-screen backdrop-blur-lg z-50 text-white"
   >
     <div class="bg-[rgba(22,22,23,255)] h-1/2">
       <div class="w-lg mx-auto py-4 flex justify-between items-center gap-2">

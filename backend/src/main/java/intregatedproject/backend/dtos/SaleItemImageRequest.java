@@ -12,15 +12,15 @@ public class SaleItemImageRequest {
     private String ogFileName;
     // Use conventional camelCase for binder compatibility: imageFile
     private MultipartFile imageFile;
-    private ImageState state;
+        private ImageState state;
 
-    public enum ImageState {
-        CREATE,
-        UPDATE,
-        REPLACE,
-        DELETE,
-        KEEP
-    }
+        public enum ImageState {
+            CREATE,
+            UPDATE,
+            REPLACE,
+            DELETE,
+            KEEP
+        }
 
     //จารเค้าใช้เป็น order เลยกันไว้้
     public void setOrder(Integer order) { this.imageViewOrder = order; }
@@ -30,7 +30,7 @@ public class SaleItemImageRequest {
     public void setStatus(String status) {
         if (status == null) return;
         switch (status.trim().toUpperCase()) {
-            case "NEW" -> this.state = ImageState.CREATE;      // add new image
+            case "CREATE" -> this.state = ImageState.CREATE;      // add new image
             case "ONLINE", "REPLACE" -> this.state = ImageState.REPLACE; // replace existing file
             case "UPDATE" -> this.state = ImageState.UPDATE;   // move/reorder only
             case "DELETE" -> this.state = ImageState.DELETE;   // delete

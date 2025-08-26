@@ -32,11 +32,11 @@ public class UserController {
 
     @PostMapping(value = "v2/user/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
-                                                         @RequestPart(value = "front",required = false) MultipartFile front,
-                                                         @RequestPart(value = "back" ,required = false)  MultipartFile back) {
-        if("seller".equalsIgnoreCase(userDto.getRole())){
+                                      @RequestPart(value = "front", required = false) MultipartFile front,
+                                      @RequestPart(value = "back", required = false) MultipartFile back) {
+        if ("seller".equalsIgnoreCase(userDto.getRole())) {
             userDto.setRole("seller");
-            User newUser = userService.registerSeller(userDto,front,back);
+            User newUser = userService.registerSeller(userDto, front, back);
             ResponseSellerDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerDto.class);
             responseSellerDto.setNickname(newUser.getNickname());
             responseSellerDto.setPassword(newUser.getPassword());
@@ -44,9 +44,9 @@ public class UserController {
             responseSellerDto.setFullname(newUser.getFullname());
             responseSellerDto.setRole(newUser.getRole());
             responseSellerDto.setStatus(newUser.getStatus());
-            return ResponseEntity.ok(responseSellerDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseSellerDto);
         }
-        if("buyer".equalsIgnoreCase(userDto.getRole())){
+        if ("buyer".equalsIgnoreCase(userDto.getRole())) {
             userDto.setRole("buyer");
             userDto.setMobileNumber(null);
             userDto.setBankAccountNumber(null);
@@ -54,7 +54,7 @@ public class UserController {
             userDto.setNationalIdNumber(null);
             User newUser = userService.registerBuyer(userDto);
             ResponseBuyerDto responseUserDto = modelMapper.map(newUser, ResponseBuyerDto.class);
-            return ResponseEntity.ok(responseUserDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDto);
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

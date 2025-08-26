@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -228,7 +227,7 @@ public class SaleItemService {
         });
 
         // รีเรียงลำดับหลังลบ
-        List<SaleItemImage> currentImages = saleItem.getSaleItemImages().stream().sorted(Comparator.comparing(SaleItemImage::getImageViewOrder)).collect(Collectors.toList());
+        List<SaleItemImage> currentImages = saleItem.getSaleItemImages().stream().sorted(Comparator.comparing(SaleItemImage::getImageViewOrder)).toList();
 
         for (int i = 0; i < currentImages.size(); i++) {
             currentImages.get(i).setImageViewOrder(i + 1);
@@ -244,7 +243,7 @@ public class SaleItemService {
                     newImage.setSaleItem(saleItem);
                     newImage.setFileName(newFileName);
                     newImage.setOgFileName(req.getImageFile().getOriginalFilename());
-
+                    System.out.println("Monkeyasdasdasdad");
                     // ถ้า request ไม่ได้ส่ง imageViewOrder → ให้ต่อท้าย
                     int nextOrder;
                     if (req.getImageViewOrder() == null || req.getImageViewOrder() <= 0) {

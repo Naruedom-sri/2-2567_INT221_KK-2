@@ -151,7 +151,6 @@ const removeImageAt = (index) => {
   } else if (index <= selectedMainIndex.value) {
     selectedMainIndex.value = Math.max(0, selectedMainIndex.value - 1);
   }
-  console.log(imgRm[0]);
   handleUpdateImage(
     imgRm[0],
     imgRm[0].state !== "CREATE" ? "DELETE" : "CREATE"
@@ -329,31 +328,29 @@ const checkUpdatedFiled = () => {
 const addUpdateNewSaleItem = async () => {
   try {
     const formData = new FormData();
-    formData.append("model", model.value);
-    formData.append("brandId", brandItem.value.id);
-    formData.append("description", description.value);
-    formData.append("price", price.value);
-    formData.append("ramGb", ramGb.value !== undefined ? ramGb.value : "");
-    formData.append(
-      "screenSizeInch",
-      screenSizeInch.value !== undefined ? screenSizeInch.value : ""
-    );
-    formData.append(
-      "quantity",
-      quantity.value !== undefined ? quantity.value : ""
-    );
-    formData.append(
-      "storageGb",
-      storageGb.value !== undefined ? storageGb.value : ""
-    );
-    formData.append("color", color.value !== undefined ? color.value : "");
     if (!props.isEditing) {
+      formData.append("model", model.value);
+      formData.append("brandId", brandItem.value.id);
+      formData.append("description", description.value);
+      formData.append("price", price.value);
+      formData.append("ramGb", ramGb.value !== undefined ? ramGb.value : "");
+      formData.append(
+        "screenSizeInch",
+        screenSizeInch.value !== undefined ? screenSizeInch.value : ""
+      );
+      formData.append(
+        "quantity",
+        quantity.value !== undefined ? quantity.value : ""
+      );
+      formData.append(
+        "storageGb",
+        storageGb.value !== undefined ? storageGb.value : ""
+      );
+      formData.append("color", color.value !== undefined ? color.value : "");
       imageItems.value.forEach((image) => {
         formData.append("images", image.file);
       });
     } else {
-      console.log("main", imageItems.value);
-      console.log("Edit", imageEditList.value);
       for (const img of imageItems.value) {
         const res = await fetch(img.url);
         const blob = await res.blob();
@@ -372,29 +369,71 @@ const addUpdateNewSaleItem = async () => {
         // ถ้า state เท่ากัน → ใช้ priority ต่อ
         return a.priority - b.priority;
       });
-      console.log("after sort: ", imageEditList.value);
-      formData.append("imageInfos".imageEditList.value);
+      if (model.value) {
+        formData.append("saleItem.model", model.value);
+      }
+      if (brandItem.value?.id) {
+        formData.append("saleItem.brandId", brandItem.value.id);
+      }
+      if (description.value) {
+        formData.append("saleItem.description", description.value);
+      }
+      if (price.value) {
+        formData.append("saleItem.price", price.value);
+      }
+      if (ramGb.value != null) {
+        formData.append("saleItem.ramGb", ramGb.value);
+      }
+      if (screenSizeInch.value != null) {
+        formData.append("saleItem.screenSizeInch", screenSizeInch.value);
+      }
+      if (quantity.value != null) {
+        formData.append("saleItem.quantity", quantity.value);
+      }
+      if (storageGb.value != null) {
+        formData.append("saleItem.storageGb", storageGb.value);
+      }
+      if (color.value) {
+        formData.append("saleItem.color", color.value);
+      }
+      console.log(imageEditList.value);
+      imageEditList.value.forEach((img, index) => {
+        formData.append(`imageInfos[${index}].status`, img.state);
+        if (img.fileName && img.state !== "CREATE") {
+          formData.append(`imageInfos[${index}].fileName`, img.fileName);
+        }
+        if (img.imageViewOrder !== undefined && img.imageViewOrder !== null) {
+          formData.append(
+            `imageInfos[${index}].imageViewOrder`,
+            img.imageViewOrder.toString()
+          );
+        }
+        if (img.imageFile) {
+          formData.append(`imageInfos[${index}].imageFile`, img.imageFile);
+          console.log("monkey");
+        }
+      });
     }
 
-    // if (!props.isEditing) {
-    //   const data = await createDataWithFile(
-    //     `${BASE_API_DOMAIN}/v2/sale-items`,
-    //     formData
-    //   );
-    //   if (data) {
-    //     statusStore.setStatusAndMethod("add", 201);
-    //   }
-    // } else {
-    //   const data = await updateDataWithFile(
-    //     `${BASE_API_DOMAIN}/v2/sale-items`,
-    //     itemId,
-    //     formData
-    //   );
-    //   if (data) {
-    //     statusStore.setStatusAndMethod("update", 200);
-    //   }
-    // }
-    // goBackToPreviousPage();
+    if (!props.isEditing) {
+      const data = await createDataWithFile(
+        `${BASE_API_DOMAIN}/v2/sale-items`,
+        formData
+      );
+      if (data) {
+        statusStore.setStatusAndMethod("add", 201);
+      }
+    } else {
+      const data = await updateDataWithFile(
+        `${BASE_API_DOMAIN}/v2/sale-items`,
+        itemId,
+        formData
+      );
+      if (data) {
+        statusStore.setStatusAndMethod("update", 200);
+      }
+    }
+    goBackToPreviousPage();
   } catch (error) {
     console.log(error);
   }
