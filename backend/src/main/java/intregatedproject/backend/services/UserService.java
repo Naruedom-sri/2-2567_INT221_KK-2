@@ -25,8 +25,8 @@ public class UserService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private FileService fileService;
-    @Autowired
-    private EmailService emailService;
+//    @Autowired
+//    private EmailService emailService;
     @Autowired
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
@@ -63,8 +63,6 @@ public class UserService {
         seller.setBankAccountNumber(userDto.getBankAccountNumber());
         seller.setBankName(userDto.getBankName());
         seller.setNationalIdNumber(userDto.getNationalIdNumber());
-//        seller.setNationalIdPhotoFront(sellerDto.getNationalIdPhotoFront());
-//        seller.setNationalIdPhotoBack(sellerDto.getNationalIdPhotoBack());
     }
 
     public User registerBuyer(RequestRegisterDto userDto) {
@@ -87,17 +85,17 @@ public class UserService {
         if (userDto.getId() != null && sellerRepository.existsById(userDto.getId())) {
             throw new RuntimeException("Seller with id " + userDto.getId() + " already exists");
         }
-        // ตรวจสอบ role
+
         if (!"seller".equalsIgnoreCase(userDto.getRole())) {
             throw new RuntimeException("Role must be 'seller'");
+
+        }if (frontFile == null || backFile == null) {
+            throw new RuntimeException("National ID front/back files are required");
         }
+
         var newUser = new User();
         var newSeller = new Seller();
         convertToEntitySeller(userDto,newUser,newSeller);
-
-        if (frontFile == null || backFile == null) {
-            throw new RuntimeException("National ID front/back files are required");
-        }
 
         String storedFront = fileService.store(frontFile);
         String storedBack = fileService.store(backFile);
