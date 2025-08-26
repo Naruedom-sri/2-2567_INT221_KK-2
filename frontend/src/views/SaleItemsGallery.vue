@@ -411,6 +411,7 @@ onMounted(() => {
   if (savedMinPrice) minPrice.value = parseInt(savedMinPrice);
   if (savedMaxPrice) maxPrice.value = parseInt(savedMaxPrice);
   if (savedSearchContent) searchContent.value = savedSearchContent;
+  console.log("searchContent", searchContent.value);
   getAllBrand();
   getAllSaleItemBySortAndFilter();
   setAnimation();

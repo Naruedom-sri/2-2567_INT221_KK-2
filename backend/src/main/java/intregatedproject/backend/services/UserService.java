@@ -27,8 +27,10 @@ public class UserService {
     private FileService fileService;
 //    @Autowired
 //    private EmailService emailService;
+
     @Autowired
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
+
 
 
     public List<User> getAllUsers() {

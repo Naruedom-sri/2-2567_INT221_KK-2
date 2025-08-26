@@ -44,13 +44,55 @@ const getAllData = async (url) => {
   return data;
 };
 
+// const getAllDataWithParam = async (url, params) => {
+//   const response = await fetch(`${url}?${params.toString()}`);
+//   let data;
+//   if (!response.ok) {
+//     data = await response.text();
+//     throw new Error(
+//       `Can't update data with status: ${
+//         response.status
+//       } and with message: ${JSON.stringify(data)}`
+//     );
+//   }
+//   data = await response.json();
+//   return data;
+// };
 const getAllDataWithParam = async (url, params) => {
-  const response = await fetch(`${url}?${params.toString()}`);
-  if (!response.ok)
-    throw new Error(`Can't fetch data with status : ${response.status}`);
-  const data = await response.json();
-  return data;
+  try {
+    // handle params ที่เป็น null/undefined
+    const queryString = params ? `?${params.toString()}` : "";
+    const response = await fetch(`${url}${queryString}`);
+
+    let data;
+    const contentType = response.headers.get("content-type");
+
+    if (!response.ok) {
+      // ถ้าไม่ ok → เช็คว่า response เป็น json หรือ text
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      throw new Error(
+        `Can't fetch data. Status: ${response.status}, Message: ${JSON.stringify(data)}`
+      );
+    }
+
+    // ถ้า ok → พยายาม parse json ถ้า parse ไม่ได้ fallback เป็น text
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+    return data;
+  } catch (err) {
+    console.error("getAllDataWithParam error:", err);
+    throw err; // โยนต่อให้ caller จัดการ
+  }
 };
+
 
 const createData = async (url, newData) => {
   const statusStore = useSaleItemStatusStore();
