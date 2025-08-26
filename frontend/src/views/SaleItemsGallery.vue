@@ -658,7 +658,7 @@ onUnmounted(() => {
           <img
             v-if="imageUrlList[index]"
             :src="imageUrlList[index]"
-            class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+            class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
           />
           <img
             v-else

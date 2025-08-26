@@ -21,32 +21,24 @@ const route = useRouter();
 const showDialog = ref(false);
 const imageUrlList = ref([]);
 const mainImage = ref(null);
+
 const getSaleItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
-    item.value.saleItemImages.forEach((img) => {
-      console.log(img);
-      getImageOfItem(itemId, img.imageViewOrder);
-    });
+    if (item.value.saleItemImages.length !== 0) {
+      for (const img of item.value.saleItemImages) {
+        const imgUrl = await getImageOfData(
+          `${BASE_API_DOMAIN}/v2/sale-items`,
+          itemId,
+          img.imageViewOrder
+        );
+        imageUrlList.value.push(imgUrl); // set ตาม index
+      }
+      mainImage.value = imageUrlList.value[0];
+    }
   } catch (error) {
     console.log(error);
     item.value = null;
-  }
-};
-
-const getImageOfItem = async (itemId, imgViewOrder) => {
-  try {
-    const imgUrl = await getImageOfData(
-      `${BASE_API_DOMAIN}/v2/sale-items`,
-      itemId,
-      imgViewOrder
-    );
-    console.log(imgUrl);
-    imageUrlList.value.push(imgUrl);
-    mainImage.value = imageUrlList.value[0];
-  } catch (error) {
-    console.log(error);
-    imageUrlList.value = [];
   }
 };
 
@@ -55,6 +47,8 @@ const deleteSaleItem = async () => {
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
     statusStore.setStatusAndMethod("delete", status);
+    sessionStorage.setItem("indexPage", String(0));
+    sessionStorage.setItem("tempIndexPage", String(0));
     route.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);

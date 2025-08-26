@@ -90,7 +90,7 @@ const emit = defineEmits([
     </div>
     <p
       @click="emit('toggleIsShow', props.class)"
-      class="w-4 pt-0.5  bg-[rgba(22,22,23,255)]"
+      class="w-4 pt-1.5  bg-[rgba(22,22,23,255)]"
       :class="[props.isShow ? 'h-[240.5px] pt-3' : 'h-10'], props.isShow && props.class === 'price'  ? 'rounded-tr':'rounded-r'"
     >
       {{ props.isShow ? "&#8963" : '&#8964' }}
