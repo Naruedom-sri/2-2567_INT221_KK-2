@@ -86,7 +86,6 @@ const getAllDataWithParam = async (url, params) => {
     } else {
       data = await response.text();
     }
-
     return data;
   } catch (err) {
     console.error("getAllDataWithParam error:", err);
