@@ -1,12 +1,10 @@
 <script setup>
 import { computed, ref } from "vue";
 
-// Props: parent can indicate submitting state to disable the button and prevent duplicates
 const props = defineProps({
   submitting: { type: Boolean, default: false },
 });
 
-// local state for the buyer form
 const buyer = ref({
   nickname: "",
   email: "",
@@ -14,7 +12,6 @@ const buyer = ref({
   fullname: "",
 });
 
-// validation rules
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 const isValid = computed(() => {
   const b = buyer.value;
@@ -27,12 +24,10 @@ const isValid = computed(() => {
   );
 });
 
-// Emits to parent
 const emit = defineEmits(["submit", "cancel"]);
 
 function onSubmit() {
   if (!isValid.value || props.submitting) return;
-  // emit plain object
   emit("submit", { ...buyer.value, accountType: "BUYER" });
 }
 </script>
