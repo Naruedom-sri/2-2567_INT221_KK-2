@@ -40,7 +40,7 @@ function onSubmit() {
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
     <div class="flex flex-col">
-      <label for="name" class="mb-1">Nickname</label>
+      <label for="name" class="mb-1 flex gap-2 items-center">Nickname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -50,7 +50,7 @@ function onSubmit() {
     </div>
 
     <div class="flex flex-col">
-      <label for="email" class="mb-1">Email</label>
+      <label for="email" class="mb-1 flex gap-2 items-center">Email <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="email"
@@ -60,7 +60,7 @@ function onSubmit() {
     </div>
 
     <div class="flex flex-col">
-      <label for="password" class="mb-1">Password</label>
+      <label for="password" class="mb-1 flex gap-2 items-center">Password <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="password"
@@ -73,7 +73,7 @@ function onSubmit() {
     </div>
 
     <div class="flex flex-col">
-      <label for="fullname" class="mb-1">Fullname</label>
+      <label for="fullname" class="mb-1 flex gap-2 items-center">Fullname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"

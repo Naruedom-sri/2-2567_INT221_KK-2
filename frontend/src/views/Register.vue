@@ -18,41 +18,43 @@ const handleSubmit = async (payload) => {
     statusStore.clearStatusAndMethod();
 
     if (accountType.value === "buyer") {
-      const body = {
-        accountType: "BUYER",
-        nickname: payload.nickname,
-        email: payload.email,
-        password: payload.password,
-        fullname: payload.fullname,
-      };
-      const res = await fetch(`${BASE_API_DOMAIN}/v1/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-  statusStore.setStatusAndMethod("register", res.status);
-      if (res.status !== 201) throw new Error("Register failed");
-    } else {
-      // seller: include additional fields and photos
       const form = new FormData();
-      form.append("accountType", "SELLER");
-      form.append("nickname", payload.seller.value.nickname);
-      form.append("email", payload.seller.value.contactEmail);
-      form.append("password", payload.seller.value.password);
-      form.append("fullname", payload.seller.value.fullname);
-      form.append("mobile", payload.seller.value.mobile);
-      form.append("bankAccount", payload.seller.value.bankAccount);
-      form.append("bankName", payload.seller.value.bankName);
-      form.append("nationalId", payload.seller.value.nationalCard);
-      if (payload.files?.front) form.append("nationalIdFront", payload.files.front);
-      if (payload.files?.back) form.append("nationalIdBack", payload.files.back);
-
-      const res = await fetch(`${BASE_API_DOMAIN}/v1/register`, {
+      form.append("role", "buyer");
+      form.append("nickname", payload.nickname);
+      form.append("email", payload.email);
+      form.append("password", payload.password);
+      form.append("fullname", payload.fullname);
+      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
         method: "POST",
         body: form,
       });
-  statusStore.setStatusAndMethod("register", res.status);
-      if (res.status !== 201) throw new Error("Register failed");
+      statusStore.setStatusAndMethod("register", res.status);
+      if (!res.ok) throw new Error("Register failed");
+    } else {
+      const form = new FormData();
+      form.append("role", "seller");
+      // payload.seller is a plain object from SellerForm, not a ref
+      form.append("nickname", payload.seller.nickname);
+      form.append("email", payload.seller.contactEmail);
+      form.append("password", payload.seller.password);
+      form.append("fullname", payload.seller.fullname);
+      // normalize mobile by removing hyphens before sending
+      const sanitizedMobile = (payload.seller.mobile ?? "")
+        .toString()
+        .replace(/-/g, "");
+      form.append("mobileNumber", sanitizedMobile);
+      form.append("bankAccountNumber", payload.seller.bankAccount);
+      form.append("bankName", payload.seller.bankName);
+      form.append("nationalIdNumber", payload.seller.nationalCard);
+      if (payload.files?.front) form.append("front", payload.files.front);
+      if (payload.files?.back) form.append("back", payload.files.back);
+
+      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
+        method: "POST",
+        body: form,
+      });
+      statusStore.setStatusAndMethod("register", res.status);
+      if (!res.ok) throw new Error("Register failed");
     }
     // success: redirect to sale item gallery
     router.push({ name: "SaleItemsGallery" });
@@ -70,9 +72,7 @@ const handleCancel = () => router.push({ name: "SaleItemsGallery" });
 <template>
   <div class="min-h-screen grid place-items-center bg-gray-0">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6">
-      <RouterLink 
-        :to="{ name: 'SaleItemsGallery' }"
-      >
+      <RouterLink :to="{ name: 'SaleItemsGallery' }">
         <img
           src="/src/assets/imgs/close-symbol.png"
           alt="close symbol"
@@ -107,12 +107,12 @@ const handleCancel = () => router.push({ name: "SaleItemsGallery" });
         </button>
       </div>
 
-  <component
-    :is="accountType === 'buyer' ? BuyerForm : SellerForm"
-    :submitting="isSubmitting"
-    @submit="handleSubmit"
-    @cancel="handleCancel"
-  />
+      <component
+        :is="accountType === 'buyer' ? BuyerForm : SellerForm"
+        :submitting="isSubmitting"
+        @submit="handleSubmit"
+        @cancel="handleCancel"
+      />
     </div>
   </div>
 </template>
