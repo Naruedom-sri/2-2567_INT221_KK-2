@@ -12,9 +12,9 @@ const handleSearchClick = (isClear) => {
     searchSaleItem.value = "";
     sessionStorage.setItem("searchContent", searchSaleItem.value);
     emit("searchSaleItem", searchSaleItem.value);
-    isSearch.value = !isSearch.value; 
+    isSearch.value = !isSearch.value;
   } else if (route.name === "SaleItemsGallery") {
-    console.log(searchSaleItem.value)
+    console.log(searchSaleItem.value);
     emit("searchSaleItem", searchSaleItem.value);
     isSearch.value = !isSearch.value;
   } else {
@@ -94,30 +94,44 @@ onMounted(() => {
   </div>
   <div
     v-if="isSearch"
-    class="box-search absolute w-full h-screen backdrop-blur-lg z-50 text-white"
+    class="box-search absolute w-full h-screen backdrop-blur-lg text-xs z-50 text-white"
   >
-    <div class="bg-[rgba(22,22,23,255)] h-1/2">
-      <div class="w-lg mx-auto py-4 flex justify-between items-center gap-2">
-        <input
-          @keyup.enter="handleSearchClick(false)"
-          v-model.trim="searchSaleItem"
-          type="text"
-          placeholder="Search"
-          class="itbms-search-text w-full outline-none text-2xl"
-        />
-        <button
-          @click="handleSearchClick(true)"
-          class="itbms--search-clear-button w-7 h-7 rounded-full bg-white text-black hover:text-white hover:bg-[#0d47a1]"
-        >
-          x
-        </button>
-      </div>
-      <div class="flex justify-center">
-        <div class="w-96">
-          <h1 class="text-center border-r">Model</h1>
+    <div
+      class="bg-black transition-all duration-300"
+      :class="[isSearch ? 'h-1/2' : 'h-0']"
+    >
+      <div class="w-md mx-auto flex flex-col items-center">
+        <div class="w-full py-10 flex justify-between items-center gap-2">
+          <input
+            @keyup.enter="handleSearchClick(false)"
+            v-model.trim="searchSaleItem"
+            type="text"
+            placeholder="Search itbms.com"
+            class="itbms-search-text w-full outline-none text-2xl"
+          />
+          <button
+            @click="handleSearchClick(true)"
+            class="itbms--search-clear-button w-7 h-7 rounded-full bg-white text-black hover:text-white hover:bg-[#0d47a1]"
+          >
+            x
+          </button>
         </div>
-        <div class="w-96">
-          <h1 class="text-center">Color</h1>
+        <div class="self-start text-white/70 space-y-4">
+          <h1>Popular search</h1>
+          <div class="space-y-4 mx-2">
+            <p class="hover:text-white duration-200 cursor-pointer">
+              > iPhone 16 Pro Max
+            </p>
+            <p class="hover:text-white duration-200 cursor-pointer">
+              > iPhone 15 Pro
+            </p>
+            <p class="hover:text-white duration-200 cursor-pointer">
+              > iPhone 13
+            </p>
+            <p class="hover:text-white duration-200 cursor-pointer">
+              > iPhone 14 Plus
+            </p>
+          </div>
         </div>
       </div>
     </div>

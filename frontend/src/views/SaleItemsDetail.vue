@@ -47,6 +47,8 @@ const deleteSaleItem = async () => {
   try {
     const status = await deleteData(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
     statusStore.setStatusAndMethod("delete", status);
+    sessionStorage.setItem("indexPage", String(0));
+    sessionStorage.setItem("tempIndexPage", String(0));
     route.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
