@@ -11,7 +11,7 @@ CREATE TABLE brands (
     updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE sale_items (
+CREATE TABLE saleItems (
     id INT AUTO_INCREMENT PRIMARY KEY,
     brandId INT NOT NULL,
     model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
@@ -50,7 +50,7 @@ INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (20, 'Nothing', 'United Kingdom', 'https://nothing.tech', 1);
 
 
-INSERT INTO sale_items (id, brandId, model, description, quantity, price, screenSizeInch, ramGb, storageGb, color) VALUES
+INSERT INTO saleItems (id, brandId, model, description, quantity, price, screenSizeInch, ramGb, storageGb, color) VALUES
 (1, 2, 'iPhone 14 Pro Max', 'ไอโฟนเรือธงรุ่นล่าสุด มาพร้อม Dynamic Island จอใหญ่สุดในตระกูล กล้องระดับโปร', 5, 42900, 6.7, 6, 512, 'Space Black'),
 (2, 2, 'iPhone 14', 'ไอโฟนรุ่นใหม่ล่าสุด รองรับ 5G เร็วแรง ถ่ายภาพสวยทุกสภาพแสง', 8, 29700, 6.1, 6, 256, 'Midnight'),
 (3, 2, 'iPhone 13 Pro', 'ไอโฟนรุ่นโปร จอ ProMotion 120Hz กล้องระดับมืออาชีพ', 3, 33000, 6.1, 6, 256, 'Sierra Blue'),
@@ -118,13 +118,27 @@ CREATE TABLE IF NOT EXISTS saleItemImage (
     fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
     imageViewOrder INT ,
     ogFileName VARCHAR(50),
-    saleItem_id int not null,
-	FOREIGN KEY (saleItem_id) REFERENCES sale_items(id)
+    saleItemId int not null,
+	FOREIGN KEY (saleItemId) REFERENCES saleItems(id)
 );
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
+('img1.jpg', 1, 'org1.jpg', 1),
+('img0.jpg', 0, 'org0.jpg', 1),
+('img3.jpg', 2, 'org3.jpg', 1),
+('img2.jpg', 3, 'org2.jpg', 1);
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
+('img4.jpg', 1, '2_original_main.jpeg', 2),
+('img5.jpg', 2, '2_original_package.jpg', 2);
+
+INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
+('img6.jpg', 1, '3_original_main.jpg', 3);
+
 
 CREATE TABLE users (
     userId int AUTO_INCREMENT PRIMARY KEY,
-    nickname VARCHAR(50) NOT NULL UNIQUE,
+    nickname VARCHAR(50) NOT NULL,
     fullname VARCHAR(40) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -143,26 +157,24 @@ CREATE TABLE buyers (
 CREATE TABLE sellers (
 	sellerId INT AUTO_INCREMENT PRIMARY KEY AUTO_INCREMENT,
     userId int NOT NULL UNIQUE, 
-    mobile_number VARCHAR(20) NOT NULL,
-    bank_account_number VARCHAR(50) NOT NULL,
-    bank_name VARCHAR(50) NOT NULL,
-    national_id_number VARCHAR(20) NOT NULL,
-    national_id_photo_front VARCHAR(255) NOT NULL,
-    national_id_photo_back VARCHAR(255) NOT NULL,
-    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	updatedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,	
+    mobileNumber VARCHAR(10) NOT NULL UNIQUE,
+    bankAccountNumber VARCHAR(50) NOT NULL UNIQUE,
+    bankName VARCHAR(50) NOT NULL,
+    nationalIdNumber VARCHAR(13) NOT NULL UNIQUE,
+    nationalIdPhotoFront VARCHAR(255) NOT NULL,
+    nationalIdPhotoBack VARCHAR(255) NOT NULL,
     CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
-CREATE TABLE email_verification_tokens (
+CREATE TABLE emailVerificationTokens (
     id int AUTO_INCREMENT PRIMARY KEY,
     userId int NOT NULL UNIQUE,
     token VARCHAR(255) NOT NULL UNIQUE,
-    expiry_time TIMESTAMP NOT NULL,
+    expiryTime TIMESTAMP NOT NULL,
     createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_token_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_tokens_userid ON email_verification_tokens(userId);
-CREATE INDEX idx_tokens_expiry ON email_verification_tokens(expiry_time);
+CREATE INDEX idx_tokens_userid ON emailVerificationTokens(userId);
+CREATE INDEX idx_tokens_expiry ON emailVerificationTokens(expiryTime);

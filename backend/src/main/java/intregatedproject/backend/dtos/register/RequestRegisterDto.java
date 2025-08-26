@@ -2,7 +2,6 @@ package intregatedproject.backend.dtos.register;
 
 import lombok.Data;
 
-
 @Data
 public class RequestRegisterDto {
     private Integer id;

@@ -14,9 +14,10 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "email_verification_tokens")
+@Table(name = "emailverificationtokens")
 public class EmailVerificationToken {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -32,7 +33,7 @@ public class EmailVerificationToken {
     private String token;
 
     @NotNull
-    @Column(name = "expiry_time", nullable = false)
+    @Column(name = "expiryTime", nullable = false)
     private Instant expiryTime;
 
     @ColumnDefault("CURRENT_TIMESTAMP")

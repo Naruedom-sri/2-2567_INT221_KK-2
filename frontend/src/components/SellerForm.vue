@@ -81,7 +81,7 @@ function onSubmit() {
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
     <div class="flex flex-col">
-      <label for="nickname" class="mb-1">Nickname</label>
+      <label for="nickname" class="mb-1 flex gap-2 items-center">Nickname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -90,7 +90,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerEmail" class="mb-1">Email</label>
+      <label for="sellerEmail" class="mb-1 flex gap-2 items-center">Email <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="email"
@@ -99,7 +99,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerPassword" class="mb-1">Password</label>
+      <label for="sellerPassword" class="mb-1 flex gap-2 items-center">Password <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="password"
@@ -111,7 +111,7 @@ function onSubmit() {
       </small>
     </div>
     <div class="flex flex-col">
-      <label for="sellerFullname" class="mb-1">Fullname</label>
+      <label for="sellerFullname" class="mb-1 flex gap-2 items-center">Fullname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -120,7 +120,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerMobile" class="mb-1">Mobile</label>
+      <label for="sellerMobile" class="mb-1 flex gap-2 items-center">Mobile <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="tel"
@@ -129,7 +129,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerBankAccount" class="mb-1">Bank Account No</label>
+      <label for="sellerBankAccount" class="mb-1 flex gap-2 items-center">Bank Account No <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -138,7 +138,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerBankName" class="mb-1">Bank Name</label>
+      <label for="sellerBankName" class="mb-1 flex gap-2 items-center">Bank Name <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -147,7 +147,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-col">
-      <label for="sellerNationalCard" class="mb-1">National Card No</label>
+      <label for="sellerNationalCard" class="mb-1 flex gap-2 items-center">National Card No <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -156,7 +156,7 @@ function onSubmit() {
       />
     </div>
     <div class="flex flex-row gap-12">
-      <label class="flex items-center">National Card Photo</label>
+      <label class="flex items-center">National Card Photo <span><img src="../assets/imgs/asterisk.png" class="w-4"></span></label>
       <div class="flex flex-row gap-5">
         <label
           class="relative mx-auto w-50 h-30 border-1 border-black/10 rounded-xl flex items-center justify-center text-center text-black/60 bg-white cursor-pointer overflow-hidden"

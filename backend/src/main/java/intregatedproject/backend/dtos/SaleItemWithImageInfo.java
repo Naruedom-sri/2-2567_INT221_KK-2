@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class  SaleItemWithImageInfo {
+public class        SaleItemWithImageInfo {
     private RequestSaleItemDto saleItem;
     private List<SaleItemImageRequest> imageInfos;
 }

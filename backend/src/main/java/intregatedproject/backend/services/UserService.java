@@ -2,7 +2,6 @@ package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.register.RequestRegisterDto;
 import intregatedproject.backend.entities.Buyer;
-import intregatedproject.backend.entities.EmailVerificationToken;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
@@ -14,9 +13,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService {
