@@ -152,15 +152,15 @@ CREATE TABLE sellers (
     CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
-CREATE TABLE emailVerificationTokens (
-    id int AUTO_INCREMENT PRIMARY KEY,
-    userId int NOT NULL UNIQUE,
-    token VARCHAR(255) NOT NULL UNIQUE,
-    expiryTime TIMESTAMP NOT NULL,
-    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_token_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
-);
+-- CREATE TABLE emailVerificationTokens (
+--     id int AUTO_INCREMENT PRIMARY KEY,
+--     userId int NOT NULL UNIQUE,
+--     token VARCHAR(255) NOT NULL UNIQUE,
+--     expiryTime TIMESTAMP NOT NULL,
+--     createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_token_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+-- );
 
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_tokens_userid ON emailVerificationTokens(userId);
-CREATE INDEX idx_tokens_expiry ON emailVerificationTokens(expiryTime);
+-- CREATE INDEX idx_users_email ON users(email);
+-- CREATE INDEX idx_tokens_userid ON emailVerificationTokens(userId);
+-- CREATE INDEX idx_tokens_expiry ON emailVerificationTokens(expiryTime);
