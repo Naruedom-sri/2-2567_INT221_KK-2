@@ -122,20 +122,6 @@ CREATE TABLE IF NOT EXISTS saleItemImage (
 	FOREIGN KEY (saleItemId) REFERENCES saleItems(id)
 );
 
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
-('img1.jpg', 1, 'org1.jpg', 1),
-('img0.jpg', 0, 'org0.jpg', 1),
-('img3.jpg', 2, 'org3.jpg', 1),
-('img2.jpg', 3, 'org2.jpg', 1);
-
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
-('img4.jpg', 1, '2_original_main.jpeg', 2),
-('img5.jpg', 2, '2_original_package.jpg', 2);
-
-INSERT INTO saleItemImage (fileName, imageViewOrder, ogFileName, saleItemId) VALUES
-('img6.jpg', 1, '3_original_main.jpg', 3);
-
-
 CREATE TABLE users (
     userId int AUTO_INCREMENT PRIMARY KEY,
     nickname VARCHAR(50) NOT NULL,

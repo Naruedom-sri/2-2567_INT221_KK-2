@@ -22,7 +22,6 @@ const {
   params: { itemId },
 } = useRoute();
 const statusStore = useSaleItemStatusStore();
-const imageEditList = ref([]);
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
@@ -63,6 +62,8 @@ const validInput = ref(false);
 const fileInputRef = ref(null);
 // Single source of truth for images in UI: [{ name, url, file, size }]
 const imageItems = ref([]);
+const imageEditList = ref([]);
+const tempImageList = ref([]);
 const uploadError = ref("");
 const priority = ref(0);
 
@@ -219,21 +220,6 @@ const checkScreenSize = () => {
   }
 };
 
-const checkValidateInput = () => {
-  validInput.value =
-    brandPass.value &&
-    modelPass.value &&
-    colorPass.value &&
-    descriptionPass.value &&
-    pricePass.value &&
-    quantityPass.value &&
-    ramGbPass.value &&
-    storageGbPass.value &&
-    screenSizeInchPass.value
-      ? true
-      : false;
-};
-
 const getAllBrand = async () => {
   brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
   brands.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -269,24 +255,40 @@ const checkIsEditing = async () => {
       descriptionPass.value = true;
       pricePass.value = true;
 
-      item.value.saleItemImages.forEach(async (img) => {
-        const url = await getImageOfData(
+      for (const img of item.value.saleItemImages) {
+        const imgUrl = await getImageOfData(
           `${BASE_API_DOMAIN}/v2/sale-items`,
-          item.value.id,
+          itemId,
           img.imageViewOrder
         );
         imageItems.value.push({
           fileName: img.fileName,
-          url: url,
+          url: imgUrl,
           name: img.ogFileName,
           imageViewOrder: img.imageViewOrder,
         });
-      });
+      }
     }
+    tempImageList.value = [...imageItems.value];
   } catch (error) {
     console.log(error);
     item.value = null;
   }
+};
+
+const checkValidateInput = () => {
+  validInput.value =
+    brandPass.value &&
+    modelPass.value &&
+    colorPass.value &&
+    descriptionPass.value &&
+    pricePass.value &&
+    quantityPass.value &&
+    ramGbPass.value &&
+    storageGbPass.value &&
+    screenSizeInchPass.value
+      ? true
+      : false;
 };
 
 const checkAllNonOptionalFiled = () => {
@@ -307,7 +309,7 @@ const checkAllNonOptionalFiled = () => {
 };
 
 const checkUpdatedFiled = () => {
-  if (
+  let updated =
     model.value !== item.value.model ||
     brandItem.value?.id !== item.value.brand?.id ||
     description.value !== item.value.description ||
@@ -316,13 +318,32 @@ const checkUpdatedFiled = () => {
     screenSizeInch.value !== item.value.screenSizeInch ||
     quantity.value !== item.value.quantity ||
     storageGb.value !== item.value.storageGb ||
-    color.value !== item.value.color ||
-    imageItems.value.length !== item.value.saleItemImages?.length
-  ) {
-    isUpdatedFiled.value = true;
-  } else {
-    isUpdatedFiled.value = false;
+    color.value !== item.value.color;
+
+  // ==== เช็คภาพ ====
+  if (!updated) {
+    // ความยาวต่างกัน -> มีการเพิ่ม/ลบ
+    if (imageItems.value.length !== tempImageList.value.length) {
+      updated = true;
+    } else {
+      // เทียบทีละภาพ
+      for (let i = 0; i < imageItems.value.length; i++) {
+        const curr = imageItems.value[i];
+        const orig = tempImageList.value[i];
+
+        // ถ้า url ไม่ตรง (เช่น อัพโหลดใหม่) หรือ order เปลี่ยน
+        if (
+          curr.url !== orig.url ||
+          curr.imageViewOrder !== orig.imageViewOrder ||
+          curr.name !== orig.name
+        ) {
+          updated = true;
+          break;
+        }
+      }
+    }
   }
+  isUpdatedFiled.value = updated;
 };
 
 const addUpdateNewSaleItem = async () => {
@@ -396,7 +417,6 @@ const addUpdateNewSaleItem = async () => {
       if (color.value) {
         formData.append("saleItem.color", color.value);
       }
-      console.log(imageEditList.value);
       imageEditList.value.forEach((img, index) => {
         formData.append(`imageInfos[${index}].status`, img.state);
         if (img.fileName && img.state !== "CREATE") {
