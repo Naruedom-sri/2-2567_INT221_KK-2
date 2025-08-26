@@ -10,6 +10,7 @@ import SaleItemsGallery from "@/views/SaleItemsGallery.vue";
 import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Register from "@/views/Register.vue";
+import VerifyEmail from "@/views/VerifyEmail.vue";
 const history = createWebHistory("/kk2/");
 const routes = [
   {
@@ -31,6 +32,11 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail,
   },
   {
     path: "/sale-items/:itemId",

@@ -78,6 +78,18 @@ const getAllSaleItemBySortAndFilter = async (search = null) => {
     params.append("filterPriceLower", minPrice.value);
     params.append("filterPriceUpper", maxPrice.value);
     params.append("searchContent", searchContent.value);
+    
+    const data = await getAllDataWithParam(
+      `${BASE_API_DOMAIN}/v2/sale-items`,
+      params
+    );
+    items.value = data.content;
+    totalPage.value = data.totalPages;
+    isLastPage.value = data.last;
+    isFirstPage.value = data.first;
+    imageUrlList.value = [];
+    getImageOfAllItem();
+    setAnimationItems();
 
     sessionStorage.setItem(
       "filterBrands",
@@ -101,18 +113,6 @@ const getAllSaleItemBySortAndFilter = async (search = null) => {
     sessionStorage.setItem("minPrice", String(minPrice.value));
     sessionStorage.setItem("maxPrice", String(maxPrice.value));
     sessionStorage.setItem("searchContent", searchContent.value);
-
-    const data = await getAllDataWithParam(
-      `${BASE_API_DOMAIN}/v2/sale-items`,
-      params
-    );
-    items.value = data.content;
-    totalPage.value = data.totalPages;
-    isLastPage.value = data.last;
-    isFirstPage.value = data.first;
-    imageUrlList.value = [];
-    getImageOfAllItem();
-    setAnimationItems();
   } catch (error) {
     console.log(error);
     items.value = [];

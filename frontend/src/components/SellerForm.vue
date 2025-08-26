@@ -1,13 +1,11 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from "vue";
 
-// Props + Emits for parent consumers
 const props = defineProps({
   submitting: { type: Boolean, default: false },
 });
 const emit = defineEmits(["submit", "cancel"]);
 
-// Seller form state
 const seller = ref({
   nickname: "",
   contactEmail: "",
@@ -19,7 +17,6 @@ const seller = ref({
   nationalCard: "",
 });
 
-// National card photo state
 const cardPhotos = ref({
   frontFile: null,
   backFile: null,
@@ -27,7 +24,6 @@ const cardPhotos = ref({
   backPreview: "",
 });
 
-// basic validation per requirement
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 const isValid = computed(() => {
   const s = seller.value;
@@ -70,7 +66,6 @@ onBeforeUnmount(() => {
 
 function onSubmit() {
   if (!isValid.value || props.submitting) return;
-  // Minimal emit with current form values and files
   emit("submit", {
   seller: { ...seller.value },
   files: { front: cardPhotos.value.frontFile, back: cardPhotos.value.backFile },

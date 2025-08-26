@@ -14,11 +14,14 @@ const handleSearchClick = (isClear) => {
     emit("searchSaleItem", searchSaleItem.value);
     isSearch.value = !isSearch.value; 
   } else if (route.name === "SaleItemsGallery") {
-    console.log(searchSaleItem.value)
+    sessionStorage.setItem("indexPage", String(0));
+    sessionStorage.setItem("tempIndexPage", String(0));
     emit("searchSaleItem", searchSaleItem.value);
     isSearch.value = !isSearch.value;
   } else {
     sessionStorage.setItem("searchContent", searchSaleItem.value);
+    sessionStorage.setItem("indexPage", String(0));
+    sessionStorage.setItem("tempIndexPage", String(0));
     router.push({ name: "SaleItemsGallery" });
   }
 };
