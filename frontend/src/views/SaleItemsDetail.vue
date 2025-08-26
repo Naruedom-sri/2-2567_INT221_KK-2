@@ -25,6 +25,7 @@ const getSaleItem = async () => {
   try {
     item.value = await getDataById(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
     item.value.saleItemImages.forEach((img) => {
+      console.log(img);
       getImageOfItem(itemId, img.imageViewOrder);
     });
   } catch (error) {
@@ -40,6 +41,7 @@ const getImageOfItem = async (itemId, imgViewOrder) => {
       itemId,
       imgViewOrder
     );
+    console.log(imgUrl);
     imageUrlList.value.push(imgUrl);
     mainImage.value = imageUrlList.value[0];
   } catch (error) {
@@ -122,7 +124,9 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="detail-content-left">
-        <div class="w-xl mx-auto my-10 py-10 rounded-xl bg-[rgba(22,22,23,255)]">
+        <div
+          class="w-xl mx-auto my-10 py-10 rounded-xl bg-[rgba(22,22,23,255)]"
+        >
           <img
             v-if="mainImage !== null"
             :src="mainImage"
@@ -131,7 +135,7 @@ onUnmounted(() => {
           <img
             v-else="mainImage !== null"
             src="../assets/imgs/no-image.png"
-            class="w-72  mx-auto object-cover"
+            class="w-72 mx-auto object-cover"
           />
         </div>
         <div class="w-full flex justify-center gap-2">

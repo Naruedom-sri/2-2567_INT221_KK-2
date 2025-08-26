@@ -78,7 +78,7 @@ const createDataWithFile = async (url, formData) => {
   });
   if (response.status !== 201) {
     statusStore.setStatusAndMethod("add", response.status);
-    throw new Error(`Can't create data with status :  ${response.status}`);
+    throw new Error(`Can't create data with status: ${response.status}`);
   }
   const data = await response.json();
   return data;
@@ -87,7 +87,7 @@ const createDataWithFile = async (url, formData) => {
 const getImageOfData = async (url, itemId, imgViewOrder) => {
   const response = await fetch(`${url}/${itemId}/images/${imgViewOrder}`);
   if (!response.ok) {
-    return null;
+    throw new Error(` Can't get image with status:  ${response.status}`);
   }
   const blob = await response.blob();
   const urlImg = window.URL.createObjectURL(blob);
@@ -100,11 +100,24 @@ const updateDataWithFile = async (url, id, formData) => {
     method: "PUT",
     body: formData,
   });
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    data = await response.text(); // เผื่อ response ไม่ใช่ json
+  }
+
   if (!response.ok) {
     statusStore.setStatusAndMethod("update", response.status);
-    throw new Error(`Can't update data with status : ${response.status}`);
+    console.error("❌ Error response:", data); // log ทั้ง object ออกมาเต็มๆ
+    throw new Error(
+      `Can't update data with status: ${
+        response.status
+      } and with message: ${JSON.stringify(data)}`
+    );
   }
-  const data = await response.json();
+
   return data;
 };
 
@@ -117,5 +130,5 @@ export {
   createDataWithFile,
   getAllDataWithParam,
   getImageOfData,
-  updateDataWithFile
+  updateDataWithFile,
 };

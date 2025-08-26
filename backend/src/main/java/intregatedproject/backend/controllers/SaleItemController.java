@@ -1,5 +1,6 @@
 package intregatedproject.backend.controllers;
 
+import intregatedproject.backend.dtos.SaleItemImageRequest;
 import intregatedproject.backend.dtos.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -83,6 +85,7 @@ public class SaleItemController {
         ResponseSaleItemImageDtoV2 dto = modelMapper.map(item, ResponseSaleItemImageDtoV2.class);
         return ResponseEntity.ok(dto);
     }
+
     @GetMapping("/v2/sale-items/edit/{id}")
     public ResponseEntity<ResponseSaleItemDtoEditV2> getSaleItemByIdEditV2(@PathVariable int id) {
         SaleItem item = service.getSaleItemById(id);

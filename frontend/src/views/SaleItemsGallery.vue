@@ -78,7 +78,7 @@ const getAllSaleItemBySortAndFilter = async (search = null) => {
     params.append("filterPriceLower", minPrice.value);
     params.append("filterPriceUpper", maxPrice.value);
     params.append("searchContent", searchContent.value);
-    
+
     sessionStorage.setItem(
       "filterBrands",
       JSON.stringify(brandFilterList.value)
@@ -418,7 +418,7 @@ onUnmounted(() => {
 
 <template>
   <NavBar @search-sale-item="getAllSaleItemBySortAndFilter" />
-  <div class="gallery-container text-white text-sm ">
+  <div class="gallery-container text-white text-sm">
     <div class="promote">
       <div
         class="w-full absolute duration-500"
@@ -781,8 +781,16 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <AlertMessageRegister v-if="statusStore.getStatus() !== null && statusStore.getMethod() === 'register'" />
-  <AlertMessageSaleItem v-if="statusStore.getStatus() !== null && statusStore.getMethod() !== 'register'" />
+  <AlertMessageRegister
+    v-if="
+      statusStore.getStatus() !== null && statusStore.getMethod() === 'register'
+    "
+  />
+  <AlertMessageSaleItem
+    v-if="
+      statusStore.getStatus() !== null && statusStore.getMethod() !== 'register'
+    "
+  />
   <Footer />
 </template>
 

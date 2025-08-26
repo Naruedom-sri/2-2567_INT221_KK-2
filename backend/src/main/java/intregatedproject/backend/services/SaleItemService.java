@@ -33,7 +33,7 @@ public class SaleItemService {
     @Autowired
     private BrandService brandService;
     @Autowired
-    private EntityManager entityManager;    
+    private EntityManager entityManager;
     @Autowired
     private SaleItemImageRepository saleItemImageRepository;
     @Autowired
@@ -228,12 +228,12 @@ public class SaleItemService {
         });
 
         // รีเรียงลำดับหลังลบ
-        List<SaleItemImage> currentImages = saleItem.getSaleItemImages().stream().sorted(Comparator.comparing(SaleItemImage::getImageViewOrder)).collect(Collectors.toList());
+        List<SaleItemImage> currentImages = saleItem.getSaleItemImages().stream().sorted(Comparator.comparing(SaleItemImage::getImageViewOrder)).toList();
 
         for (int i = 0; i < currentImages.size(); i++) {
             currentImages.get(i).setImageViewOrder(i + 1);
         }
-
+        
         // 2) จัดการคำสั่ง UPDATE / REPLACE / CREATE ตามลำดับคำขอ
         for (SaleItemImageRequest req : imageRequests) {
             switch (req.getState()) {
@@ -244,7 +244,7 @@ public class SaleItemService {
                     newImage.setSaleItem(saleItem);
                     newImage.setFileName(newFileName);
                     newImage.setOgFileName(req.getImageFile().getOriginalFilename());
-
+                    System.out.println("Monkeyasdasdasdad");
                     // ถ้า request ไม่ได้ส่ง imageViewOrder → ให้ต่อท้าย
                     int nextOrder;
                     if (req.getImageViewOrder() == null || req.getImageViewOrder() <= 0) {
