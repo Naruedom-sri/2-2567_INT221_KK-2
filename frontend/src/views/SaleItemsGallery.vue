@@ -42,7 +42,6 @@ const isFirstPage = ref();
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const params = new URLSearchParams();
-const itemAnimations = ref([]);
 const minPrice = ref("");
 const maxPrice = ref("");
 const searchContent = ref("");
@@ -82,7 +81,7 @@ const getAllSaleItemBySortAndFilter = async (search = null, from = "") => {
     params.append("filterPriceLower", minPrice.value);
     params.append("filterPriceUpper", maxPrice.value);
     params.append("searchContent", searchContent.value);
-    
+
     const data = await getAllDataWithParam(
       `${BASE_API_DOMAIN}/v2/sale-items`,
       params
@@ -93,7 +92,6 @@ const getAllSaleItemBySortAndFilter = async (search = null, from = "") => {
     isFirstPage.value = data.first;
     imageUrlList.value = [];
     getImageOfAllItem();
-    setAnimationItems();
 
     sessionStorage.setItem(
       "filterBrands",
@@ -121,18 +119,6 @@ const getAllSaleItemBySortAndFilter = async (search = null, from = "") => {
     console.log(error);
     items.value = [];
   }
-};
-
-const setAnimationItems = () => {
-  itemAnimations.value = [];
-  items.value.forEach((_) => {
-    itemAnimations.value.push(false);
-  });
-  itemAnimations.value.forEach((boolean, index) => {
-    setTimeout(() => {
-      itemAnimations.value[index] = true;
-    }, index * 200);
-  });
 };
 
 const nextNavPage = () => {
@@ -411,7 +397,6 @@ onMounted(() => {
   if (savedMinPrice) minPrice.value = parseInt(savedMinPrice);
   if (savedMaxPrice) maxPrice.value = parseInt(savedMaxPrice);
   if (savedSearchContent) searchContent.value = savedSearchContent;
-  console.log("searchContent", searchContent.value);
   getAllBrand();
   getAllSaleItemBySortAndFilter();
   setAnimation();
@@ -655,8 +640,7 @@ onUnmounted(() => {
           params: { itemId: item.id },
         }"
         :key="index"
-        class="itbms-row w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[2%] hover:shadow-sm duration-300"
-        :class="itemAnimations[index] ? 'animation-slide-up' : 'opacity-0'"
+        class="itbms-row animation-slide-up w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[2%] hover:shadow-sm duration-300"
         ><div
           class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
         >

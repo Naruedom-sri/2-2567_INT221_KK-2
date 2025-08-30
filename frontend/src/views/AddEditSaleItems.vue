@@ -26,14 +26,14 @@ const route = useRouter();
 const item = ref({});
 const brands = ref([]);
 const brandItem = ref("");
-const model = ref();
-const color = ref();
-const description = ref();
-const price = ref();
-const ramGb = ref();
-const storageGb = ref();
-const quantity = ref();
-const screenSizeInch = ref();
+const model = ref("");
+const color = ref("");
+const description = ref("");
+const price = ref("");
+const ramGb = ref("");
+const storageGb = ref("");
+const quantity = ref("");
+const screenSizeInch = ref("");
 const isContainAllNonOptionalFiled = ref(false);
 const isUpdatedFiled = ref(false);
 const isDisabled = ref(true);
@@ -84,7 +84,7 @@ const onFilesSelected = (e) => {
   const existingCount = imageItems.value.length;
   const availableSlots = Math.max(0, MAX_FILES - existingCount);
   if (availableSlots === 0) {
-    uploadError.value = `You already selected ${MAX_FILES} images.`;
+    uploadError.value = `Maximum 4 pictures are allowed.`;
     e.target.value = "";
     return;
   }
@@ -94,13 +94,13 @@ const onFilesSelected = (e) => {
   // ถ้าเลือกไฟล์เกิน availableSlots → ตัดออก
   if (files.length > availableSlots) {
     candidates = files.slice(0, availableSlots);
-    uploadError.value = `Only ${availableSlots} more image(s) allowed.`;
+    uploadError.value = `Maximum 4 pictures are allowed.`;
   }
 
   // Per-file size check
   const tooLarge = candidates.find((f) => f.size > MAX_PER_FILE);
   if (tooLarge) {
-    uploadError.value = `Each image must be ≤ 2MB. "${tooLarge.name}" is too large.`;
+    uploadError.value = `The picture file size cannot be larger than 2MB.`;
     e.target.value = "";
     return;
   }
@@ -293,13 +293,9 @@ const checkValidateInput = () => {
 
 const checkAllNonOptionalFiled = () => {
   if (
-    brandItem.value !== undefined &&
     brandItem.value !== "" &&
-    model.value !== undefined &&
     model.value !== "" &&
-    price.value !== undefined &&
     price.value !== "" &&
-    description.value !== undefined &&
     description.value !== ""
   ) {
     isContainAllNonOptionalFiled.value = true;
@@ -310,15 +306,18 @@ const checkAllNonOptionalFiled = () => {
 
 const checkUpdatedFiled = () => {
   let updated =
-    model.value !== item.value.model ||
-    brandItem.value?.id !== item.value.brand?.id ||
-    description.value !== item.value.description ||
-    price.value !== item.value.price ||
-    ramGb.value !== item.value.ramGb ||
-    screenSizeInch.value !== item.value.screenSizeInch ||
-    quantity.value !== item.value.quantity ||
-    storageGb.value !== item.value.storageGb ||
-    color.value !== item.value.color;
+    (model.value !== "" && model.value !== item.value.model) ||
+    (brandItem.value?.id !== "" &&
+      brandItem.value?.id !== item.value.brand?.id) ||
+    (description.value !== "" &&
+      description.value !== item.value.description) ||
+    (price.value !== "" && price.value !== item.value.price) ||
+    (ramGb.value !== "" && ramGb.value !== item.value.ramGb) ||
+    (screenSizeInch.value !== "" &&
+      screenSizeInch.value !== item.value.screenSizeInch) ||
+    (quantity.value !== "" && quantity.value !== item.value.quantity) ||
+    (storageGb.value !== "" && storageGb.value !== item.value.storageGb) ||
+    (color.value !== "" && color.value !== item.value.color);
 
   // ==== เช็คภาพ ====
   if (!updated) {
@@ -354,20 +353,11 @@ const addUpdateNewSaleItem = async () => {
       formData.append("brandId", brandItem.value.id);
       formData.append("description", description.value);
       formData.append("price", price.value);
-      formData.append("ramGb", ramGb.value !== undefined ? ramGb.value : "");
-      formData.append(
-        "screenSizeInch",
-        screenSizeInch.value !== undefined ? screenSizeInch.value : ""
-      );
-      formData.append(
-        "quantity",
-        quantity.value !== undefined ? quantity.value : ""
-      );
-      formData.append(
-        "storageGb",
-        storageGb.value !== undefined ? storageGb.value : ""
-      );
-      formData.append("color", color.value !== undefined ? color.value : "");
+      formData.append("ramGb", ramGb.value);
+      formData.append("screenSizeInch", screenSizeInch.value);
+      formData.append("quantity", quantity.value);
+      formData.append("storageGb", storageGb.value);
+      formData.append("color", color.value);
       imageItems.value.forEach((image) => {
         formData.append("images", image.file);
       });
@@ -560,6 +550,7 @@ watch(
     screenSizeInch,
     storageGb,
     color,
+    imageItems.value,
   ],
   () => {
     checkAllNonOptionalFiled();
@@ -567,12 +558,10 @@ watch(
   },
   { immediate: true }
 );
+
 watch(
   imageItems.value,
   () => {
-    checkAllNonOptionalFiled();
-    checkUpdatedFiled();
-    checkValidateInput();
     checkDisabled();
   },
   { immediate: true }
