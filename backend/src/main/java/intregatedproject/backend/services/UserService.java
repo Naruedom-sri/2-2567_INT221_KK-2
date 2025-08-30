@@ -1,6 +1,7 @@
 package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.user.RequestRegisterDto;
+import intregatedproject.backend.dtos.user.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
@@ -12,6 +13,7 @@ import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 //import intregatedproject.backend.utils.Token.JwtUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,8 @@ public class UserService {
 
     @Autowired
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
-
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     public List<User> getAllUsers() {
@@ -44,6 +47,19 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        if (user.getRole().equalsIgnoreCase("seller")) {
+            ResponseSellerDto sellerDto= modelMapper.map(user.getSeller(), ResponseSellerDto.class);
+            sellerDto.setNickname(user.getNickname());
+            sellerDto.setEmail(user.getEmail());
+            sellerDto.setFullname(user.getFullname());
+            sellerDto.setRole(user.getRole());
+            sellerDto.setStatus(user.getStatus());
+            return user;
+        }else if (user.getRole().equalsIgnoreCase("buyer")) {
+            return user;
+        }
+
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 

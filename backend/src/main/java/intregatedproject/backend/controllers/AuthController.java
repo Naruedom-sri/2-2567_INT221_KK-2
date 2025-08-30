@@ -3,17 +3,12 @@ package intregatedproject.backend.controllers;
 import intregatedproject.backend.dtos.user.ResponseBuyerDto;
 import intregatedproject.backend.dtos.user.ResponseSellerDto;
 import intregatedproject.backend.entities.User;
-import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
-import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.utils.Token.JwtUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/itb-mshop")
@@ -32,7 +27,12 @@ public class AuthController {
             User user = emailService.verifyEmail(jwtToken);
 
             if ("SELLER".equalsIgnoreCase(user.getRole())) {
-                ResponseSellerDto response = modelMapper.map(user, ResponseSellerDto.class);
+                ResponseSellerDto response = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
+                response.setNickname(user.getNickname());
+                response.setEmail(user.getEmail());
+                response.setFullname(user.getFullname());
+                response.setRole(user.getRole());
+                response.setStatus(user.getStatus());
                 return ResponseEntity.ok(response);
             } else {
                 ResponseBuyerDto response = modelMapper.map(user, ResponseBuyerDto.class);

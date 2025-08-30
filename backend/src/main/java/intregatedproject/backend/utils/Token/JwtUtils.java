@@ -10,6 +10,7 @@ import com.nimbusds.jwt.SignedJWT;
 import intregatedproject.backend.dtos.user.RequestRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,15 +32,32 @@ public class JwtUtils {
         return this.rsaPublicJWK;
     }
 
+//    public JwtUtils() {
+//        try {
+//            rsaPrivateJWK = new RSAKeyGenerator(2048).keyID(KEY_ID).generate();
+//            rsaPublicJWK = rsaPrivateJWK.toPublicJWK();
+//            System.out.println(rsaPublicJWK.toJSONString());
+//        } catch (JOSEException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
     public JwtUtils() {
+        // ควรเว้นให้ Spring inject @Value ก่อน แล้วสร้าง key ใน @PostConstruct
+    }
+
+    @PostConstruct
+    private void initKeys() {
         try {
+            // ถ้าต้องการใช้งานจริง ควรโหลดจากไฟล์/Keystore หรือ config (ไม่ generate ทุกครั้ง)
             rsaPrivateJWK = new RSAKeyGenerator(2048).keyID(KEY_ID).generate();
             rsaPublicJWK = rsaPrivateJWK.toPublicJWK();
-            System.out.println(rsaPublicJWK.toJSONString());
+            System.out.println("Public JWK: " + rsaPublicJWK.toJSONString());
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
     }
+
 //    public String generateToken(UserDetails user) {
 //        return generateToken(user,MAX_TOKEN_INTERVAL,TokenType.ACCESS_TOKEN);
 //    }
@@ -106,14 +124,11 @@ public class JwtUtils {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             JWSVerifier verifier = new RSASSAVerifier(rsaPublicJWK);
-
             if (!signedJWT.verify(verifier)) {
-                // เดิม: throw new RuntimeException("Invalid JWT signature");
                 throw new InvalidVerificationTokenException("Invalid JWT signature");
             }
             return signedJWT;
         } catch (JOSEException | ParseException ex) {
-            // เดิม: throw new RuntimeException(...)
             throw new InvalidVerificationTokenException("Invalid JWT (can't parse/verify)");
         }
     }

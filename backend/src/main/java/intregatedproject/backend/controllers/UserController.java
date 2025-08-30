@@ -40,6 +40,8 @@ public class UserController {
                                       @RequestPart(value = "front", required = false) MultipartFile front,
                                       @RequestPart(value = "back", required = false) MultipartFile back) {
         String token = jwtUtils.generateEmailVerificationToken(userDto, 48);
+        System.out.println("Generated token: " + token);
+
         if ("seller".equalsIgnoreCase(userDto.getRole())) {
             userDto.setRole("seller");
             User newUser = userService.registerSeller(userDto, front, back);
