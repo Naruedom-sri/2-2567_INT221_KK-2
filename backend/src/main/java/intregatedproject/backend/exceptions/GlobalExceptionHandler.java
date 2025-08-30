@@ -1,5 +1,12 @@
 package intregatedproject.backend.exceptions;
 
+import intregatedproject.backend.exceptions.brand.BrandAlreadyExistsException;
+import intregatedproject.backend.exceptions.brand.BrandHasSaleItemException;
+import intregatedproject.backend.exceptions.user.InvalidRoleException;
+import intregatedproject.backend.exceptions.user.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.user.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
+import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -8,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -64,11 +70,31 @@ public class GlobalExceptionHandler {
                 request);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<Object> handleInvalidRole(InvalidRoleException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(RequiredFileMissingException.class)
+    public ResponseEntity<Object> handleRequiredFileMissing(RequiredFileMissingException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
+    }
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<Object> handleEmailAlreadyVerified(EmailAlreadyVerifiedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<Object> handleInvalidVerificationToken(InvalidVerificationTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
+    }
+
+}
 
 
 //    @ExceptionHandler(ResourceNotFoundException.class)
@@ -136,4 +162,4 @@ public class GlobalExceptionHandler {
 //
 //        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 //    }
-}
+
