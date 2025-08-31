@@ -1,6 +1,6 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.SaleItemWithImageInfo;
+import intregatedproject.backend.dtos.saleitems.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;

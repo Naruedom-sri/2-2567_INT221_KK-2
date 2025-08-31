@@ -40,7 +40,7 @@ function onSubmit() {
         class="border rounded px-3 py-2"
         type="text"
         id="name"
-        v-model="buyer.nickname"
+        v-model.trim="buyer.nickname"
       />
     </div>
 
@@ -50,7 +50,7 @@ function onSubmit() {
         class="border rounded px-3 py-2"
         type="email"
         id="email"
-        v-model="buyer.email"
+        v-model.trim="buyer.email"
       />
     </div>
 
@@ -60,7 +60,7 @@ function onSubmit() {
         class="border rounded px-3 py-2"
         type="password"
         id="password"
-        v-model="buyer.password"
+        v-model.trim="buyer.password"
       />
       <small class="text-xs text-gray-500 mt-1">
         Minimum 8 chars, including upper, lower, number, and special character
@@ -73,7 +73,7 @@ function onSubmit() {
         class="border rounded px-3 py-2"
         type="text"
         id="fullname"
-        v-model="buyer.fullname"
+        v-model.trim="buyer.fullname"
       />
     </div>
 

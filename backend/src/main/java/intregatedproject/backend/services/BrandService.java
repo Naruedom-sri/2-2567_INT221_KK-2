@@ -2,8 +2,8 @@ package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.brands.RequestBrandDto;
 import intregatedproject.backend.entities.Brand;
-import intregatedproject.backend.exceptions.BrandAlreadyExistsException;
-import intregatedproject.backend.exceptions.BrandHasSaleItemException;
+import intregatedproject.backend.exceptions.brands.BrandAlreadyExistsException;
+import intregatedproject.backend.exceptions.brands.BrandHasSaleItemException;
 import intregatedproject.backend.repositories.BrandRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,13 +1,16 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.register.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
-import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
-import intregatedproject.backend.repositories.SaleItemRepository;
+import intregatedproject.backend.exceptions.users.InvalidRoleException;
+import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,13 +25,9 @@ public class UserService {
     @Autowired
     private SellerRepository sellerRepository;
     @Autowired
-    private SaleItemRepository saleItemRepository;
-    @Autowired
     private FileService fileService;
-//    @Autowired
-//    private EmailService emailService;
-//    @Autowired
-//    private EmailVerificationTokenRepository emailVerificationTokenRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     public List<User> getAllUsers() {
@@ -36,6 +35,18 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        if (user.getRole().equalsIgnoreCase("seller")) {
+            ResponseSellerDto sellerDto= modelMapper.map(user.getSeller(), ResponseSellerDto.class);
+            sellerDto.setNickname(user.getNickname());
+            sellerDto.setEmail(user.getEmail());
+            sellerDto.setFullname(user.getFullName());
+            sellerDto.setRole(user.getRole());
+            sellerDto.setStatus(user.getStatus());
+            return user;
+        }else if (user.getRole().equalsIgnoreCase("buyer")) {
+            return user;
+        }
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 
@@ -43,18 +54,23 @@ public class UserService {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
-        user.setFullname(userDto.getFullname());
+        user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
         user.setBuyer(buyer);
         buyer.setUser(user);
+        userDto.setRole("buyer");
+        userDto.setMobileNumber(null);
+        userDto.setBankAccountNumber(null);
+        userDto.setBankName(null);
+        userDto.setNationalIdNumber(null);
     }
 
     private void convertToEntitySeller(RequestRegisterDto userDto, User user, Seller seller) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
-        user.setFullname(userDto.getFullname());
+        user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
         user.setSeller(seller);
@@ -63,21 +79,18 @@ public class UserService {
         seller.setBankAccountNumber(userDto.getBankAccountNumber());
         seller.setBankName(userDto.getBankName());
         seller.setNationalIdNumber(userDto.getNationalIdNumber());
-//        seller.setNationalIdPhotoFront(sellerDto.getNationalIdPhotoFront());
-//        seller.setNationalIdPhotoBack(sellerDto.getNationalIdPhotoBack());
     }
 
     public User registerBuyer(RequestRegisterDto userDto) {
         if (userDto.getId() != null && userRepository.existsById(userDto.getId())) {
-            throw new RuntimeException("Buyer with id " + userDto.getId() + " already exists");
+            throw new UserAlreadyExistsException("Buyer with id " + userDto.getId() + " already exists");
         }
         if (!"buyer".equalsIgnoreCase(userDto.getRole())) {
-            throw new RuntimeException("Role must be 'buyer'");
+            throw new InvalidRoleException("Role must be 'buyer'");
         }
         var newUser = new User();
         var newBuyer = new Buyer();
-        convertToEntityBuyer(userDto,newUser,newBuyer);
-
+        convertToEntityBuyer(userDto, newUser, newBuyer);
         User savedUser = userRepository.save(newUser);
         newBuyer.setUser(savedUser);
         return savedUser;
@@ -85,35 +98,59 @@ public class UserService {
 
     public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
         if (userDto.getId() != null && sellerRepository.existsById(userDto.getId())) {
-            throw new RuntimeException("Seller with id " + userDto.getId() + " already exists");
+            throw new UserAlreadyExistsException("Seller with id " + userDto.getId() + " already exists");
         }
-        // ตรวจสอบ role
         if (!"seller".equalsIgnoreCase(userDto.getRole())) {
-            throw new RuntimeException("Role must be 'seller'");
+            throw new InvalidRoleException("Role must be 'seller'");
         }
+        if (frontFile == null || backFile == null) {
+            throw new RequiredFileMissingException("National ID front/back files are required");
+        }
+
         var newUser = new User();
         var newSeller = new Seller();
-        convertToEntitySeller(userDto,newUser,newSeller);
-
-        if (frontFile == null || backFile == null) {
-            throw new RuntimeException("National ID front/back files are required");
-        }
+        convertToEntitySeller(userDto, newUser, newSeller);
 
         String storedFront = fileService.store(frontFile);
         String storedBack = fileService.store(backFile);
-
 
         newSeller.setNationalIdPhotoFront(storedFront);
         newSeller.setNationalIdPhotoBack(storedBack);
 
         User savedUser = userRepository.save(newUser);
-
-
         newSeller.setUser(savedUser);
         sellerRepository.save(newSeller);
 
         return savedUser;
     }
+
+
+//    public Map<String, Object> authenticateUser(JwtRequestUser user) {
+//        UsernamePasswordAuthenticationToken upat = new
+//                UsernamePasswordAuthenticationToken(
+//                user.getUsername(), user.getPassword());
+//        authenticationManager.authenticate(upat);
+//        //Exception occurred (401) if failed
+//        UserDetails userDetails = jwtUserDetailsService
+//                .loadUserByUsername(user.getUsername());
+//        long refreshTokenAgeInMinute = 8 * 60 * 60 * 1000;
+//        return Map.of(
+//                "access_token", jwtUtils.generateToken(userDetails)
+//                , "refresh_token", jwtUtils.generateToken(
+//                        userDetails, refreshTokenAgeInMinute, TokenType.REFRESH_TOKEN)
+//        );
+//    }
+//
+//    public Map<String, Object> refreshToken(String refreshToken) {
+//        jwtUtils.verifyToken(refreshToken);
+//        Map<String, Object> claims = jwtUtils.getJWTClaimsSet(refreshToken);
+//        jwtUtils.isExpired(claims);
+//        if (!jwtUtils.isValidClaims(claims) || !"REFRESH_TOKEN".equals(claims.get("typ"))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+//        }
+//        UserDetails userDetails = jwtUserDetailsService.loadUserById((Long) claims.get("uid"));
+//        return Map.of("access_token", jwtUtils.generateToken(userDetails));
+//    }
 
 //    @Transactional
 //    public User registerSeller(RequestSellerDto sellerDto, List<MultipartFile> files) {

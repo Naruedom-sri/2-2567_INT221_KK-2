@@ -1,6 +1,5 @@
 package intregatedproject.backend.dtos.saleitems;
 
-import intregatedproject.backend.dtos.SaleItemImageResponse;
 import lombok.Getter;
 import lombok.Setter;
 

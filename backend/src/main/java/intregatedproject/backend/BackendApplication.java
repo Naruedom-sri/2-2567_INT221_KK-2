@@ -20,14 +20,4 @@ public class BackendApplication {
 
         return new ModelMapper();
     }
-//    @Bean
-//    public ModelMapper modelMapper() {
-//        ModelMapper mapper = new ModelMapper();
-//
-//        // ข้าม field id เวลา map จาก DTO ไป entity
-//        mapper.typeMap(RequestSaleItemDto.class, SaleItem.class)
-//                .addMappings(m -> m.skip(SaleItem::setId));
-//
-//        return mapper;
-//    }
 }

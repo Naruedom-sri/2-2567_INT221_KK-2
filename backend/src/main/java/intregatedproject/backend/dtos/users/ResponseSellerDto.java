@@ -1,4 +1,4 @@
-package intregatedproject.backend.dtos.register;
+package intregatedproject.backend.dtos.users;
 import lombok.Getter;
 import lombok.Setter;
 

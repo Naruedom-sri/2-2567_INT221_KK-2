@@ -1,6 +1,5 @@
-package intregatedproject.backend.dtos;
+package intregatedproject.backend.dtos.saleitems;
 
-import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import lombok.Data;
 
 import java.util.List;

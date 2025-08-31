@@ -1,4 +1,4 @@
-package intregatedproject.backend.exceptions;
+package intregatedproject.backend.exceptions.brands;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

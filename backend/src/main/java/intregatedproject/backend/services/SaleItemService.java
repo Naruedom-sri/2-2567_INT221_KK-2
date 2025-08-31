@@ -1,12 +1,12 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.SaleItemImageRequest;
-import intregatedproject.backend.dtos.SaleItemWithImageInfo;
+import intregatedproject.backend.dtos.saleitems.SaleItemImageRequest;
+import intregatedproject.backend.dtos.saleitems.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.Brand;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
-import intregatedproject.backend.exceptions.PriceIsNotPresentException;
+import intregatedproject.backend.exceptions.saleitems.PriceIsNotPresentException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.utils.SaleItemSpecification;
