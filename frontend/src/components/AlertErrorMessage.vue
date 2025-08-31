@@ -42,7 +42,7 @@ const cancel = () => emit("cancel");
       <div v-else>
         <button
           @click="$emit('toggleUploadError')"
-          class="itbms-ok-button bg-gray-300 px-4 py-2 rounded hover:cursor-pointer hover:bg-gray-300/80"
+          class="itbms-ok-button bg-blue-500 px-4 py-2 rounded hover:cursor-pointer hover:bg-[#0d47a1] duration-200"
         >
           Ok
         </button>

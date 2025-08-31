@@ -11,6 +11,7 @@ import SaleItemsList from "@/views/SaleItemsList.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Register from "@/views/Register.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
+import Login from "@/views/Login.vue";
 const history = createWebHistory("/kk2/");
 const routes = [
   {
@@ -29,9 +30,9 @@ const routes = [
     component: Home,
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: Register
+    path: "/registers",
+    name: "Register",
+    component: Register,
   },
   {
     path: "/verify-email",
@@ -83,9 +84,19 @@ const routes = [
     component: AboutUs,
   },
   {
-    path: "/not-found",
+    path: "/signin",
+    name: "Login",
+    component: Login,
+  },
+
+  {
+    path: "/not-founds",
     name: "NotFoundPage",
     component: NotFoundPage,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: { name: "NotFoundPage" },
   },
 ];
 
