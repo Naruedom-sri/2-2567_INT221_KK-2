@@ -7,14 +7,20 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.Token.TokenType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/itb-mshop")
@@ -39,7 +45,7 @@ public class UserController {
     public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
                                       @RequestPart(value = "front", required = false) MultipartFile front,
                                       @RequestPart(value = "back", required = false) MultipartFile back) {
-        String token = jwtUtils.generateEmailVerificationToken(userDto, 48);
+        String token = jwtUtils.generateToken(userDto, 48, TokenType.ACCESS_TOKEN);
         System.out.println("Generated token: " + token);
 
         if ("seller".equalsIgnoreCase(userDto.getRole())) {
@@ -69,14 +75,5 @@ public class UserController {
     }
 
 
-
-//    @PostMapping("v2/users/verify-email")
-//    public ResponseEntity<?> verifyEmail(String jwtToken) {
-//
-//
-//
-//
-//        return null;
-//    }
 
 }

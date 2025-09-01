@@ -7,15 +7,22 @@ import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedExce
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.utils.Token.JwtUtils;
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import jakarta.mail.MessagingException;
+
 
 @Service
 public class EmailService {
@@ -28,21 +35,51 @@ public class EmailService {
     private JavaMailSender mailSender;
     @Autowired
     private JwtUtils jwtUtil;
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
-    public void sendVerificationEmail(String toEmail,String token) {
+
+//    @Async
+//    public void sendVerificationEmail(String toEmail,String token) {
+//        String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
+//        String verificationUrl = "http://localhost:5173/kk2/verify-email/?token=" + encoded;
+//        String body = "Click the link to verify your account:\n" + verificationUrl;
+//
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(toEmail);
+//        message.setSubject("Verification Email");
+//        message.setText(body);
+//        mailSender.send(message);
+//    }
+
+    @Async
+    public void sendVerificationEmail(String toEmail, String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
         String verificationUrl = "http://localhost:5173/kk2/verify-email/?token=" + encoded;
-        String body = "Click the link to verify your account:\n" + verificationUrl;
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Verification Email");
-        message.setText(body);
-        mailSender.send(message);
+        // เตรียม context สำหรับ Thymeleaf
+        Context context = new Context();
+        context.setVariable("verificationUrl", verificationUrl);
+        context.setVariable("token",encoded);
+        // ประมวลผล template
+        String htmlContent = templateEngine.process("verificationEmail", context);
+
+        // ส่งอีเมลแบบ HTML
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject("Verification Email");
+            helper.setText(htmlContent, true); // true = HTML
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
     }
+
     //ใช้ตอน deploy จริง
 //        String verificationUrl = "http    ://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token="+token ;
 
@@ -52,7 +89,7 @@ public class EmailService {
                 throw new InvalidVerificationTokenException("Missing token");
             }
 
-            SignedJWT signedJWT = jwtUtil.parseToken(jwtToken); // parseToken จะโยน InvalidVerificationTokenException ถ้าล้ม
+            SignedJWT signedJWT = jwtUtil.parseToken(jwtToken); // parseToken จะโยน Exception ถ้าล้ม
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
             System.out.println("verifyEmail - claims: " + claims.getClaims());
 
@@ -65,7 +102,6 @@ public class EmailService {
                     .orElseThrow(() -> new InvalidVerificationTokenException("User not found for email: " + email));
 
             if ("ACTIVE".equals(user.getStatus())) {
-                // ให้โยน EmailAlreadyVerifiedException ตรงนี้ และอย่าไปกลบมันใน catch ข้างล่าง
                 throw new EmailAlreadyVerifiedException("Email is already verified.");
             }
 
@@ -73,10 +109,8 @@ public class EmailService {
             return userRepository.save(user);
 
         } catch (InvalidVerificationTokenException | EmailAlreadyVerifiedException e) {
-            // ให้ rethrow เพื่อให้ controller หรือ exception handler จัดการ
             throw e;
         } catch (Exception e) {
-            // log stacktrace เพื่อดีบัก แล้วส่ง InvalidVerificationTokenException
             e.printStackTrace();
             throw new InvalidVerificationTokenException("Invalid verification token.");
         }

@@ -1,5 +1,6 @@
 package intregatedproject.backend.services;
 
+import intregatedproject.backend.dtos.user.RequestJwtUser;
 import intregatedproject.backend.dtos.user.RequestRegisterDto;
 import intregatedproject.backend.dtos.user.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
@@ -8,18 +9,27 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.user.InvalidRoleException;
 import intregatedproject.backend.exceptions.user.RequiredFileMissingException;
 import intregatedproject.backend.exceptions.user.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 //import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.Token.TokenType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -28,16 +38,11 @@ public class UserService {
     @Autowired
     private SellerRepository sellerRepository;
     @Autowired
-    private SaleItemRepository saleItemRepository;
+    private AuthenticationManager authenticationManager;
     @Autowired
     private FileService fileService;
-//    @Autowired
-//    private JwtUtils jwtUtils;
-//    @Autowired
-//    private EmailService emailService;
-
     @Autowired
-    private EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private JwtUtils jwtUtils;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -49,14 +54,14 @@ public class UserService {
     public User getUserById(Integer id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
         if (user.getRole().equalsIgnoreCase("seller")) {
-            ResponseSellerDto sellerDto= modelMapper.map(user.getSeller(), ResponseSellerDto.class);
+            ResponseSellerDto sellerDto = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
             sellerDto.setNickname(user.getNickname());
             sellerDto.setEmail(user.getEmail());
             sellerDto.setFullname(user.getFullname());
             sellerDto.setRole(user.getRole());
             sellerDto.setStatus(user.getStatus());
             return user;
-        }else if (user.getRole().equalsIgnoreCase("buyer")) {
+        } else if (user.getRole().equalsIgnoreCase("buyer")) {
             return user;
         }
 
@@ -188,19 +193,20 @@ public class UserService {
     }
 
 
-//    public Map<String, Object> authenticateUser(JwtRequestUser user) {
+//    public Map<String, Object> authenticateUser(RequestJwtUser user) {
 //        UsernamePasswordAuthenticationToken upat = new
 //                UsernamePasswordAuthenticationToken(
-//                user.getUsername(), user.getPassword());
+//                user.getEmail(), user.getPassword());
 //        authenticationManager.authenticate(upat);
 //        //Exception occurred (401) if failed
-//        UserDetails userDetails = jwtUserDetailsService
-//                .loadUserByUsername(user.getUsername());
+//        User user1 = userRepository.findByEmail(user.getEmail())
+//                .orElseThrow(() -> new InvalidVerificationTokenException("User not found for email: " + user.getEmail()));
+//        RequestRegisterDto userDto = modelMapper.map(user1, RequestRegisterDto.class);
 //        long refreshTokenAgeInMinute = 8 * 60 * 60 * 1000;
 //        return Map.of(
-//                "access_token", jwtUtils.generateToken(userDetails)
+//                "access_token", jwtUtils.generateToken(userDto, 48,TokenType.ACCESS_TOKEN)
 //                , "refresh_token", jwtUtils.generateToken(
-//                        userDetails, refreshTokenAgeInMinute, TokenType.REFRESH_TOKEN)
+//                        userDto, refreshTokenAgeInMinute, TokenType.REFRESH_TOKEN)
 //        );
 //    }
 //
@@ -211,84 +217,8 @@ public class UserService {
 //        if (!jwtUtils.isValidClaims(claims) || !"REFRESH_TOKEN".equals(claims.get("typ"))) {
 //            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
 //        }
-//        UserDetails userDetails = jwtUserDetailsService.loadUserById((Long) claims.get("uid"));
-//        return Map.of("access_token", jwtUtils.generateToken(userDetails));
-//    }
-
-//    @Transactional
-//    public User registerSeller(RequestSellerDto sellerDto, List<MultipartFile> files) {
-//        // 1) Validate role
-//        if (!"seller".equalsIgnoreCase(sellerDto.getRole())) {
-//            throw new RuntimeException("Role must be 'seller'");
-//        }
-//
-//        // 2) Validate รูปบัตร (บังคับ 2 ไฟล์: front, back)
-//        List<MultipartFile> safeFiles = (files == null) ? List.of() : files;
-//        if (safeFiles.size() < 2) {
-//            throw new RuntimeException("National ID front and back photos are required (2 files).");
-//        }
-//
-//        // 3) ตรวจ email/nickname ไม่ซ้ำ (ตัวอย่างคร่าว ๆ)
-//        if (userRepository.existsByEmail(sellerDto.getEmail())) {
-//            throw new RuntimeException("Email already in use.");
-//        }
-//        if (userRepository.existsByNickname(sellerDto.getNickname())) {
-//            throw new RuntimeException("Nickname already in use.");
-//        }
-//
-//        // 4) สร้าง entity และ map ฟิลด์
-//        var newUser   = new User();
-//        var newSeller = new Seller();
-//        convertToEntitySeller(sellerDto, newUser, newSeller);
-//
-//        // 5) เข้ารหัสรหัสผ่าน + บังคับค่า role/status ฝั่งเซิร์ฟเวอร์
-//        newUser.setPassword(passwordEncoder.encode(sellerDto.getPassword()));
-//        newUser.setRole("SELLER");
-//        newUser.setStatus("INACTIVE");
-//
-//        // 6) เซฟ User ก่อน (เพื่อให้มี id ใช้เป็น FK)
-//        User savedUser = userRepository.save(newUser);
-//
-//        // 7) อัปโหลดไฟล์ (คืนชื่อไฟล์ใหม่แบบ UUID)
-//        List<String> storedNames = fileService.multiStore(safeFiles);
-//        // สมมติ FE ส่งลำดับเป็น [front, back]
-//        String front = storedNames.get(0);
-//        String back  = storedNames.get(1);
-//
-//        newSeller.setUser(savedUser);
-//        newSeller.setNationalIdPhotoFront(front);
-//        newSeller.setNationalIdPhotoBack(back);
-//
-//        sellerRepository.save(newSeller);
-//
-//        // 8) สร้าง email verification token (อายุ 1 ชม.)
-//        String tokenStr = UUID.randomUUID().toString();
-//        EmailVerificationToken token = new EmailVerificationToken();
-//        token.setUserId(savedUser.getId());
-//        token.setToken(tokenStr);
-//        token.setExpiryTime(Timestamp.from(Instant.now().plus(1, ChronoUnit.HOURS)));
-//        tokenRepository.save(token);
-//
-//        // 9) ส่งอีเมลยืนยัน
-//        emailService.sendVerification(savedUser.getEmail(), tokenStr);
-//
-//        // 10) คืนผล (หรือ map ไปเป็น Response DTO ตามต้องการ)
-//        return savedUser;
-//    }
-
-//    private void sendVerificationToken(User user) {
-//        String token = UUID.randomUUID().toString();
-//        EmailVerificationToken newToken = new EmailVerificationToken();
-//        newToken.setToken(token);
-//        newToken.setUser(user);
-//        newToken.setExpiryTime(LocalDateTime.now().plusHours(24));
-//        emailVerificationTokenRepository.save(newToken);
-//
-//        emailService.sendVerificationEmail(user.getEmail(), token);
-//    }
-
-//    private boolean verifyToken(String token) {
-//        Optional<EmailVerificationToken> tokenFromOtp = emailVerificationTokenRepository.findByToken(token);
-//
+//        User user = getUserById((Integer) claims.get("uid"));
+//        RequestRegisterDto userDetails = modelMapper.map(user, RequestRegisterDto.class);
+//        return Map.of("access_token", jwtUtils.generateToken(userDetails,48,TokenType.ACCESS_TOKEN));
 //    }
 }

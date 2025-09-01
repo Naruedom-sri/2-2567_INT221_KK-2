@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .email-wrapper {
+            width: 100%;
+            padding: 20px;
+            background-color: #f4f6f8;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .email-header {
+            background: linear-gradient(135deg, #4CAF50, #2e7d32);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 30px;
+            color: #333333;
+        }
+        .email-body h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #43a047;
+        }
+        .token-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #555;
+            word-break: break-all;
+        }
+        .email-footer {
+            background-color: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+        }
+        @media (max-width: 600px) {
+            .email-body {
+                padding: 20px;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <h1>MyApp</h1>
+        </div>
+
+        <!-- Body -->
+        <div class="email-body">
+            <h2>ยืนยันการสมัครสมาชิก</h2>
+            <p>สวัสดี,</p>
+            <p>กรุณาคลิกลิงก์ด้านล่างเพื่อยืนยันอีเมลของคุณ:</p>
+            <p>
+                <a th:href="${verificationUrl}" class="btn">ยืนยันอีเมล</a>
+            </p>
+
+            <!-- แสดง token สำหรับทดสอบ -->
+            <div class="token-box">
+                <strong>Token สำหรับทดสอบ:</strong><br>
+                <span th:text="${token}">sample-token</span>
+            </div>
+
+            <p style="margin-top: 20px;">หากคุณไม่ได้ทำการสมัคร กรุณาละเว้นอีเมลนี้</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+            © 2025 MyApp. All rights reserved.
+        </div>
+    </div>
+</div>
+</body>
+</html>

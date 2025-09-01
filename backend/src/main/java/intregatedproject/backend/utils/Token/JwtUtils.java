@@ -49,7 +49,6 @@ public class JwtUtils {
     @PostConstruct
     private void initKeys() {
         try {
-            // ถ้าต้องการใช้งานจริง ควรโหลดจากไฟล์/Keystore หรือ config (ไม่ generate ทุกครั้ง)
             rsaPrivateJWK = new RSAKeyGenerator(2048).keyID(KEY_ID).generate();
             rsaPublicJWK = rsaPrivateJWK.toPublicJWK();
             System.out.println("Public JWK: " + rsaPublicJWK.toJSONString());
@@ -84,16 +83,17 @@ public class JwtUtils {
 //        }
 //    }
 
-    public String generateEmailVerificationToken(RequestRegisterDto user, long ageInMillis) {
+    public String generateToken(RequestRegisterDto user, long ageInMillis, TokenType tokenType) {
         try {
             // 1) ใช้ private key สำหรับเซ็น token
             JWSSigner signer = new RSASSASigner(rsaPrivateJWK);
-
+//            TokenType tokenType = TokenType.ACCESS_TOKEN;
             // 2) สร้าง claims (ข้อมูลที่จะเก็บใน token)
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                     .claim("userId", user.getId())
                     .claim("email", user.getEmail())
                     .claim("role", user.getRole())
+                    .claim("typ", tokenType.toString())
                     .subject(user.getEmail()) // subject = email
                     .issuer("http://localhost:8080/itb-mshop/v2/users/register") // ออกโดยใคร
                     .expirationTime(new Date(System.currentTimeMillis() + MAX_TOKEN_INTERVAL * ageInMillis)) // วันหมดอายุ
@@ -109,7 +109,7 @@ public class JwtUtils {
                     claimsSet
             );
 
-            // 4) เซ็น token ด้วย private key (RS256)
+            // 4) เซ็น token ด้วย private key
             signedJWT.sign(signer);
 
             // 5) แปลงเป็น String (JWT format: header.payload.signature)
