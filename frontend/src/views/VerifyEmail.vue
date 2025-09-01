@@ -16,14 +16,18 @@ const resendMessage = ref('')
 
 const verify = async (token) => {
   try {
-    let res = await fetch(`${BASE_API_DOMAIN}/v2/user/verify-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token })
-    })
+    let res = await fetch(
+      `${BASE_API_DOMAIN}/v2/users/verify-email?token=${encodeURIComponent(token)}`,{
+        method: 'GET'
+      }
+    )
 
     if (!res.ok) {
-      res = await fetch(`${BASE_API_DOMAIN}/v2/user/verify-email?token=${encodeURIComponent(token)}`)
+      res = await fetch(`${BASE_API_DOMAIN}/v2/users/verify-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      })
     }
 
     if (!res.ok) {
@@ -48,7 +52,7 @@ const handleResend = async () => {
   }
   try {
     isResending.value = true
-    const res = await fetch(`${BASE_API_DOMAIN}/v2/user/resend-verification-email`, {
+    const res = await fetch(`${BASE_API_DOMAIN}/v2/users/resend-verification-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: resendEmail.value.trim() })
@@ -67,8 +71,9 @@ const handleResend = async () => {
 }
 
 onMounted(() => {
-  const token = route.query.token
-  if (!token || typeof token !== 'string') {
+  const tokenRaw = route.query.token ?? route.params?.token
+  const token = typeof tokenRaw === 'string' ? tokenRaw.trim() : ''
+  if (!token) {
     isVerifying.value = false
     errorMessage.value = 'Invalid verification link.'
     return

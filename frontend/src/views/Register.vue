@@ -24,8 +24,8 @@ const handleSubmit = async (payload) => {
       form.append("nickname", safeTrim(payload.nickname));
       form.append("email", safeTrim(payload.email));
       form.append("password", safeTrim(payload.password));
-      form.append("fullname", safeTrim(payload.fullname));
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
+      form.append("fullName", safeTrim(payload.fullname));
+      const res = await fetch(`${BASE_API_DOMAIN}/v2/users/register`, {
         method: "POST",
         body: form,
       });
@@ -37,7 +37,7 @@ const handleSubmit = async (payload) => {
       form.append("nickname", safeTrim(payload.seller.nickname));
       form.append("email", safeTrim(payload.seller.contactEmail));
       form.append("password", safeTrim(payload.seller.password));
-      form.append("fullname", safeTrim(payload.seller.fullname));
+      form.append("fullName", safeTrim(payload.seller.fullname));
       const sanitizedMobile = safeTrim(payload.seller.mobile).replace(/-/g, "");
       form.append("mobileNumber", sanitizedMobile);
       form.append("bankAccountNumber", safeTrim(payload.seller.bankAccount));
@@ -46,7 +46,7 @@ const handleSubmit = async (payload) => {
       if (payload.files?.front) form.append("front", payload.files.front);
       if (payload.files?.back) form.append("back", payload.files.back);
 
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
+      const res = await fetch(`${BASE_API_DOMAIN}/v2/users/register`, {
         method: "POST",
         body: form,
       });

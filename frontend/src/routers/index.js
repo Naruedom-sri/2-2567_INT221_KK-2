@@ -35,6 +35,11 @@ const routes = [
     component: Register,
   },
   {
+    path: "/verify-email/:token",
+    name: "VerifyEmailWithToken",
+    component: VerifyEmail,
+  },
+  {
     path: "/verify-email",
     name: "VerifyEmail",
     component: VerifyEmail,
