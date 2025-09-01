@@ -1,6 +1,5 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.user.RequestJwtUser;
 import intregatedproject.backend.dtos.user.RequestRegisterDto;
 import intregatedproject.backend.dtos.user.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
@@ -9,14 +8,11 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.user.InvalidRoleException;
 import intregatedproject.backend.exceptions.user.RequiredFileMissingException;
 import intregatedproject.backend.exceptions.user.UserAlreadyExistsException;
-import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 //import intregatedproject.backend.utils.Token.JwtUtils;
-import intregatedproject.backend.utils.Token.JwtUtils;
-import intregatedproject.backend.utils.Token.TokenType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -38,11 +34,16 @@ public class UserService {
     @Autowired
     private SellerRepository sellerRepository;
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private SaleItemRepository saleItemRepository;
     @Autowired
     private FileService fileService;
+//    @Autowired
+//    private JwtUtils jwtUtils;
+//    @Autowired
+//    private EmailService emailService;
+
     @Autowired
-    private JwtUtils jwtUtils;
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -57,14 +58,13 @@ public class UserService {
             ResponseSellerDto sellerDto = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
             sellerDto.setNickname(user.getNickname());
             sellerDto.setEmail(user.getEmail());
-            sellerDto.setFullname(user.getFullname());
+            sellerDto.setFullname(user.getFullName());
             sellerDto.setRole(user.getRole());
             sellerDto.setStatus(user.getStatus());
             return user;
         } else if (user.getRole().equalsIgnoreCase("buyer")) {
             return user;
         }
-
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 
@@ -72,7 +72,7 @@ public class UserService {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
-        user.setFullname(userDto.getFullname());
+        user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
         user.setBuyer(buyer);
@@ -88,7 +88,7 @@ public class UserService {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
-        user.setFullname(userDto.getFullname());
+        user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
         user.setSeller(seller);
@@ -99,54 +99,6 @@ public class UserService {
         seller.setNationalIdNumber(userDto.getNationalIdNumber());
     }
 
-//    public User registerBuyer(RequestRegisterDto userDto) {
-//        if (userDto.getId() != null && userRepository.existsById(userDto.getId())) {
-//            throw new RuntimeException("Buyer with id " + userDto.getId() + " already exists");
-//        }
-//        if (!"buyer".equalsIgnoreCase(userDto.getRole())) {
-//            throw new RuntimeException("Role must be 'buyer'");
-//        }
-//        var newUser = new User();
-//        var newBuyer = new Buyer();
-//        convertToEntityBuyer(userDto,newUser,newBuyer);
-//
-//        User savedUser = userRepository.save(newUser);
-//        newBuyer.setUser(savedUser);
-//        return savedUser;
-//    }
-//
-//    public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
-//        if (userDto.getId() != null && sellerRepository.existsById(userDto.getId())) {
-//            throw new RuntimeException("Seller with id " + userDto.getId() + " already exists");
-//        }
-//
-//        if (!"seller".equalsIgnoreCase(userDto.getRole())) {
-//            throw new RuntimeException("Role must be 'seller'");
-//
-//        }if (frontFile == null || backFile == null) {
-//            throw new RuntimeException("National ID front/back files are required");
-//        }
-//
-//        var newUser = new User();
-//        var newSeller = new Seller();
-//        convertToEntitySeller(userDto,newUser,newSeller);
-//
-//        String storedFront = fileService.store(frontFile);
-//        String storedBack = fileService.store(backFile);
-//
-//
-//        newSeller.setNationalIdPhotoFront(storedFront);
-//        newSeller.setNationalIdPhotoBack(storedBack);
-//
-//        User savedUser = userRepository.save(newUser);
-//
-//
-//        newSeller.setUser(savedUser);
-//        sellerRepository.save(newSeller);
-//
-//        return savedUser;
-//    }
-
     public User registerBuyer(RequestRegisterDto userDto) {
         if (userDto.getId() != null && userRepository.existsById(userDto.getId())) {
             throw new UserAlreadyExistsException("Buyer with id " + userDto.getId() + " already exists");
@@ -154,11 +106,9 @@ public class UserService {
         if (!"buyer".equalsIgnoreCase(userDto.getRole())) {
             throw new InvalidRoleException("Role must be 'buyer'");
         }
-
         var newUser = new User();
         var newBuyer = new Buyer();
         convertToEntityBuyer(userDto, newUser, newBuyer);
-
         User savedUser = userRepository.save(newUser);
         newBuyer.setUser(savedUser);
         return savedUser;

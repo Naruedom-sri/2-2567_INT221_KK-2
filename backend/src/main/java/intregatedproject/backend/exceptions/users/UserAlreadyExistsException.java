@@ -1,4 +1,4 @@
-package intregatedproject.backend.exceptions.user;
+package intregatedproject.backend.exceptions.users;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

@@ -1,4 +1,4 @@
-package intregatedproject.backend.Configs;
+package intregatedproject.backend.configs;
 
 import intregatedproject.backend.filters.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;

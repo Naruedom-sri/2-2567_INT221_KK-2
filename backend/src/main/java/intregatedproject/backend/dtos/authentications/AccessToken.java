@@ -1,11 +1,11 @@
-package intregatedproject.backend.dtos.Authentication;
+package intregatedproject.backend.dtos.authentications;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class accessToken {
+public class AccessToken {
     private final String token;
     @JsonIgnore
-    public accessToken(String token) {
+    public AccessToken(String token) {
         this.token = token;
     }
 

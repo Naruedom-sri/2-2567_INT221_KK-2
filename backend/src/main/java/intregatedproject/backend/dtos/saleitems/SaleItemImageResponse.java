@@ -1,4 +1,4 @@
-package intregatedproject.backend.dtos;
+package intregatedproject.backend.dtos.saleitems;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

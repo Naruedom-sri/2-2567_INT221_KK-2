@@ -1,8 +1,8 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.user.RequestRegisterDto;
-import intregatedproject.backend.dtos.user.ResponseBuyerDto;
-import intregatedproject.backend.dtos.user.ResponseSellerDto;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.ResponseBuyerDto;
+import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
@@ -34,12 +34,7 @@ public class UserController {
     private EmailService emailService;
     @Autowired
     private JwtUtils jwtUtils;
-//    @GetMapping("/V2/sale-items/register/{id}")
-//    public ResponseEntity<ResponseUserDto> getUserById(@PathVariable Integer id) {
-//        User user = userService.getUserById(id);
-//        ResponseUserDto userDto = modelMapper.map(user, ResponseUserDto.class);
-//        return ResponseEntity.ok(userDto);
-//    }
+
 
     @PostMapping(value = "/v2/users/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
@@ -54,7 +49,7 @@ public class UserController {
             ResponseSellerDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerDto.class);
             responseSellerDto.setNickname(newUser.getNickname());
             responseSellerDto.setEmail(newUser.getEmail());
-            responseSellerDto.setFullname(newUser.getFullname());
+            responseSellerDto.setFullname(newUser.getFullName());
             responseSellerDto.setRole(newUser.getRole());
             responseSellerDto.setStatus(newUser.getStatus());
 

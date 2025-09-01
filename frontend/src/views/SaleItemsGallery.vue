@@ -35,6 +35,7 @@ const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
 const isShowAllBrand = ref(false);
 const isShowAllPrice = ref(false);
 const isShowAllStorage = ref(false);
+const showButtonItem = ref(null);
 const totalPage = ref(0);
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
@@ -519,7 +520,7 @@ onUnmounted(() => {
                 maxPrice === '' &&
                 priceFilterList.length === 0)
                 ? 'opacity-50 bg-[rgba(22,22,23,255)] cursor-not-allowed'
-                : 'bg-blue-300 border-[#0d47a1] text-[#0d47a1]  hover:bg-[#0d47a1] hover:text-white cursor-pointer',
+                : 'bg-blue-500 border-[#0d47a1] text-[#0d47a1]text-white  hover:bg-[#0d47a1]  cursor-pointer',
             ]"
             :disabled="
               (minPrice > maxPrice && maxPrice !== '') ||
@@ -633,6 +634,8 @@ onUnmounted(() => {
       </h1>
       <RouterLink
         @click="statusStore.clearStatusAndMethod()"
+        @mouseover="showButtonItem = index"
+        @mouseleave="showButtonItem = null"
         v-for="(item, index) in items"
         v-show="items.length !== 0"
         :to="{
@@ -640,7 +643,7 @@ onUnmounted(() => {
           params: { itemId: item.id },
         }"
         :key="index"
-        class="itbms-row animation-slide-up w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:-translate-y-[2%] hover:shadow-sm duration-300"
+        class="itbms-row animation-slide-up w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:shadow-sm duration-300"
         ><div
           class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
         >
@@ -693,7 +696,8 @@ onUnmounted(() => {
             }}</span>
           </p>
           <button
-            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-[#0d47a1] hover:text-white hover:cursor-pointer duration-200"
+            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-black hover:text-white hover:cursor-pointer duration-300"
+            :class="[showButtonItem === index ? '' : 'opacity-0']"
           >
             Add to Cart
           </button>

@@ -33,6 +33,9 @@ onMounted(() => {
 <template>
   <div class="container-header text-white text-xs">
     <div class="flex justify-center items-center gap-7 h-12">
+      <div class="empty-element w-28 h-full">
+        <!-- Empty element for spacing -->
+      </div>
       <div class="logo w-56 flex justify-end">
         <img
           @click="router.push({ name: 'LandingPage' })"
@@ -78,18 +81,30 @@ onMounted(() => {
           alt="search-symbol"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
-        <RouterLink :to="{ name: 'Register' }">
-          <img
-            src="/src/assets/imgs/account-symbol4.png"
-            alt="account"
-            class="itbms-register-button w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
-          />
-        </RouterLink>
+        <img
+          src="/src/assets/imgs/account-symbol.png"
+          alt="account"
+          class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+        />
         <img
           src="/src/assets/imgs/cart-symbol.png"
           alt="cart"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
+      </div>
+      <div class="register-login w-28 flex justify-center items-center gap-3">
+        <RouterLink
+          :to="{ name: 'Login' }"
+          class="opacity-85 hover:opacity-100 duration-200"
+          >Login</RouterLink
+        >
+        <p>/</p>
+        <RouterLink
+          :to="{ name: 'Register' }"
+          class="itbms-register-button opacity-85 hover:opacity-100 duration-200"
+        >
+          Signup
+        </RouterLink>
       </div>
     </div>
   </div>

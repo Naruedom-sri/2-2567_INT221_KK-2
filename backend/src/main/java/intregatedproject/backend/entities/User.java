@@ -27,7 +27,7 @@ public class User {
     @Size(max = 40)
     @NotNull
     @Column(name = "fullname", nullable = false, length = 40)
-    private String fullname;
+    private String fullName;
 
     @Size(max = 100)
     @NotNull

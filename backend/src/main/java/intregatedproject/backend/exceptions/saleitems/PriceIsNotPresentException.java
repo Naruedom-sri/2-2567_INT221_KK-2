@@ -1,11 +1,11 @@
-package intregatedproject.backend.exceptions.brand;
+package intregatedproject.backend.exceptions.saleitems;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class BrandAlreadyExistsException extends RuntimeException {
-    public BrandAlreadyExistsException(String message) {
+public class PriceIsNotPresentException extends RuntimeException {
+    public PriceIsNotPresentException(String message) {
         super(message);
     }
 }

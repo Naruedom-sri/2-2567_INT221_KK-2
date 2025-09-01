@@ -7,13 +7,17 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import intregatedproject.backend.dtos.user.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
@@ -26,7 +30,8 @@ public class JwtUtils {
     private String KEY_ID;
     private RSAKey rsaPrivateJWK;
     private RSAKey rsaPublicJWK;
-    private User user;
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
 
     public RSAKey getRsaPublicJWK() {
         return this.rsaPublicJWK;
@@ -46,6 +51,26 @@ public class JwtUtils {
         // ควรเว้นให้ Spring inject @Value ก่อน แล้วสร้าง key ใน @PostConstruct
     }
 
+
+    public String generateAccessToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                .signWith(key)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                .signWith(key)
+                .compact();
+    }
+
+
     @PostConstruct
     private void initKeys() {
         try {
@@ -57,9 +82,6 @@ public class JwtUtils {
         }
     }
 
-//    public String generateToken(UserDetails user) {
-//        return generateToken(user,MAX_TOKEN_INTERVAL,TokenType.ACCESS_TOKEN);
-//    }
 
 //    public String generateToken(UserDetails user
 //            , long ageInMinute, TokenType tokenType) {

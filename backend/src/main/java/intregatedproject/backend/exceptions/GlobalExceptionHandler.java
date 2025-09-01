@@ -1,14 +1,14 @@
 package intregatedproject.backend.exceptions;
 
-import intregatedproject.backend.exceptions.brand.BrandAlreadyExistsException;
-import intregatedproject.backend.exceptions.brand.BrandHasSaleItemException;
-import intregatedproject.backend.exceptions.user.InvalidRoleException;
-import intregatedproject.backend.exceptions.user.RequiredFileMissingException;
-import intregatedproject.backend.exceptions.user.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.brands.BrandAlreadyExistsException;
+import intregatedproject.backend.exceptions.brands.BrandHasSaleItemException;
+import intregatedproject.backend.exceptions.users.InvalidRoleException;
+import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
+import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +94,10 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
+    }
 }
 
 

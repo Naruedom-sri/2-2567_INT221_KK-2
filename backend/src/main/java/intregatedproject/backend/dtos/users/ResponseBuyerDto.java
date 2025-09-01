@@ -1,4 +1,4 @@
-package intregatedproject.backend.dtos.user;
+package intregatedproject.backend.dtos.users;
 
 import lombok.Data;
 
