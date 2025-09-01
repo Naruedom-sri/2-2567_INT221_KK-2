@@ -7,6 +7,8 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
 const password = ref("");
 const isDisable = ref(true);
+const isShowError = ref(false);
+const isShowPassword = ref(false);
 const login = async () => {
   try {
     const data = await loginUser(BASE_API_DOMAIN, {
@@ -16,12 +18,14 @@ const login = async () => {
     console.log(data);
   } catch (error) {
     console.log(error);
+    isShowError.value = true;
   }
 };
 watch(
   [email, password],
   () => {
-    if (email.value !== "" && password.value !== "") isDisable.value = false;
+    if (email.value.trim() !== "" && password.value !== "")
+      isDisable.value = false;
     else isDisable.value = true;
   },
   { immediate: true }
@@ -42,16 +46,13 @@ watch(
         class="flex-1 flex flex-col items-center justify-center gap-5"
       >
         <div
-          v-show="
-            statusStore.getStatus() !== 200 &&
-            statusStore.getMethod() === 'login'
-          "
+          v-show="isShowError"
           class="itbms-message flex justify-between w-72 py-1 px-3 bg-red-100 border border-red-500 text-red-500 text-xs text-center"
         >
           <p>Username or Password incorrect!</p>
           <button
             type="button"
-            @click="statusStore.clearStatusAndMethod()"
+            @click="isShowError = false"
             class="text-black hover:text-red-500"
           >
             x
@@ -65,18 +66,25 @@ watch(
               v-model="email"
               maxlength="50"
               placeholder="Email"
-              class="itbms-email w-72 pl-4 py-3 border border-gray-300 rounded-2xl outline-none"
+              class="itbms-email w-72 px-4 py-3 border border-gray-300 rounded-2xl outline-none"
             />
           </div>
 
-          <div>
+          <div class="flex items-center border border-gray-300 rounded-2xl">
             <input
-              type="password"
+              :type="isShowPassword ? 'text' : 'password'"
               v-model="password"
               maxlength="14"
               placeholder="Password"
-              class="itbms-password w-72 pl-4 py-3 border border-gray-300 rounded-2xl outline-none"
+              class="itbms-password w-72 pl-4 py-3 outline-none"
             />
+            <button
+              type="button"
+              @click="isShowPassword = !isShowPassword"
+              class="px-4 text-xs"
+            >
+              {{ isShowPassword ? "Hide" : "Show" }}
+            </button>
           </div>
         </div>
         <div class="flex justify-between w-72 text-xs">
