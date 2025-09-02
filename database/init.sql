@@ -161,5 +161,5 @@ VALUES (
     'itbkk.somchai@ad.sit.kmutt.ac.th',
     'itProj24/SOM',
     'BUYER',
-    'INACTIVE'
+    'ACTIVE'
 );
