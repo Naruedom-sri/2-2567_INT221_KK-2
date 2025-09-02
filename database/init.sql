@@ -68,18 +68,6 @@ CREATE TABLE sellers (
     CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
-CREATE TABLE email_verification_tokens (
-    id int AUTO_INCREMENT PRIMARY KEY,
-    userId int NOT NULL UNIQUE,
-    token VARCHAR(255) NOT NULL UNIQUE,
-    expiryTime TIMESTAMP NOT NULL,
-    createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_token_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_tokens_userid ON email_verification_tokens(userId);
-CREATE INDEX idx_tokens_expiry ON email_verification_tokens(expiryTime);
 
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),

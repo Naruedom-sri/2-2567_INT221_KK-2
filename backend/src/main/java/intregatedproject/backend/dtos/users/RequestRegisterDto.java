@@ -1,6 +1,5 @@
 package intregatedproject.backend.dtos.users;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import intregatedproject.backend.utils.PasswordUtils;
 import lombok.Data;
 
@@ -21,8 +20,8 @@ public class RequestRegisterDto {
     private String nationalIdPhotoFront;
     private String nationalIdPhotoBack;
 
-    public void setPassword(String password) {
-        this.password = PasswordUtils.hashPassword(password);
-    }
+//    public void setPassword(String password) {
+//        this.password = PasswordUtils.hashPassword(password);
+//    }
 }
 
