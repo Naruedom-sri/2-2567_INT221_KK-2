@@ -78,6 +78,7 @@ const handleSubmit = async (payload) => {
         "The user account has been successfully registered."
       );
     }
+    router.push({ name: "SaleItemsGallery" });
   } catch (e) {
     console.error(e);
     isSubmitting.value = false;
