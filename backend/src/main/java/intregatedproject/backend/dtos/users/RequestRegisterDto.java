@@ -23,5 +23,9 @@ public class RequestRegisterDto {
 //    public void setPassword(String password) {
 //        this.password = PasswordUtils.hashPassword(password);
 //    }
+
+    public void setStatus(String status) {
+        this.status = status == null || status.isBlank() ? "INACTIVE" : status;
+    }
 }
 

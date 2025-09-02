@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from "vue";
-import { loginUser } from "@/libs/user-api";
+import { loginUser } from "@/libs/userApi";
 import { useRouter } from "vue-router";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
@@ -102,10 +102,10 @@ watch(
         >
           Login
         </button>
-        <p>
+        <button type="button" @click="router.push({ name: 'Register' })">
           Don't have account?
           <span class="text-blue-500">Create an Account</span>
-        </p>
+        </button>
       </form>
     </div>
   </div>

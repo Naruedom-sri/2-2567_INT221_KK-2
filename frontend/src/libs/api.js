@@ -1,6 +1,6 @@
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import { useStatusStore } from "@/stores/statusStore";
 const updateData = async (url, id, newData) => {
-  const statusStore = useSaleItemStatusStore();
+  const statusStore = useStatusStore();
   const response = await fetch(`${url}/${id}`, {
     method: "PUT",
     headers: {

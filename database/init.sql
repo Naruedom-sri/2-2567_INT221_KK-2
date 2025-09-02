@@ -29,7 +29,7 @@ CREATE TABLE sale_items (
 
 
 
-CREATE TABLE IF NOT EXISTS sale_item_images (
+CREATE TABLE sale_item_images (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
     imageViewOrder INT ,
@@ -152,3 +152,4 @@ INSERT INTO sale_items (id, brandId, model, description, quantity, price, screen
 (83, 10, 'Find X5 Lite', 'Previous gen lite', 8, 14850, 6.43, 8, 128, 'Starry Black'),
 (84, 10, 'A77', 'Budget friendly', 20, 8250, 6.56, 6, 128, 'Ocean Blue'),
 (85, 10, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
+

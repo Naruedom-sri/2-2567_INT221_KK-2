@@ -1,9 +1,8 @@
 <script setup>
 import NavBar from "@/components/NavBar.vue";
 import { ref, onMounted, watch } from "vue";
-import { createData, updateData, getDataById } from "@/libs/api";
+import { createBrand, updateBrand, getBrandById } from "@/libs/brandApi";
 import { useRouter, useRoute } from "vue-router";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
 import BrandNotFound from "@/components/BrandNotFound.vue";
 const {
@@ -13,14 +12,14 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
   isEditing: Boolean,
 });
-const statusStore = useSaleItemStatusStore();
+
 const route = useRouter();
 const brand = ref({});
 const name = ref();
 const websiteUrl = ref();
 const country = ref();
 const isActive = ref(true);
-const isContainAllNonOtionalFiled = ref(false);
+const isContainAllNonOptionalFiled = ref(false);
 const isUpdatedFiled = ref(false);
 const isDisabled = ref(true);
 
@@ -50,7 +49,7 @@ const checkValidateInput = () => {
 const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
-      brand.value = await getDataById(`${BASE_API_DOMAIN}/v1/brands`, brandId);
+      brand.value = await getBrandById(`${BASE_API_DOMAIN}`, brandId);
       name.value = brand.value.name;
       websiteUrl.value = brand.value.websiteUrl;
       country.value = brand.value.countryOfOrigin;
@@ -65,9 +64,9 @@ const checkIsEditing = async () => {
 
 const checkAllNonOptionalFiled = () => {
   if (name.value !== undefined && name.value !== "") {
-    isContainAllNonOtionalFiled.value = true;
+    isContainAllNonOptionalFiled.value = true;
   } else {
-    isContainAllNonOtionalFiled.value = false;
+    isContainAllNonOptionalFiled.value = false;
   }
 };
 
@@ -87,43 +86,43 @@ const checkUpdatedFiled = () => {
 
 const checkDisabled = () => {
   if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    !isContainAllNonOtionalFiled.value &&
+    !isContainAllNonOptionalFiled.value &&
     isUpdatedFiled.value &&
     !validInput.value
   ) {
     isDisabled.value = true;
   } else if (
-    isContainAllNonOtionalFiled.value &&
+    isContainAllNonOptionalFiled.value &&
     !isUpdatedFiled.value &&
     validInput.value
   ) {
@@ -142,19 +141,9 @@ const addUpdateNewBrand = async () => {
       isActive: isActive.value,
     };
     if (!props.isEditing) {
-      const data = await createData(`${BASE_API_DOMAIN}/v1/brands`, newBrand);
-      if (data) {
-        statusStore.setStatusAndMethod("add", 201);
-      }
+      const data = await createBrand(`${BASE_API_DOMAIN}`, newBrand);
     } else {
-      const data = await updateData(
-        `${BASE_API_DOMAIN}/v1/brands`,
-        brandId,
-        newBrand
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("update", 200);
-      }
+      const data = await updateBrand(`${BASE_API_DOMAIN}`, brandId, newBrand);
     }
     goBackToPreviousPage();
   } catch (error) {

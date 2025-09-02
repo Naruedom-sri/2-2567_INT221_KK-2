@@ -3,12 +3,11 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-
+import { useStatusStore } from "@/stores/statusStore";
 const accountType = ref("buyer");
 const isSubmitting = ref(false);
 const router = useRouter();
-const statusStore = useSaleItemStatusStore();
+const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
 const safeTrim = (v) => (v ?? "").toString().trim();
@@ -16,7 +15,7 @@ const safeTrim = (v) => (v ?? "").toString().trim();
 const handleSubmit = async (payload) => {
   try {
     isSubmitting.value = true;
-    statusStore.clearStatusAndMethod();
+    statusStore.clearEntityAndMethodAndStatusAndMessage();
 
     if (accountType.value === "buyer") {
       const form = new FormData();
@@ -29,8 +28,21 @@ const handleSubmit = async (payload) => {
         method: "POST",
         body: form,
       });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (res.status >= 400) throw new Error("Register failed");
+      if (res.status !== 201) {
+        statusStore.setStatusAndMethod(
+          "user",
+          "register",
+          res.status,
+          "Register failed."
+        );
+        throw new Error("Register failed");
+      }
+      statusStore.setStatusAndMethod(
+        "user",
+        "register",
+        res.status,
+        "The user account has been successfully registered."
+      );
     } else {
       const form = new FormData();
       form.append("role", "seller");
@@ -50,30 +62,37 @@ const handleSubmit = async (payload) => {
         method: "POST",
         body: form,
       });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (res.status >= 400) throw new Error("Register failed");
+      if (res.status !== 201) {
+        statusStore.setStatusAndMethod(
+          "user",
+          "register",
+          res.status,
+          "Register failed."
+        );
+        throw new Error("Register failed");
+      }
+      statusStore.setStatusAndMethod(
+        "user",
+        "register",
+        res.status,
+        "The user account has been successfully registered."
+      );
     }
-    router.push({ name: "SaleItemsGallery" });
   } catch (e) {
     console.error(e);
-  } finally {
     isSubmitting.value = false;
   }
 };
 
-const handleCancel = () => router.push({ name: "SaleItemsGallery" });
+const handleCancel = () => {
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
+  router.back();
+};
 </script>
 
 <template>
   <div class="min-h-screen grid place-items-center bg-gray-0">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6">
-      <RouterLink :to="{ name: 'SaleItemsGallery' }">
-        <img
-          src="/src/assets/imgs/close-symbol.png"
-          alt="close symbol"
-          class="w-7 hover:cursor-pointer"
-        />
-      </RouterLink>
       <h1 class="text-3xl font-semibold text-center mb-2">Register</h1>
       <p class="text-center text-gray-500 mb-6">Register as Buyer or Seller</p>
 
@@ -105,6 +124,7 @@ const handleCancel = () => router.push({ name: "SaleItemsGallery" });
       <component
         :is="accountType === 'buyer' ? BuyerForm : SellerForm"
         :submitting="isSubmitting"
+        :statusErr="statusStore.getStatus()"
         @submit="handleSubmit"
         @cancel="handleCancel"
       />

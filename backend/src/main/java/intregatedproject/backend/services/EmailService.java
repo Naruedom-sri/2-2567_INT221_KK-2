@@ -41,24 +41,11 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-//    @Async
-//    public void sendVerificationEmail(String toEmail,String token) {
-//        String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-//        String verificationUrl = "http://localhost:5173/kk2/verify-email/?token=" + encoded;
-//        String body = "Click the link to verify your account:\n" + verificationUrl;
-//
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(toEmail);
-//        message.setSubject("Verification Email");
-//        message.setText(body);
-//        mailSender.send(message);
-//    }
-
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-//        String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
-        String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token=" + token;
+        String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
+//        String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token=" + token;
         // เตรียม context สำหรับ Thymeleaf
         Context context = new Context();
         context.setVariable("verificationUrl", verificationUrl);

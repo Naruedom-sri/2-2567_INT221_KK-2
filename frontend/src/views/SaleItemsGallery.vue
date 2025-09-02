@@ -1,18 +1,17 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import {
-  getAllData,
-  getAllDataWithParam,
-  getImageOfData,
-  getDataById,
-} from "@/libs/api";
 import NavBar from "@/components/NavBar.vue";
-import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
-import AlertMessageRegister from "@/components/AlertMessageRegister.vue";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import Notification from "@/components/Notification.vue";
+import { useStatusStore } from "@/stores/statusStore";
 import Footer from "@/components/Footer.vue";
 import FilterItem from "@/components/FilterItem.vue";
-const statusStore = useSaleItemStatusStore();
+import {
+  getAllSaleItemV2,
+  getImageOfSaleItem,
+  getSaleItemById,
+} from "@/libs/saleItemApi";
+import { getAllBrand } from "@/libs/brandApi";
+const statusStore = useStatusStore();
 const items = ref([]);
 const brands = ref([]);
 const prices = ref([
@@ -83,10 +82,7 @@ const getAllSaleItemBySortAndFilter = async (search = null, from = "") => {
     params.append("filterPriceUpper", maxPrice.value);
     params.append("searchContent", searchContent.value);
 
-    const data = await getAllDataWithParam(
-      `${BASE_API_DOMAIN}/v2/sale-items`,
-      params
-    );
+    const data = await getAllSaleItemV2(`${BASE_API_DOMAIN}`, params);
     items.value = data.content;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
@@ -306,8 +302,8 @@ const sortDesc = () => {
   getAllSaleItemBySortAndFilter();
 };
 
-const getAllBrand = async () => {
-  brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+const getAllBrands = async () => {
+  brands.value = await getAllBrand(`${BASE_API_DOMAIN}`);
   brands.value.sort((a, b) => a.name.localeCompare(b.name));
   try {
   } catch (error) {
@@ -335,13 +331,10 @@ const imageUrlList = ref([]);
 const getImageOfAllItem = async () => {
   for (const item of items.value) {
     try {
-      const data = await getDataById(
-        `${BASE_API_DOMAIN}/v2/sale-items`,
-        item.id
-      );
+      const data = await getSaleItemById(`${BASE_API_DOMAIN}`, item.id);
       if (data.saleItemImages.length !== 0) {
-        const imgUrl = await getImageOfData(
-          `${BASE_API_DOMAIN}/v2/sale-items`,
+        const imgUrl = await getImageOfSaleItem(
+          `${BASE_API_DOMAIN}`,
           item.id,
           1
         );
@@ -398,7 +391,7 @@ onMounted(() => {
   if (savedMinPrice) minPrice.value = parseInt(savedMinPrice);
   if (savedMaxPrice) maxPrice.value = parseInt(savedMaxPrice);
   if (savedSearchContent) searchContent.value = savedSearchContent;
-  getAllBrand();
+  getAllBrands();
   getAllSaleItemBySortAndFilter();
   setAnimation();
 });
@@ -633,7 +626,7 @@ onUnmounted(() => {
         no sale item
       </h1>
       <RouterLink
-        @click="statusStore.clearStatusAndMethod()"
+        @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
         @mouseover="showButtonItem = index"
         @mouseleave="showButtonItem = null"
         v-for="(item, index) in items"
@@ -774,16 +767,7 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <AlertMessageRegister
-    v-if="
-      statusStore.getStatus() !== null && statusStore.getMethod() === 'register'
-    "
-  />
-  <AlertMessageSaleItem
-    v-if="
-      statusStore.getStatus() !== null && statusStore.getMethod() !== 'register'
-    "
-  />
+  <Notification v-if="statusStore.getStatus() !== null" />
   <Footer />
 </template>
 

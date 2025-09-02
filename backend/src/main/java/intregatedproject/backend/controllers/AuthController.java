@@ -33,7 +33,6 @@ public class AuthController {
 
     @PostMapping("/v2/users/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String jwtToken) {
-        System.out.println("jwtToken: " + jwtToken);
         User user = emailService.verifyEmail(jwtToken);
 
         if ("SELLER".equalsIgnoreCase(user.getRole())) {
@@ -62,7 +61,7 @@ public class AuthController {
 //                responseLogin.setAccess_token(access_token);
 //                responseLogin.setRefresh_token(refresh_token);
 //            }
-            if("Active".equalsIgnoreCase(user.getStatus())) {
+            if("ACTIVE".equalsIgnoreCase(user.getStatus())) {
                 if (user.getPassword().equals(requestLogin.getPassword()) && user.getEmail().equals(requestLogin.getEmail())) {
                     String access_token = jwtUtil.generateAccessToken(user.getNickname());
                     String refresh_token = jwtUtil.generateRefreshToken(user.getNickname());

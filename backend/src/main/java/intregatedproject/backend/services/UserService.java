@@ -8,6 +8,7 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
 import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
 import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -26,7 +27,6 @@ public class UserService {
     private SellerRepository sellerRepository;
     @Autowired
     private FileService fileService;
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -83,6 +83,12 @@ public class UserService {
     }
 
     public User registerBuyer(RequestRegisterDto userDto) {
+        List<User> users = getAllUsers();
+        users.forEach(user -> {
+            if (user.getEmail().equals(userDto.getEmail())) {
+                throw new EmailAlreadyVerifiedException("Email Already Exists");
+            }
+        });
         if (userDto.getId() != null && userRepository.existsById(userDto.getId())) {
             throw new UserAlreadyExistsException("Buyer with id " + userDto.getId() + " already exists");
         }
@@ -98,6 +104,12 @@ public class UserService {
     }
 
     public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
+        List<User> users = getAllUsers();
+        users.forEach(user -> {
+            if (user.getEmail().equals(userDto.getEmail())) {
+                throw new EmailAlreadyVerifiedException("Email Already Exists");
+            }
+        });
         if (userDto.getId() != null && sellerRepository.existsById(userDto.getId())) {
             throw new UserAlreadyExistsException("Seller with id " + userDto.getId() + " already exists");
         }
@@ -124,5 +136,6 @@ public class UserService {
 
         return savedUser;
     }
+
 
 }

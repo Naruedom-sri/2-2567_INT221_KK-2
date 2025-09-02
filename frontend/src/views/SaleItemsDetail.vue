@@ -1,34 +1,37 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { getDataById, getImageOfData } from "@/libs/api";
-import { deleteData } from "@/libs/api";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
-import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
+import { useStatusStore } from "@/stores/statusStore";
+import AlertMessage from "@/components/AlertMessage.vue";
+import Notification from "@/components/Notification.vue";
+import {
+  deleteSaleItemById,
+  getImageOfSaleItem,
+  getSaleItemById,
+} from "@/libs/saleItemApi";
 
 const {
   params: { itemId },
 } = useRoute();
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
-const statusStore = useSaleItemStatusStore();
+const statusStore = useStatusStore();
 const item = ref({});
-const route = useRouter();
+const router = useRouter();
 const showDialog = ref(false);
 const imageUrlList = ref([]);
 const mainImage = ref(null);
 
 const getSaleItem = async () => {
   try {
-    item.value = await getDataById(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
+    item.value = await getSaleItemById(`${BASE_API_DOMAIN}`, itemId);
     if (item.value.saleItemImages.length !== 0) {
       for (const img of item.value.saleItemImages) {
-        const imgUrl = await getImageOfData(
-          `${BASE_API_DOMAIN}/v2/sale-items`,
+        const imgUrl = await getImageOfSaleItem(
+          `${BASE_API_DOMAIN}`,
           itemId,
           img.imageViewOrder
         );
@@ -45,11 +48,11 @@ const getSaleItem = async () => {
 const deleteSaleItem = async () => {
   showDialog.value = false;
   try {
-    const status = await deleteData(`${BASE_API_DOMAIN}/v2/sale-items`, itemId);
-    statusStore.setStatusAndMethod("delete", status);
+    const status = await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
     sessionStorage.setItem("indexPage", String(0));
     sessionStorage.setItem("tempIndexPage", String(0));
-    route.push({ name: "SaleItemsGallery" });
+    console.log("Monkey");
+    router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
   }
@@ -62,13 +65,20 @@ onUnmounted(() => {
 
 <template>
   <NavBar />
-  <AlertMessageSaleItem v-show="statusStore.getStatus() !== null" />
+  <Notification v-show="statusStore.getStatus() !== null" />
   <SaleItemNotFound v-if="item === null" />
   <div v-else class="detail-container text-sm text-white">
+    <AlertMessage
+      v-if="showDialog"
+      title="Are you sure?"
+      message="Do you want to delete this sale item?"
+      @confirm="deleteSaleItem"
+      @cancel="showDialog = false"
+    />
     <div class="itbms-row grid grid-cols-2 mb-10">
       <div class="flex col-span-2 py-7 mx-20 mb-6 border-b border-white">
         <RouterLink
-          @click="statusStore.clearStatusAndMethod()"
+          @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
           :to="{ name: 'SaleItemsGallery' }"
           class="itbms-home-button hover:text-blue-500 hover:cursor-pointer duration-100"
         >
@@ -282,13 +292,6 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-    <AlertErrorMessage
-      v-if="showDialog"
-      title="Are you sure?"
-      message="Do you want to delete this sale item?"
-      @confirm="deleteSaleItem"
-      @cancel="showDialog = false"
-    />
   </div>
   <Footer />
 </template>

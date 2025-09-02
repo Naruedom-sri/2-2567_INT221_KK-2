@@ -41,7 +41,6 @@ public class UserController {
                                       @RequestPart(value = "front", required = false) MultipartFile front,
                                       @RequestPart(value = "back", required = false) MultipartFile back) {
         String token = jwtUtils.generateToken(userDto, 48, TokenType.ACCESS_TOKEN);
-        System.out.println("Generated token: " + token);
 
         if ("seller".equalsIgnoreCase(userDto.getRole())) {
             userDto.setRole("seller");
@@ -60,7 +59,6 @@ public class UserController {
         if ("buyer".equalsIgnoreCase(userDto.getRole())) {
             User newUser = userService.registerBuyer(userDto);
             ResponseBuyerDto responseUserDto = modelMapper.map(newUser, ResponseBuyerDto.class);
-
             emailService.sendVerificationEmail(newUser.getEmail(), token);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDto);
