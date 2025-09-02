@@ -33,6 +33,7 @@ public class AuthController {
 
     @PostMapping("/v2/users/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String jwtToken) {
+        System.out.println("jwtToken: " + jwtToken);
         User user = emailService.verifyEmail(jwtToken);
 
         if ("SELLER".equalsIgnoreCase(user.getRole())) {

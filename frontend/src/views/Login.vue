@@ -1,21 +1,22 @@
 <script setup>
 import { ref, watch } from "vue";
 import { loginUser } from "@/libs/user-api";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-const statusStore = useSaleItemStatusStore();
+import { useRouter } from "vue-router";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
 const password = ref("");
 const isDisable = ref(true);
 const isShowError = ref(false);
 const isShowPassword = ref(false);
+const router = useRouter();
 const login = async () => {
   try {
     const data = await loginUser(BASE_API_DOMAIN, {
       email: email.value,
       password: password.value,
     });
-    console.log(data);
+    router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
     isShowError.value = true;
@@ -24,7 +25,7 @@ const login = async () => {
 watch(
   [email, password],
   () => {
-    if (email.value.trim() !== "" && password.value !== "")
+    if (EMAIL_RE.test(email.value) && password.value !== "")
       isDisable.value = false;
     else isDisable.value = true;
   },

@@ -58,9 +58,6 @@ public class User {
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Buyer buyer;
 
-    @OneToOne(mappedBy = "user")
-    private EmailVerificationToken emailverificationtoken;
-
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Seller seller;
 

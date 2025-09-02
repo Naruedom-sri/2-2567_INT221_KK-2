@@ -8,24 +8,15 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
 import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
 import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
-import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
-import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
-//import intregatedproject.backend.utils.Token.JwtUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserService {
@@ -34,16 +25,8 @@ public class UserService {
     @Autowired
     private SellerRepository sellerRepository;
     @Autowired
-    private SaleItemRepository saleItemRepository;
-    @Autowired
     private FileService fileService;
-//    @Autowired
-//    private JwtUtils jwtUtils;
-//    @Autowired
-//    private EmailService emailService;
 
-    @Autowired
-    private EmailVerificationTokenRepository emailVerificationTokenRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -142,33 +125,4 @@ public class UserService {
         return savedUser;
     }
 
-
-//    public Map<String, Object> authenticateUser(RequestJwtUser user) {
-//        UsernamePasswordAuthenticationToken upat = new
-//                UsernamePasswordAuthenticationToken(
-//                user.getEmail(), user.getPassword());
-//        authenticationManager.authenticate(upat);
-//        //Exception occurred (401) if failed
-//        User user1 = userRepository.findByEmail(user.getEmail())
-//                .orElseThrow(() -> new InvalidVerificationTokenException("User not found for email: " + user.getEmail()));
-//        RequestRegisterDto userDto = modelMapper.map(user1, RequestRegisterDto.class);
-//        long refreshTokenAgeInMinute = 8 * 60 * 60 * 1000;
-//        return Map.of(
-//                "access_token", jwtUtils.generateToken(userDto, 48,TokenType.ACCESS_TOKEN)
-//                , "refresh_token", jwtUtils.generateToken(
-//                        userDto, refreshTokenAgeInMinute, TokenType.REFRESH_TOKEN)
-//        );
-//    }
-//
-//    public Map<String, Object> refreshToken(String refreshToken) {
-//        jwtUtils.verifyToken(refreshToken);
-//        Map<String, Object> claims = jwtUtils.getJWTClaimsSet(refreshToken);
-//        jwtUtils.isExpired(claims);
-//        if (!jwtUtils.isValidClaims(claims) || !"REFRESH_TOKEN".equals(claims.get("typ"))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
-//        }
-//        User user = getUserById((Integer) claims.get("uid"));
-//        RequestRegisterDto userDetails = modelMapper.map(user, RequestRegisterDto.class);
-//        return Map.of("access_token", jwtUtils.generateToken(userDetails,48,TokenType.ACCESS_TOKEN));
-//    }
 }
