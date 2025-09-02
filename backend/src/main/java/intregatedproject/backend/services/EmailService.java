@@ -56,7 +56,7 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-        String verificationUrl = "http://localhost:5173/kk2/verify-email/?token=" + encoded;
+        String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
 
         // เตรียม context สำหรับ Thymeleaf
         Context context = new Context();

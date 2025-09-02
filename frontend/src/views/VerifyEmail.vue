@@ -18,7 +18,7 @@ const verify = async (token) => {
   try {
     let res = await fetch(
       `${BASE_API_DOMAIN}/v2/users/verify-email?token=${encodeURIComponent(token)}`,{
-        method: 'GET'
+        method: 'POST'
       }
     )
 
