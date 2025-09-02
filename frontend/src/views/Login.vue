@@ -25,7 +25,7 @@ const login = async () => {
 watch(
   [email, password],
   () => {
-    if (EMAIL_RE.test(email.value) && password.value !== "")
+    if (email.value.trim() !== "" && password.value !== "")
       isDisable.value = false;
     else isDisable.value = true;
   },

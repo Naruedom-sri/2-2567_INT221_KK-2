@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import jakarta.mail.MessagingException;
@@ -56,12 +57,12 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-        String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
-
+//        String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
+        String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token=" + token;
         // เตรียม context สำหรับ Thymeleaf
         Context context = new Context();
         context.setVariable("verificationUrl", verificationUrl);
-        context.setVariable("token",encoded);
+        context.setVariable("token", encoded);
         // ประมวลผล template
         String htmlContent = templateEngine.process("verificationEmail", context);
 
