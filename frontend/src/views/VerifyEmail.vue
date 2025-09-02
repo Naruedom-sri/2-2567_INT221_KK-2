@@ -18,21 +18,10 @@ const verify = async (token) => {
   try {
     console.log(token);
     let res = await fetch(
-      `${BASE_API_DOMAIN}/v2/users/verify-email?token=${encodeURIComponent(
-        token
-      )}`,
-      {
-        method: "POST",
+      `${BASE_API_DOMAIN}/v2/users/verify-email?token=${encodeURIComponent(token)}`,{
+        method: 'POST'
       }
     );
-
-    // if (!res.ok) {
-    //   res = await fetch(`${BASE_API_DOMAIN}/v2/users/verify-email`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ token }),
-    //   });
-    // }
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
