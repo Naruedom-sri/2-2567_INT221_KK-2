@@ -79,7 +79,7 @@ public class EmailService {
     }
 
     //ใช้ตอน deploy จริง
-//        String verificationUrl = "http    ://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token="+token ;
+//        String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token="+token ;
 
     public User verifyEmail(String jwtToken) {
         try {
