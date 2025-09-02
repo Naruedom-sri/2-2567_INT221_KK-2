@@ -9,7 +9,7 @@ const loginUser = async (url, newData) => {
     body: JSON.stringify({ ...newData }),
   });
   if (response.status !== 200) {
-    statusStore.setStatusAndMethod(
+    statusStore.setEntityAndMethodAndStatusAndMessage(
       "user",
       "login",
       response.status,
@@ -19,7 +19,7 @@ const loginUser = async (url, newData) => {
       `Can't login with status:  ${response.status} and with body: ${response.json}`
     );
   }
-  statusStore.setStatusAndMethod(
+  statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
     "login",
     response.status,
