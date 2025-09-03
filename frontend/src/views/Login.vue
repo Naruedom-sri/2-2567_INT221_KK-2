@@ -50,7 +50,7 @@ watch(
           v-show="isShowError"
           class="itbms-message flex justify-between w-72 py-1 px-3 bg-red-100 border border-red-500 text-red-500 text-xs text-center"
         >
-          <p>Username or Password incorrect!</p>
+          <p>Email or Password incorrect.</p>
           <button
             type="button"
             @click="isShowError = false"
