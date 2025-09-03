@@ -55,13 +55,13 @@ public class AuthController {
         ResponseLogin responseLogin = new ResponseLogin();
         userList.forEach(user -> {
 //            System.out.println(PasswordUtils.matches(requestLogin.getPassword(), user.getPassword()));
-//            if (PasswordUtils.matches(requestLogin.getPassword(), user.getPassword()) && user.getEmail().equals(requestLogin.getEmail())) {
+            if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
+                // if (PasswordUtils.matches(requestLogin.getPassword(), user.getPassword()) && user.getEmail().equals(requestLogin.getEmail())) {
 //                String access_token = jwtUtil.generateAccessToken(user.getNickname());
 //                String refresh_token = jwtUtil.generateRefreshToken(user.getNickname());
 //                responseLogin.setAccess_token(access_token);
 //                responseLogin.setRefresh_token(refresh_token);
 //            }
-            if("ACTIVE".equalsIgnoreCase(user.getStatus())) {
                 if (user.getPassword().equals(requestLogin.getPassword()) && user.getEmail().equals(requestLogin.getEmail())) {
                     String access_token = jwtUtil.generateAccessToken(user.getNickname());
                     String refresh_token = jwtUtil.generateRefreshToken(user.getNickname());

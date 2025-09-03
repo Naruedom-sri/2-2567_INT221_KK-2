@@ -11,7 +11,7 @@ public class RequestRegisterDto {
     private String email;
     private String fullName;
     private String role;
-    private String status;
+    private String status = "INACTIVE";;
 
     private String mobileNumber;
     private String bankAccountNumber;

@@ -29,7 +29,7 @@ const handleSubmit = async (payload) => {
         body: form,
       });
       if (res.status !== 201) {
-        statusStore.setStatusAndMethod(
+        statusStore.setEntityAndMethodAndStatusAndMessage(
           "user",
           "register",
           res.status,
@@ -37,7 +37,7 @@ const handleSubmit = async (payload) => {
         );
         throw new Error("Register failed");
       }
-      statusStore.setStatusAndMethod(
+      statusStore.setEntityAndMethodAndStatusAndMessage(
         "user",
         "register",
         res.status,
@@ -63,7 +63,7 @@ const handleSubmit = async (payload) => {
         body: form,
       });
       if (res.status !== 201) {
-        statusStore.setStatusAndMethod(
+        statusStore.setEntityAndMethodAndStatusAndMessage(
           "user",
           "register",
           res.status,
@@ -71,7 +71,7 @@ const handleSubmit = async (payload) => {
         );
         throw new Error("Register failed");
       }
-      statusStore.setStatusAndMethod(
+      statusStore.setEntityAndMethodAndStatusAndMessage(
         "user",
         "register",
         res.status,
