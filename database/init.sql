@@ -163,3 +163,14 @@ VALUES (
     'BUYER',
     'ACTIVE'
 );
+
+
+INSERT INTO users (nickname, fullname, email, password, role, status)
+VALUES (
+    'Somkiat',
+    'Somkiat  Luckchart',
+    'itbkk.somkiat@ad.sit.kmutt.ac.th',
+    'itProj24/SOM',
+    'BUYER',
+    'ACTIVE'
+);
