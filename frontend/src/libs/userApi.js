@@ -8,17 +8,39 @@ const loginUser = async (url, newData) => {
     },
     body: JSON.stringify({ ...newData }),
   });
-  if (response.status !== 200) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "user",
-      "login",
-      response.status,
-      "Login filed."
-    );
-    throw new Error(
-      `Can't login with status:  ${response.status} and with body: ${response.json}`
-    );
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    if (response.status === 401) {
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "login",
+        response.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't login (status: ${response.status}) - ${errorMessage}`
+      );
+    } else {
+      // 400 bad request invalid email format
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "login",
+        response.status,
+        errorMessage.email
+      );
+      throw new Error(
+        `Can't login (status: ${response.status}) - ${errorMessage.email}`
+      );
+    }
   }
+
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
     "login",
@@ -27,6 +49,7 @@ const loginUser = async (url, newData) => {
   );
   return response.json();
 };
+
 const register = () => {};
 
 export { loginUser, register };

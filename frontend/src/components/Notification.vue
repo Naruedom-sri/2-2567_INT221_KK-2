@@ -8,7 +8,7 @@ const showMessage = ref(true);
 const setIntervalShowMessage = () => {
   setTimeout(() => {
     showMessage.value = false;
-    statusStore.clearStatusAndMethod();
+    statusStore.clearEntityAndMethodAndStatusAndMessage();
   }, 5000);
 };
 onMounted(() => {

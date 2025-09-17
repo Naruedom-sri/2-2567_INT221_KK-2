@@ -4,7 +4,7 @@ const getAllSaleItem = async (url) => {
   const response = await fetch(`${url}/v1/sale-items`);
   if (!response.ok) {
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json()}`
     );
   }
   const data = await response.json();
@@ -15,7 +15,7 @@ const getAllSaleItemV2 = async (url, params) => {
   const response = await fetch(`${url}/v2/sale-items?${params.toString()}`);
   if (!response.ok) {
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json()}`
     );
   }
   const data = await response.json();
