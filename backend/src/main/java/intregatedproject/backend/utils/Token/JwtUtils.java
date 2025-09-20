@@ -10,6 +10,8 @@ import com.nimbusds.jwt.SignedJWT;
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -78,6 +80,19 @@ public class JwtUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .signWith(key)
                 .compact();
+    }
+
+
+    public Claims validateToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(key) // secret key
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            // token หมดอายุ, key ไม่ตรง, หรือ format ไม่ถูกต้อง
+            return null;
+        }
     }
 
 

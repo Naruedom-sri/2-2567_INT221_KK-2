@@ -7,6 +7,7 @@ import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
 import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
@@ -27,8 +28,6 @@ public class UserService {
     private SellerRepository sellerRepository;
     @Autowired
     private FileService fileService;
-    @Autowired
-    private ModelMapper modelMapper;
 
 
     public List<User> getAllUsers() {
@@ -36,19 +35,7 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
-        if (user.getRole().equalsIgnoreCase("seller")) {
-            ResponseSellerDto sellerDto = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
-            sellerDto.setNickname(user.getNickname());
-            sellerDto.setEmail(user.getEmail());
-            sellerDto.setFullname(user.getFullName());
-            sellerDto.setRole(user.getRole());
-            sellerDto.setStatus(user.getStatus());
-            return user;
-        } else if (user.getRole().equalsIgnoreCase("buyer")) {
-            return user;
-        }
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
     }
 
     private void convertToEntityBuyer(RequestRegisterDto userDto, User user, Buyer buyer) {
