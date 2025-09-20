@@ -11,39 +11,12 @@ CREATE TABLE brands (
     updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE sale_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    brandId INT NOT NULL,
-    model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
-    description TEXT CHARACTER SET utf8mb4 NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    price INT NOT NULL,
-    screenSizeInch DECIMAL(4,2),
-    ramGb INT,
-    storageGb INT,
-    color VARCHAR(40) CHARACTER SET utf8mb4,
-    createdOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId)
-);
-
-
-
-CREATE TABLE sale_item_images (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
-    imageViewOrder INT ,
-    ogFileName VARCHAR(50),
-    saleItemId int not null,
-	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
-);
-
 CREATE TABLE users (
     userId int AUTO_INCREMENT PRIMARY KEY,
     nickname VARCHAR(50) NOT NULL,
     fullname VARCHAR(40) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(14) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     role ENUM('BUYER', 'SELLER') DEFAULT 'BUYER',
     status ENUM('INACTIVE', 'ACTIVE') DEFAULT 'INACTIVE',
     createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -67,6 +40,36 @@ CREATE TABLE sellers (
     nationalIdPhotoBack VARCHAR(255) NOT NULL,
     CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
+
+CREATE TABLE sale_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    brandId INT NOT NULL,
+    sellerId INT,
+    model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
+    description TEXT CHARACTER SET utf8mb4 NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    price INT NOT NULL,
+    screenSizeInch DECIMAL(4,2),
+    ramGb INT,
+    storageGb INT,
+    color VARCHAR(40) CHARACTER SET utf8mb4,
+    createdOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId),
+    CONSTRAINT fk_seller FOREIGN KEY (sellerId) REFERENCES sellers(sellerId) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE IF NOT EXISTS sale_item_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
+    imageViewOrder INT ,
+    ogFileName VARCHAR(50),
+    saleItemId int not null,
+	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
+);
+
 
 
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
@@ -153,23 +156,11 @@ INSERT INTO sale_items (id, brandId, model, description, quantity, price, screen
 (84, 10, 'A77', 'Budget friendly', 20, 8250, 6.56, 6, 128, 'Ocean Blue'),
 (85, 10, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
 
-
 INSERT INTO users (nickname, fullname, email, password, role, status)
 VALUES (
     'Somchai',
     'Somchai Jaidee',
     'itbkk.somchai@ad.sit.kmutt.ac.th',
-    'itProj24/SOM',
-    'BUYER',
-    'ACTIVE'
-);
-
-
-INSERT INTO users (nickname, fullname, email, password, role, status)
-VALUES (
-    'Somkiat',
-    'Somkiat  Luckchart',
-    'itbkk.somkiat@ad.sit.kmutt.ac.th',
     'itProj24/SOM',
     'BUYER',
     'ACTIVE'
