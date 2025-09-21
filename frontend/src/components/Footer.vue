@@ -83,7 +83,7 @@
       <span class="text-blue-500 underline">other retailer</span> near you. Or
       call 1800-01-9209.
     </p>
-    <p class=" py-3">Copyright © 2025 Apple Inc. All rights reserved.</p>
+    <p class=" py-3">Copyright © 2025 ITBMS Inc. All rights reserved.</p>
   </div>
 </template>
 
