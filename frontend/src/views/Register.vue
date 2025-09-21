@@ -3,12 +3,13 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import { useStatusStore } from "@/stores/statusStore";
+import { register } from "@/libs/userApi";
 
 const accountType = ref("buyer");
 const isSubmitting = ref(false);
 const router = useRouter();
-const statusStore = useSaleItemStatusStore();
+const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
 const safeTrim = (v) => (v ?? "").toString().trim();
@@ -16,28 +17,21 @@ const safeTrim = (v) => (v ?? "").toString().trim();
 const handleSubmit = async (payload) => {
   try {
     isSubmitting.value = true;
-    statusStore.clearStatusAndMethod();
-
+    statusStore.clearEntityAndMethodAndStatusAndMessage();
+    const form = new FormData();
     if (accountType.value === "buyer") {
-      const form = new FormData();
       form.append("role", "buyer");
       form.append("nickname", safeTrim(payload.nickname));
       form.append("email", safeTrim(payload.email));
       form.append("password", safeTrim(payload.password));
-      form.append("fullname", safeTrim(payload.fullname));
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
-        method: "POST",
-        body: form,
-      });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (res.status >= 400) throw new Error("Register failed");
+      form.append("fullName", safeTrim(payload.fullname));
+      const data = await register(BASE_API_DOMAIN, form);
     } else {
-      const form = new FormData();
       form.append("role", "seller");
       form.append("nickname", safeTrim(payload.seller.nickname));
       form.append("email", safeTrim(payload.seller.contactEmail));
       form.append("password", safeTrim(payload.seller.password));
-      form.append("fullname", safeTrim(payload.seller.fullname));
+      form.append("fullName", safeTrim(payload.seller.fullname));
       const sanitizedMobile = safeTrim(payload.seller.mobile).replace(/-/g, "");
       form.append("mobileNumber", sanitizedMobile);
       form.append("bankAccountNumber", safeTrim(payload.seller.bankAccount));
@@ -45,35 +39,24 @@ const handleSubmit = async (payload) => {
       form.append("nationalIdNumber", safeTrim(payload.seller.nationalCard));
       if (payload.files?.front) form.append("front", payload.files.front);
       if (payload.files?.back) form.append("back", payload.files.back);
-
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/user/register`, {
-        method: "POST",
-        body: form,
-      });
-      statusStore.setStatusAndMethod("register", res.status);
-      if (res.status >= 400) throw new Error("Register failed");
+      const data = await register(BASE_API_DOMAIN, form);
     }
     router.push({ name: "SaleItemsGallery" });
   } catch (e) {
-    console.error(e);
-  } finally {
+    console.log(e);
     isSubmitting.value = false;
   }
 };
 
-const handleCancel = () => router.push({ name: "SaleItemsGallery" });
+const handleCancel = () => {
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
+  router.back();
+};
 </script>
 
 <template>
   <div class="min-h-screen grid place-items-center bg-gray-0">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6">
-      <RouterLink :to="{ name: 'SaleItemsGallery' }">
-        <img
-          src="/src/assets/imgs/close-symbol.png"
-          alt="close symbol"
-          class="w-7 hover:cursor-pointer"
-        />
-      </RouterLink>
       <h1 class="text-3xl font-semibold text-center mb-2">Register</h1>
       <p class="text-center text-gray-500 mb-6">Register as Buyer or Seller</p>
 
@@ -105,6 +88,7 @@ const handleCancel = () => router.push({ name: "SaleItemsGallery" });
       <component
         :is="accountType === 'buyer' ? BuyerForm : SellerForm"
         :submitting="isSubmitting"
+        :statusErr="statusStore.getStatus()"
         @submit="handleSubmit"
         @cancel="handleCancel"
       />

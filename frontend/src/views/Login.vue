@@ -1,21 +1,23 @@
 <script setup>
 import { ref, watch } from "vue";
-import { loginUser } from "@/libs/user-api";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-const statusStore = useSaleItemStatusStore();
+import { loginUser } from "@/libs/userApi";
+import { useRouter } from "vue-router";
+import { useStatusStore } from "@/stores/statusStore";
+const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
 const password = ref("");
 const isDisable = ref(true);
 const isShowError = ref(false);
 const isShowPassword = ref(false);
+const router = useRouter();
 const login = async () => {
   try {
     const data = await loginUser(BASE_API_DOMAIN, {
-      email: email.value,
+      email: email.value.trim(),
       password: password.value,
     });
-    console.log(data);
+    router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
     isShowError.value = true;
@@ -49,7 +51,13 @@ watch(
           v-show="isShowError"
           class="itbms-message flex justify-between w-72 py-1 px-3 bg-red-100 border border-red-500 text-red-500 text-xs text-center"
         >
-          <p>Username or Password incorrect!</p>
+          <p>
+            {{
+              statusStore.getStatus() === 400
+                ? "Email or password is incorrect."
+                : statusStore.getMessage()
+            }}
+          </p>
           <button
             type="button"
             @click="isShowError = false"
@@ -101,10 +109,10 @@ watch(
         >
           Login
         </button>
-        <p>
+        <button type="button" @click="router.push({ name: 'Register' })">
           Don't have account?
           <span class="text-blue-500">Create an Account</span>
-        </p>
+        </button>
       </form>
     </div>
   </div>

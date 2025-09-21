@@ -9,10 +9,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +23,7 @@ import java.security.Key;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class JwtUtils {
@@ -51,22 +55,43 @@ public class JwtUtils {
     }
 
 
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(User user, HttpServletRequest request) {
+        String issuer = request.getRequestURL().toString().replace(request.getRequestURI(), "");
         return Jwts.builder()
-                .setSubject(username)
+                .setId(user.getId().toString())
+                .claim("email", user.getEmail())
+                .claim("nickname", user.getNickname())
+                .claim("role", user.getRole())
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(key)
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(User user,HttpServletRequest request) {
+        String issuer = request.getRequestURL().toString().replace(request.getRequestURI(), "");
         return Jwts.builder()
-                .setSubject(username)
+                .setId(UUID.randomUUID().toString()) // unique id สำหรับ refresh token
+                .setSubject(user.getId().toString()) // ใช้ userId หรือ email ก็ได้
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .signWith(key)
                 .compact();
+    }
+
+
+    public Claims validateToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(key) // secret key
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            // token หมดอายุ, key ไม่ตรง, หรือ format ไม่ถูกต้อง
+            return null;
+        }
     }
 
 
@@ -81,28 +106,6 @@ public class JwtUtils {
         }
     }
 
-
-//    public String generateToken(UserDetails user
-//            , long ageInMinute, TokenType tokenType) {
-//        try {
-//            JWSSigner signer = new RSASSASigner(rsaPrivateJWK);
-//            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-//                    .subject(user.getUsername())
-//                    .issuer("https://int204.sit.kmutt.ac.th")
-//                    .expirationTime(new Date(new Date().getTime() + ageInMinute))
-//                    .issueTime(new Date(new Date().getTime()))
-//                    .claim("authorities", user.getAuthorities())
-//                    .claim("typ", tokenType.toString())
-//                    .claim("uid", ((AuthUserDetail) user).getId())
-//                    .build();
-//            SignedJWT signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256)
-//                    .keyID(rsaPrivateJWK.getKeyID()).build(), claimsSet);
-//            signedJWT.sign(signer);
-//            return signedJWT.serialize();
-//        } catch (JOSEException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     public String generateToken(RequestRegisterDto user, long ageInMillis, TokenType tokenType) {
         try {

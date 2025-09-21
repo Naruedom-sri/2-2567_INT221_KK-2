@@ -1,10 +1,9 @@
 <script setup>
-import { computed, ref } from "vue";
-
+import { computed, ref} from "vue";
 const props = defineProps({
   submitting: { type: Boolean, default: false },
+  statusErr: { default: null },
 });
-
 const buyer = ref({
   nickname: "",
   email: "",
@@ -35,7 +34,10 @@ function onSubmit() {
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
     <div class="flex flex-col">
-      <label for="name" class="mb-1 flex gap-2 items-center">Nickname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
+      <label for="name" class="mb-1 flex gap-2 items-center"
+        >Nickname
+        <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
+      ></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -45,17 +47,25 @@ function onSubmit() {
     </div>
 
     <div class="flex flex-col">
-      <label for="email" class="mb-1 flex gap-2 items-center">Email <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
+      <label for="email" class="mb-1 flex gap-2 items-center"
+        >Email <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
+      ></label>
       <input
         class="border rounded px-3 py-2"
         type="email"
         id="email"
         v-model.trim="buyer.email"
       />
+      <p v-if="props.statusErr === 409" class="mt-1 text-xs text-red-500">
+        Email Already Exists
+      </p>
     </div>
 
     <div class="flex flex-col">
-      <label for="password" class="mb-1 flex gap-2 items-center">Password <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
+      <label for="password" class="mb-1 flex gap-2 items-center"
+        >Password
+        <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
+      ></label>
       <input
         class="border rounded px-3 py-2"
         type="password"
@@ -68,7 +78,10 @@ function onSubmit() {
     </div>
 
     <div class="flex flex-col">
-      <label for="fullname" class="mb-1 flex gap-2 items-center">Fullname <span><img src="../assets/imgs/asterisk.png" class="w-3"></span></label>
+      <label for="fullname" class="mb-1 flex gap-2 items-center"
+        >Fullname
+        <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
+      ></label>
       <input
         class="border rounded px-3 py-2"
         type="text"
@@ -83,7 +96,7 @@ function onSubmit() {
         class="mt-2 px-4 py-2 rounded bg-green-500 text-white hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="!isValid || props.submitting"
       >
-        {{ props.submitting ? 'Submitting...' : 'Submit' }}
+        {{ props.submitting ? "Submitting..." : "Submit" }}
       </button>
       <button
         type="button"
@@ -93,7 +106,6 @@ function onSubmit() {
         Cancel
       </button>
     </div>
-    
   </form>
 </template>
 

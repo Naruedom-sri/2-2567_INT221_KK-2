@@ -7,12 +7,11 @@ import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
 import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
-import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
-import intregatedproject.backend.repositories.SaleItemRepository;
+import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
-//import intregatedproject.backend.utils.Token.JwtUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -28,18 +27,7 @@ public class UserService {
     @Autowired
     private SellerRepository sellerRepository;
     @Autowired
-    private SaleItemRepository saleItemRepository;
-    @Autowired
     private FileService fileService;
-//    @Autowired
-//    private JwtUtils jwtUtils;
-//    @Autowired
-//    private EmailService emailService;
-
-    @Autowired
-    private EmailVerificationTokenRepository emailVerificationTokenRepository;
-    @Autowired
-    private ModelMapper modelMapper;
 
 
     public List<User> getAllUsers() {
@@ -47,19 +35,7 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
-        if (user.getRole().equalsIgnoreCase("seller")) {
-            ResponseSellerDto sellerDto = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
-            sellerDto.setNickname(user.getNickname());
-            sellerDto.setEmail(user.getEmail());
-            sellerDto.setFullname(user.getFullName());
-            sellerDto.setRole(user.getRole());
-            sellerDto.setStatus(user.getStatus());
-            return user;
-        } else if (user.getRole().equalsIgnoreCase("buyer")) {
-            return user;
-        }
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
     }
 
     private void convertToEntityBuyer(RequestRegisterDto userDto, User user, Buyer buyer) {
@@ -94,6 +70,12 @@ public class UserService {
     }
 
     public User registerBuyer(RequestRegisterDto userDto) {
+        List<User> users = getAllUsers();
+        users.forEach(user -> {
+            if (user.getEmail().equals(userDto.getEmail())) {
+                throw new EmailAlreadyVerifiedException("Email Already Exists");
+            }
+        });
         if (userDto.getId() != null && userRepository.existsById(userDto.getId())) {
             throw new UserAlreadyExistsException("Buyer with id " + userDto.getId() + " already exists");
         }
@@ -109,6 +91,12 @@ public class UserService {
     }
 
     public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
+        List<User> users = getAllUsers();
+        users.forEach(user -> {
+            if (user.getEmail().equals(userDto.getEmail())) {
+                throw new EmailAlreadyVerifiedException("Email Already Exists");
+            }
+        });
         if (userDto.getId() != null && sellerRepository.existsById(userDto.getId())) {
             throw new UserAlreadyExistsException("Seller with id " + userDto.getId() + " already exists");
         }
@@ -137,32 +125,4 @@ public class UserService {
     }
 
 
-//    public Map<String, Object> authenticateUser(RequestJwtUser user) {
-//        UsernamePasswordAuthenticationToken upat = new
-//                UsernamePasswordAuthenticationToken(
-//                user.getEmail(), user.getPassword());
-//        authenticationManager.authenticate(upat);
-//        //Exception occurred (401) if failed
-//        User user1 = userRepository.findByEmail(user.getEmail())
-//                .orElseThrow(() -> new InvalidVerificationTokenException("User not found for email: " + user.getEmail()));
-//        RequestRegisterDto userDto = modelMapper.map(user1, RequestRegisterDto.class);
-//        long refreshTokenAgeInMinute = 8 * 60 * 60 * 1000;
-//        return Map.of(
-//                "access_token", jwtUtils.generateToken(userDto, 48,TokenType.ACCESS_TOKEN)
-//                , "refresh_token", jwtUtils.generateToken(
-//                        userDto, refreshTokenAgeInMinute, TokenType.REFRESH_TOKEN)
-//        );
-//    }
-//
-//    public Map<String, Object> refreshToken(String refreshToken) {
-//        jwtUtils.verifyToken(refreshToken);
-//        Map<String, Object> claims = jwtUtils.getJWTClaimsSet(refreshToken);
-//        jwtUtils.isExpired(claims);
-//        if (!jwtUtils.isValidClaims(claims) || !"REFRESH_TOKEN".equals(claims.get("typ"))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
-//        }
-//        User user = getUserById((Integer) claims.get("uid"));
-//        RequestRegisterDto userDetails = modelMapper.map(user, RequestRegisterDto.class);
-//        return Map.of("access_token", jwtUtils.generateToken(userDetails,48,TokenType.ACCESS_TOKEN));
-//    }
 }

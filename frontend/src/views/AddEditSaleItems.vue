@@ -2,26 +2,26 @@
 import NavBar from "@/components/NavBar.vue";
 import SaleItemNotFound from "@/components/SaleItemNotFound.vue";
 import { ref, onMounted, watch, onBeforeUnmount, computed } from "vue";
-import {
-  getAllData,
-  updateDataWithFile,
-  createDataWithFile,
-  getDataById,
-  getImageOfData,
-} from "@/libs/api";
 import { useRouter, useRoute } from "vue-router";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
 import Footer from "@/components/Footer.vue";
-import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
+import AlertMessage from "@/components/AlertMessage.vue";
+import { getAllBrand } from "@/libs/brandApi";
+import {
+  createSaleItem,
+  getImageOfSaleItem,
+  getSaleItemByIdForEdit,
+  updateSaleItem,
+} from "@/libs/saleItemApi";
+import { useStatusStore } from "@/stores/statusStore";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
   isEditing: Boolean,
 });
+const statusStore = useStatusStore();
 const {
   params: { itemId },
 } = useRoute();
-const statusStore = useSaleItemStatusStore();
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
@@ -220,10 +220,10 @@ const checkScreenSize = () => {
   }
 };
 
-const getAllBrand = async () => {
-  brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
-  brands.value.sort((a, b) => a.name.localeCompare(b.name));
+const getAllBrands = async () => {
   try {
+    brands.value = await getAllBrand(`${BASE_API_DOMAIN}`);
+    brands.value.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.log(error);
     brands.value = [];
@@ -237,10 +237,7 @@ const goBackToPreviousPage = () => {
 const checkIsEditing = async () => {
   try {
     if (props.isEditing) {
-      item.value = await getDataById(
-        `${BASE_API_DOMAIN}/v2/sale-items/edit`,
-        itemId
-      );
+      item.value = await getSaleItemByIdForEdit(`${BASE_API_DOMAIN}`, itemId);
       model.value = item.value.model;
       brandItem.value = item.value.brand;
       description.value = item.value.description;
@@ -256,8 +253,8 @@ const checkIsEditing = async () => {
       pricePass.value = true;
 
       for (const img of item.value.saleItemImages) {
-        const imgUrl = await getImageOfData(
-          `${BASE_API_DOMAIN}/v2/sale-items`,
+        const imgUrl = await getImageOfSaleItem(
+          `${BASE_API_DOMAIN}`,
           itemId,
           img.imageViewOrder
         );
@@ -420,28 +417,14 @@ const addUpdateNewSaleItem = async () => {
         }
         if (img.imageFile) {
           formData.append(`imageInfos[${index}].imageFile`, img.imageFile);
-          console.log("monkey");
         }
       });
     }
 
     if (!props.isEditing) {
-      const data = await createDataWithFile(
-        `${BASE_API_DOMAIN}/v2/sale-items`,
-        formData
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("add", 201);
-      }
+      const data = await createSaleItem(`${BASE_API_DOMAIN}`, formData);
     } else {
-      const data = await updateDataWithFile(
-        `${BASE_API_DOMAIN}/v2/sale-items`,
-        itemId,
-        formData
-      );
-      if (data) {
-        statusStore.setStatusAndMethod("update", 200);
-      }
+      const data = await updateSaleItem(`${BASE_API_DOMAIN}`, itemId, formData);
     }
     goBackToPreviousPage();
   } catch (error) {
@@ -528,7 +511,7 @@ const focusNext = (refName) => {
 
 onMounted(() => {
   checkIsEditing();
-  getAllBrand();
+  getAllBrands();
 });
 
 onBeforeUnmount(() => {
@@ -572,8 +555,16 @@ watch(
   <NavBar />
   <SaleItemNotFound v-if="item === null" />
   <div v-else class="add-edit-container text-white">
+    <AlertMessage
+      v-if="uploadError"
+      title="Warning"
+      :message="uploadError"
+      :over-image="uploadError ? true : false"
+      @toggleUploadError="uploadError = ''"
+    />
     <div class="flex py-7 mx-20 border-b border-white">
       <RouterLink
+        @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
         :to="{ name: 'SaleItemsGallery' }"
         class="itbms-home-button hover:text-blue-500 hover:cursor-pointer duration-100"
       >
@@ -656,13 +647,6 @@ watch(
               multiple
               accept="image/*"
               @change="onFilesSelected"
-            />
-            <AlertErrorMessage
-              v-if="uploadError"
-              title="Warning"
-              :message="uploadError"
-              :over-image="uploadError ? true : false"
-              @toggleUploadError="uploadError = ''"
             />
           </div>
           <div v-if="imageItems.length" class="mx-3 w-[360px] space-y-2">

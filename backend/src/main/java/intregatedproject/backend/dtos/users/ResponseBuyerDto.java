@@ -11,5 +11,5 @@ public class ResponseBuyerDto {
     private String email;
     private String fullname;
     private String role;
-    private String status = "INACTIVE";
+    private String status;
 }

@@ -27,15 +27,15 @@ public class WebSecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ เปิด register & verify-email แบบ public
+                        // เปิด register & verify-email แบบ public
                         .requestMatchers("/itb-mshop/v2/user/register","/itb-mshop/v2/user/**"
                                 ,"/itb-mshop/v2/**","/itb-mshop/v1/**").permitAll()
-                        // ✅ ที่เหลือต้อง login ด้วย JWT
+                        // ที่เหลือต้อง login ด้วย JWT
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // ✅ เพิ่ม JWT Filter ก่อน UsernamePasswordAuthenticationFilter
+        // เพิ่ม JWT Filter ก่อน UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

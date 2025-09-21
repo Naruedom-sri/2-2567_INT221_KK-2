@@ -7,6 +7,5 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class EmailAlreadyVerifiedException extends RuntimeException {
     public EmailAlreadyVerifiedException(String message) {
         super(message);
-//        super("Email already verified");
     }
 }

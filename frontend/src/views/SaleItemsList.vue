@@ -1,12 +1,13 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { getAllData, deleteData } from "@/libs/api";
-import AlertMessageSaleItem from "@/components/AlertMessageSaleItem.vue";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
+import { useStatusStore } from "@/stores/statusStore";
 import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
-import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
-const statusStore = useSaleItemStatusStore();
+import AlertMessage from "@/components/AlertMessage.vue";
+import Notification from "@/components/Notification.vue";
+import { deleteSaleItemById, getAllSaleItem } from "@/libs/saleItemApi";
+import { getAllBrand } from "@/libs/brandApi";
+const statusStore = useStatusStore();
 const items = ref([]);
 const brands = ref([]);
 const time = ref();
@@ -20,7 +21,7 @@ const updateTime = () => {
 };
 const getAllSaleItems = async () => {
   try {
-    items.value = await getAllData(`${BASE_API_DOMAIN}/v1/sale-items`);
+    items.value = await getAllSaleItem(`${BASE_API_DOMAIN}`);
   } catch (error) {
     console.log(error);
     items.value = [];
@@ -29,18 +30,17 @@ const getAllSaleItems = async () => {
 
 const getAllBrands = async () => {
   try {
-    brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+    brands.value = await getAllBrand(`${BASE_API_DOMAIN}`);
   } catch (error) {
     console.log(error);
     brands.value = [];
   }
 };
 const deleteSaleItem = async (itemId) => {
-  statusStore.clearStatusAndMethod();
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
   showDialog.value = false;
   try {
-    const status = await deleteData(`${BASE_API_DOMAIN}/v1/sale-items`, itemId);
-    statusStore.setStatusAndMethod("delete", status);
+    const status = await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
     items.value = items.value.filter((item) => item.id !== itemId);
   } catch (error) {
     console.log(error);
@@ -58,7 +58,15 @@ onMounted(() => {
     :search="searchContent"
     @search-sale-item="getAllSaleItemBySortAndFilter"
   />
+  <Notification v-if="statusStore.getStatus() !== null" />
   <div class="list-container text-white">
+    <AlertMessage
+      v-if="showDialog"
+      title="Delete Confirmation"
+      message="Do you want to delete this sale item?"
+      @confirm="deleteSaleItem(itemId)"
+      @cancel="showDialog = false"
+    />
     <div class="promote h-96 flex flex-col justify-center items-center gap-8">
       <h1 class="text-6xl">It's your lifestyle</h1>
       <p class="text-white">Portable, fast to use, new model</p>
@@ -85,7 +93,6 @@ onMounted(() => {
         Manage Brand
       </RouterLink>
     </div>
-    <AlertMessageSaleItem v-if="statusStore.getStatus() !== null" />
     <div class="table w-full px-10 my-10">
       <div class="flex justify-center mb-10">
         <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
@@ -156,13 +163,7 @@ onMounted(() => {
       </h1>
     </div>
   </div>
-  <AlertErrorMessage
-    v-if="showDialog"
-    title="Delete Confirmation"
-    message="Do you want to delete this sale item?"
-    @confirm="deleteSaleItem(itemId)"
-    @cancel="showDialog = false"
-  />
+
   <Footer />
 </template>
 

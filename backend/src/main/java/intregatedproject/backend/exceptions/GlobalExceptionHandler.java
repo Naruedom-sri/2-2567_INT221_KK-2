@@ -2,10 +2,7 @@ package intregatedproject.backend.exceptions;
 
 import intregatedproject.backend.exceptions.brands.BrandAlreadyExistsException;
 import intregatedproject.backend.exceptions.brands.BrandHasSaleItemException;
-import intregatedproject.backend.exceptions.users.InvalidRoleException;
-import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
-import intregatedproject.backend.exceptions.users.UnauthorizedException;
-import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.users.*;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,6 +94,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Object> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
+    }
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleAccountIsNotActive(ForbiddenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage(), request);
     }
 }
 

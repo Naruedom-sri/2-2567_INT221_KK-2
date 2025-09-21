@@ -11,7 +11,7 @@ public class RequestRegisterDto {
     private String email;
     private String fullName;
     private String role;
-    private String status = "INACTIVE";
+    private String status = "INACTIVE";;
 
     private String mobileNumber;
     private String bankAccountNumber;
@@ -20,8 +20,12 @@ public class RequestRegisterDto {
     private String nationalIdPhotoFront;
     private String nationalIdPhotoBack;
 
-    public void setPassword(String password) {
-        this.password = PasswordUtils.hashPassword(password);
+//    public void setPassword(String password) {
+//        this.password = PasswordUtils.hashPassword(password);
+//    }
+
+    public void setStatus(String status) {
+        this.status = status == null || status.isBlank() ? "INACTIVE" : status;
     }
 }
 

@@ -2,11 +2,11 @@
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, onMounted } from "vue";
-import { getAllData, deleteData, getDataById } from "@/libs/api";
-import { useSaleItemStatusStore } from "@/stores/SaleItemStatus";
-import AlertMessageBrand from "@/components/AlertMessageBrand.vue";
-import AlertErrorMessage from "@/components/AlertErrorMessage.vue";
-const statusStore = useSaleItemStatusStore();
+import { getAllBrand, deleteBrandById, getBrandById } from "@/libs/brandApi";
+import { useStatusStore } from "@/stores/statusStore";
+import AlertMessage from "@/components/AlertMessage.vue";
+import Notification from "@/components/Notification.vue";
+const statusStore = useStatusStore();
 const brands = ref([]);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const showDialog = ref(false);
@@ -16,14 +16,9 @@ const haveSaleItem = ref(false);
 
 const checkHaveSaleItem = async () => {
   try {
-    const brand = await getDataById(
-      `${BASE_API_DOMAIN}/v1/brands`,
-      brandId.value
-    );
-    console.log(brand);
+    const brand = await getBrandById(`${BASE_API_DOMAIN}`, brandId.value);
     if (brand) {
       haveSaleItem.value = brand.noOfSaleItems !== 0 ? true : false;
-      console.log(haveSaleItem.value);
     }
   } catch (error) {
     console.log(error);
@@ -32,7 +27,7 @@ const checkHaveSaleItem = async () => {
 
 const getAllBrands = async () => {
   try {
-    brands.value = await getAllData(`${BASE_API_DOMAIN}/v1/brands`);
+    brands.value = await getAllBrand(`${BASE_API_DOMAIN}`);
   } catch (error) {
     console.log(error);
     brands.value = [];
@@ -40,11 +35,10 @@ const getAllBrands = async () => {
 };
 
 const deleteBrand = async (brandId) => {
-  statusStore.clearStatusAndMethod();
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
   showDialog.value = false;
   try {
-    const status = await deleteData(`${BASE_API_DOMAIN}/v1/brands`, brandId);
-    statusStore.setStatusAndMethod("delete", status);
+    const status = await deleteBrandById(`${BASE_API_DOMAIN}`, brandId);
     if (status === 204) {
       brands.value = brands.value.filter((brand) => brand.id !== brandId);
     }
@@ -52,6 +46,7 @@ const deleteBrand = async (brandId) => {
     console.log(error);
   }
 };
+
 onMounted(() => {
   getAllBrands();
 });
@@ -59,7 +54,23 @@ onMounted(() => {
 
 <template>
   <NavBar />
+  <Notification
+    v-if="statusStore.getStatus() !== null"
+    :brandName="brandName"
+  />
   <div class="brand-container text-white">
+    <AlertMessage
+      v-if="showDialog"
+      :title="haveSaleItem ? 'Warning!' : 'Are you sure?'"
+      :message="
+        haveSaleItem
+          ? `Delete ${brandName} is not allowed. There are sale items with ${brandName} brand.`
+          : `Do you want to delete ${brandName} brand?`
+      "
+      :haveSaleItem="haveSaleItem"
+      @confirm="deleteBrand(brandId)"
+      @cancel="showDialog = false"
+    />
     <div class="promote h-96 flex flex-col justify-center items-center gap-8">
       <h1 class="text-6xl">Elegance in Every Touch</h1>
       <p class="text-white">Designed with heart, felt in every touch.</p>
@@ -82,10 +93,7 @@ onMounted(() => {
         Brand List
       </h1>
     </div>
-    <AlertMessageBrand
-      v-if="statusStore.getStatus() !== null"
-      :brandName="brandName"
-    />
+
     <div class="flex justify-around my-10">
       <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
         <img
@@ -141,18 +149,7 @@ onMounted(() => {
       </h1>
     </div>
   </div>
-  <AlertErrorMessage
-    v-if="showDialog"
-    :title="haveSaleItem ? 'Warning!' : 'Are you sure?'"
-    :message="
-      haveSaleItem
-        ? `Delete ${brandName} is not allowed. There are sale items with ${brandName} brand.`
-        : `Do you want to delete ${brandName} brand?`
-    "
-    :haveSaleItem="haveSaleItem"
-    @confirm="deleteBrand(brandId)"
-    @cancel="showDialog = false"
-  />
+
   <Footer />
 </template>
 
