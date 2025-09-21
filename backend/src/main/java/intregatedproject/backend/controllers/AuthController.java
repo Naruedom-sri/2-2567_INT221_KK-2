@@ -8,7 +8,6 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
-import intregatedproject.backend.utils.PasswordUtils;
 import intregatedproject.backend.utils.Token.JwtUtils;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;

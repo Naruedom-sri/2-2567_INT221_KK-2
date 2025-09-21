@@ -1,6 +1,5 @@
 package intregatedproject.backend.dtos.users;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import intregatedproject.backend.utils.PasswordUtils;
 import lombok.Data;
 

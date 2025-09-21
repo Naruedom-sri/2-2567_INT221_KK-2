@@ -1,13 +1,13 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.user.RequestRegisterDto;
-import intregatedproject.backend.dtos.user.ResponseSellerDto;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
-import intregatedproject.backend.exceptions.user.InvalidRoleException;
-import intregatedproject.backend.exceptions.user.RequiredFileMissingException;
-import intregatedproject.backend.exceptions.user.UserAlreadyExistsException;
+import intregatedproject.backend.exceptions.users.InvalidRoleException;
+import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.repositories.EmailVerificationTokenRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.repositories.SellerRepository;
@@ -16,16 +16,10 @@ import intregatedproject.backend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserService {
