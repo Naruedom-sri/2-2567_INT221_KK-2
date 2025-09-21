@@ -1,72 +1,73 @@
 package intregatedproject.backend.controllers;
 
-import intregatedproject.backend.dtos.users.RequestRegisterDto;
-import intregatedproject.backend.dtos.users.ResponseBuyerDto;
-import intregatedproject.backend.dtos.users.ResponseSellerDto;
+import intregatedproject.backend.dtos.saleitems.*;
+import intregatedproject.backend.entities.SaleItem;
+
 import intregatedproject.backend.entities.User;
-import intregatedproject.backend.services.EmailService;
+import intregatedproject.backend.exceptions.users.ForbiddenException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
+import intregatedproject.backend.services.SaleItemService;
+
 import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.Token.JwtUtils;
-import intregatedproject.backend.utils.Token.TokenType;
+
+import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.data.domain.Page;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/itb-mshop")
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip24kk2.sit.kmutt.ac.th"})
 public class UserController {
     @Autowired
+    private SaleItemService saleItemService;
+    @Autowired
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private EmailService emailService;
-    @Autowired
     private JwtUtils jwtUtils;
 
-
-    @PostMapping(value = "/v2/users/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
-                                      @RequestPart(value = "front", required = false) MultipartFile front,
-                                      @RequestPart(value = "back", required = false) MultipartFile back) {
-        String token = jwtUtils.generateToken(userDto, 48, TokenType.ACCESS_TOKEN);
-
-        if ("seller".equalsIgnoreCase(userDto.getRole())) {
-            userDto.setRole("seller");
-            User newUser = userService.registerSeller(userDto, front, back);
-            ResponseSellerDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerDto.class);
-            responseSellerDto.setNickname(newUser.getNickname());
-            responseSellerDto.setEmail(newUser.getEmail());
-            responseSellerDto.setFullname(newUser.getFullName());
-            responseSellerDto.setRole(newUser.getRole());
-            responseSellerDto.setStatus(newUser.getStatus());
-
-            emailService.sendVerificationEmail(newUser.getEmail(), token);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseSellerDto);
+    @GetMapping("/v2/sellers/{id}/sale-items")
+    public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
+                                                              @RequestParam("token") String accessToken,
+                                                              @RequestParam Integer page,
+                                                              @RequestParam(defaultValue = "10") Integer size,
+                                                              @RequestParam(defaultValue = "createdOn") String sortField,
+                                                              @RequestParam(defaultValue = "asc") String sortDirection) {
+        Claims claims = jwtUtils.validateToken(accessToken);
+        if (claims == null) {
+            throw new UnauthorizedException("Invalid token.");
         }
-        if ("buyer".equalsIgnoreCase(userDto.getRole())) {
-            User newUser = userService.registerBuyer(userDto);
-            ResponseBuyerDto responseUserDto = modelMapper.map(newUser, ResponseBuyerDto.class);
-            emailService.sendVerificationEmail(newUser.getEmail(), token);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDto);
+        User user = userService.getUserById(Integer.valueOf(claims.getId()));
+        if (!user.getId().equals(id)) {
+            throw new ForbiddenException("Request seller id not matched with id in access token.");
         }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+//        Page<SaleItem> pageResult = saleItemService.getAllSortedAndFiltered(null, null, null, null, null, sortField, sortDirection, page, size);
+//        List<SaleItemSellerDto> saleItemsDto = pageResult.getContent().stream()
+//                .map(saleItem -> modelMapper.map(saleItem, SaleItemSellerDto.class))
+//                .collect(Collectors.toList());
+//        PageSellerDto dto = new PageSellerDto();
+//        dto.setContent(saleItemsDto);
+//        dto.setPage(page);
+//        dto.setSize(pageResult.getSize());
+//        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
+//        dto.setFirst(pageResult.isFirst());
+//        dto.setLast(pageResult.isLast());
+//        dto.setTotalPages(pageResult.getTotalPages());
+//        dto.setTotalElements((int) pageResult.getTotalElements());
+        return null;
     }
-
-
-
-}
+}   

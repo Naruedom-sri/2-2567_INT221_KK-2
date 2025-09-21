@@ -4,6 +4,8 @@ import { useRouter } from "vue-router";
 import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
 import { useStatusStore } from "@/stores/statusStore";
+import { register } from "@/libs/userApi";
+
 const accountType = ref("buyer");
 const isSubmitting = ref(false);
 const router = useRouter();
@@ -16,35 +18,15 @@ const handleSubmit = async (payload) => {
   try {
     isSubmitting.value = true;
     statusStore.clearEntityAndMethodAndStatusAndMessage();
-
+    const form = new FormData();
     if (accountType.value === "buyer") {
-      const form = new FormData();
       form.append("role", "buyer");
       form.append("nickname", safeTrim(payload.nickname));
       form.append("email", safeTrim(payload.email));
       form.append("password", safeTrim(payload.password));
       form.append("fullName", safeTrim(payload.fullname));
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/users/register`, {
-        method: "POST",
-        body: form,
-      });
-      if (res.status !== 201) {
-        statusStore.setEntityAndMethodAndStatusAndMessage(
-          "user",
-          "register",
-          res.status,
-          "Register failed."
-        );
-        throw new Error("Register failed");
-      }
-      statusStore.setEntityAndMethodAndStatusAndMessage(
-        "user",
-        "register",
-        res.status,
-        "The user account has been successfully registered."
-      );
+      const data = await register(BASE_API_DOMAIN, form);
     } else {
-      const form = new FormData();
       form.append("role", "seller");
       form.append("nickname", safeTrim(payload.seller.nickname));
       form.append("email", safeTrim(payload.seller.contactEmail));
@@ -57,30 +39,11 @@ const handleSubmit = async (payload) => {
       form.append("nationalIdNumber", safeTrim(payload.seller.nationalCard));
       if (payload.files?.front) form.append("front", payload.files.front);
       if (payload.files?.back) form.append("back", payload.files.back);
-
-      const res = await fetch(`${BASE_API_DOMAIN}/v2/users/register`, {
-        method: "POST",
-        body: form,
-      });
-      if (res.status !== 201) {
-        statusStore.setEntityAndMethodAndStatusAndMessage(
-          "user",
-          "register",
-          res.status,
-          "Register failed."
-        );
-        throw new Error("Register failed");
-      }
-      statusStore.setEntityAndMethodAndStatusAndMessage(
-        "user",
-        "register",
-        res.status,
-        "The user account has been successfully registered."
-      );
+      const data = await register(BASE_API_DOMAIN, form);
     }
     router.push({ name: "SaleItemsGallery" });
   } catch (e) {
-    console.error(e);
+    console.log(e);
     isSubmitting.value = false;
   }
 };

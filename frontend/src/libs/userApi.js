@@ -1,7 +1,7 @@
 import { useStatusStore } from "@/stores/statusStore";
+const statusStore = useStatusStore();
 const loginUser = async (url, newData) => {
-  const statusStore = useStatusStore();
-  const response = await fetch(`${url}/v2/users/authentications`, {
+  const response = await fetch(`${url}/v2/auth/login`, {
     method: "POST",
     headers: {
       "Content-type": "application/json; charset=UTF-8",
@@ -40,7 +40,6 @@ const loginUser = async (url, newData) => {
       );
     }
   }
-
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
     "login",
@@ -50,6 +49,36 @@ const loginUser = async (url, newData) => {
   return response.json();
 };
 
-const register = () => {};
+const register = async (url, form) => {
+  const res = await fetch(`${url}/v2/auth/register`, {
+    method: "POST",
+    body: form,
+  });
+  if (res.status !== 201) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "register",
+      res.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't sign-up (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "register",
+    res.status,
+    "The user account has been successfully registered."
+  );
+  return res.json();
+};
 
 export { loginUser, register };

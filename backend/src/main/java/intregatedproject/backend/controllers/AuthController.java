@@ -1,21 +1,27 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.authentications.RequestLogin;
-import intregatedproject.backend.dtos.authentications.ResponseLogin;
+import intregatedproject.backend.dtos.authentications.ResponseToken;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.User;
+import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
-import intregatedproject.backend.utils.PasswordUtils;
 import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.Token.TokenType;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -50,27 +56,100 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/v2/users/authentications")
-    public ResponseEntity<ResponseLogin> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
+    @PostMapping(value = "/v2/auth/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
+                                      @RequestPart(value = "front", required = false) MultipartFile front,
+                                      @RequestPart(value = "back", required = false) MultipartFile back) {
+        String token = jwtUtil.generateToken(userDto, 48, TokenType.ACCESS_TOKEN);
+
+        if ("seller".equalsIgnoreCase(userDto.getRole())) {
+            userDto.setRole("seller");
+            User newUser = userService.registerSeller(userDto, front, back);
+            ResponseSellerDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerDto.class);
+            responseSellerDto.setNickname(newUser.getNickname());
+            responseSellerDto.setEmail(newUser.getEmail());
+            responseSellerDto.setFullname(newUser.getFullName());
+            responseSellerDto.setRole(newUser.getRole());
+            responseSellerDto.setStatus(newUser.getStatus());
+
+            emailService.sendVerificationEmail(newUser.getEmail(), token);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseSellerDto);
+        }
+        if ("buyer".equalsIgnoreCase(userDto.getRole())) {
+            User newUser = userService.registerBuyer(userDto);
+            ResponseBuyerDto responseUserDto = modelMapper.map(newUser, ResponseBuyerDto.class);
+            emailService.sendVerificationEmail(newUser.getEmail(), token);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDto);
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+
+    @PostMapping("/v2/auth/login")
+    public ResponseEntity<ResponseToken> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
         List<User> userList = userService.getAllUsers();
-        ResponseLogin responseLogin = new ResponseLogin();
-        userList.forEach(user -> {
-//            System.out.println(PasswordUtils.matches(requestLogin.getPassword(), user.getPassword()));
-            if (user.getPassword().equals(requestLogin.getPassword()) && user.getEmail().equals(requestLogin.getEmail())) {
+        ResponseToken responseToken = new ResponseToken();
+        for (User user : userList) {
+            if (user.getEmail().equals(requestLogin.getEmail())
+                    && user.getPassword().equals(requestLogin.getPassword())) {
+
                 if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                    String access_token = jwtUtil.generateAccessToken(user,httpServletRequest);
-                    String refresh_token = jwtUtil.generateRefreshToken(user,httpServletRequest);
-                    responseLogin.setAccess_token(access_token);
-                    responseLogin.setRefresh_token(refresh_token);
+                    String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
+                    String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
+
+                    // access token อยู่ใน body
+                    responseToken.setAccess_token(access_token);
+
+                    // refresh token อยู่ใน HttpOnly cookie
+                    ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
+                            .httpOnly(true)       // JS อ่านไม่ได้
+                            .secure(true)         // เฉพาะ HTTPS
+                            .path("/v2/auth/refresh") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                            .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
+                            .sameSite("Strict")   // ป้องกัน CSRF
+                            .build();
+
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                            .body(responseToken);
                 } else {
-                    throw new UnauthorizedException("You need to activate your account before sining in.");
+                    throw new ForbiddenException("You need to activate your account before signing in.");
                 }
             }
-        });
-        if (responseLogin.getAccess_token() == null || responseLogin.getRefresh_token() == null) {
-            throw new UnauthorizedException("Email or password is incorrect.");
         }
-        return ResponseEntity.ok(responseLogin);
+        throw new UnauthorizedException("Email or password is incorrect.");
+    }
+
+    @PostMapping("/v2/auth/refresh")
+    public ResponseEntity<ResponseToken> refreshToken(HttpServletRequest request) throws BadRequestException {
+        ResponseToken responseToken = new ResponseToken();
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (refreshToken == null) {
+            throw new BadRequestException("No access token.");
+        }
+
+        Claims claims = jwtUtil.validateToken(refreshToken);
+        if (claims == null) {
+            throw new BadRequestException("Invalid refresh token.");
+        }
+        User user = userService.getUserById(Integer.valueOf(claims.getId()));
+        if (user.getStatus().equals("INACTIVE")) {
+            throw new ForbiddenException("User  is not active.");
+        }
+        String newAccessToken = jwtUtil.generateAccessToken(user, request);
+        responseToken.setAccess_token(newAccessToken);
+        return ResponseEntity.ok(responseToken);
     }
 }
 
