@@ -21,6 +21,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -137,17 +138,25 @@ public class SaleItemController {
     @PostMapping(value = "/v2/sellers/{id}/sale-items",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItem(
-            @RequestParam("token") String accessToken,
+            Authentication authentication,
             @PathVariable int id,
             @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws BadRequestException {
 
-        Claims claims = jwtUtils.validateToken(accessToken);
-        if (claims == null) {
-            throw new UnauthorizedException("Invalid token.");
+        if (id <= 0) {
+            throw new BadRequestException("Missing or invalid request parameters.");
         }
-        User user = userService.getUserById(Integer.valueOf(claims.getId()));
-        if (!user.getId().equals(id)) {
+        if (authentication == null) {
+            throw new UnauthorizedException("invalid token.");
+        }
+
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+
+        if (!"SELLER".equalsIgnoreCase(user.getRole())) {
+            throw new ForbiddenException("User is not a seller.");
+        }
+        if (!user.getId().equals(userIdFromToken)) {
             throw new ForbiddenException("Request seller id not matched with id in access token.");
         }
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
