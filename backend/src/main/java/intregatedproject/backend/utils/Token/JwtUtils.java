@@ -17,9 +17,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.text.ParseException;
 import java.util.Date;
@@ -33,26 +36,12 @@ public class JwtUtils {
     @Value("${app.security.jwt.key-id}")
     private String KEY_ID;
     private RSAKey rsaPrivateJWK;
+    @Getter
     private RSAKey rsaPublicJWK;
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final Key key;
 
-
-    public RSAKey getRsaPublicJWK() {
-        return this.rsaPublicJWK;
-    }
-
-//    public JwtUtils() {
-//        try {
-//            rsaPrivateJWK = new RSAKeyGenerator(2048).keyID(KEY_ID).generate();
-//            rsaPublicJWK = rsaPrivateJWK.toPublicJWK();
-//            System.out.println(rsaPublicJWK.toJSONString());
-//        } catch (JOSEException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    public JwtUtils() {
-        // ควรเว้นให้ Spring inject @Value ก่อน แล้วสร้าง key ใน @PostConstruct
+    public JwtUtils(@Value("${jwt.secret}") String secret) {
+        this.key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
     }
 
 
@@ -70,7 +59,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateRefreshToken(User user,HttpServletRequest request) {
+    public String generateRefreshToken(User user, HttpServletRequest request) {
         String issuer = request.getRequestURL().toString().replace(request.getRequestURI(), "");
         return Jwts.builder()
                 .setId(UUID.randomUUID().toString()) // unique id สำหรับ refresh token
@@ -85,16 +74,16 @@ public class JwtUtils {
 
     public Claims validateToken(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(key) // secret key
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException e) {
-            // token หมดอายุ, key ไม่ตรง, หรือ format ไม่ถูกต้อง
+            System.out.println("JWT validate error: " + e.getMessage());
             return null;
         }
     }
-
 
     @PostConstruct
     private void initKeys() {

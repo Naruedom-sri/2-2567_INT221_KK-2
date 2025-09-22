@@ -8,18 +8,11 @@
         <p class="text-2xl my-6">
           0% Installments for Up to 10 Months + Tons of Freebies!
         </p>
-        <div class="flex items-center">
-          <div
-            class="itbms-shopnow w-fit py-2 px-4 text-xl bg-blue-500 rounded-3xl hover:bg-blue-500/80 duration-300"
-          >
-            <RouterLink :to="{ name: 'SaleItemsGallery' }">Shop Now</RouterLink>
-          </div>
-          <div
-            class="itbms-seller w-fit py-2 px-4 text-xl text-blue-500 hover:mr-1 duration-300"
-          >
-            <RouterLink :to="{ name: 'SaleItemsList' }">Seller</RouterLink>
-          </div>
-          <p class="text-blue-500">></p>
+
+        <div
+          class="itbms-shopnow w-fit py-2 px-4 text-xl bg-blue-500 rounded-3xl hover:bg-blue-500/80 duration-300"
+        >
+          <RouterLink :to="{ name: 'SaleItemsGallery' }">Shop Now</RouterLink>
         </div>
       </div>
       <img

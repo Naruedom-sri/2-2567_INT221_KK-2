@@ -57,7 +57,5 @@ public class Seller {
     @Column(name = "nationalIdPhotoBack", nullable = false)
     private String nationalIdPhotoBack;
 
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SaleItem> saleItems= new ArrayList<>();
 
 }

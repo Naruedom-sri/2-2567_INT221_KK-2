@@ -1,6 +1,8 @@
 <script setup>
+import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+const tokenStore = useTokenStore();
 const router = useRouter();
 const route = useRoute();
 const isSearch = ref(false);
@@ -81,18 +83,27 @@ onMounted(() => {
           alt="search-symbol"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
-        <img
-          src="/src/assets/imgs/account-symbol.png"
-          alt="account"
-          class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
-        />
+
         <img
           src="/src/assets/imgs/cart-symbol.png"
           alt="cart"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
+        <div class="flex justify-center items-center gap-2">
+          <img
+            src="/src/assets/imgs/account-symbol.png"
+            alt="account"
+            class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+          />
+          <p class="opacity-85 hover:opacity-100 hover:cursor-pointer">
+            {{ tokenStore.getDecode()?.nickname }}
+          </p>
+        </div>
       </div>
-      <div class="register-login w-28 flex justify-center items-center gap-3">
+      <div
+        v-if="tokenStore.getAccessToken() === null"
+        class="register-login w-28 flex justify-center items-center gap-3"
+      >
         <RouterLink
           :to="{ name: 'Login' }"
           class="opacity-85 hover:opacity-100 duration-200"
@@ -105,6 +116,11 @@ onMounted(() => {
         >
           Signup
         </RouterLink>
+      </div>
+      <div v-else class="logout w-28 flex justify-center items-center gap-3">
+        <button class="opacity-85 hover:opacity-100 duration-200">
+          Logout
+        </button>
       </div>
     </div>
   </div>

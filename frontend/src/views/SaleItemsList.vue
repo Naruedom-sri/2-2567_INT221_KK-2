@@ -5,26 +5,71 @@ import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import Notification from "@/components/Notification.vue";
-import { deleteSaleItemById, getAllSaleItem } from "@/libs/saleItemApi";
+import { deleteSaleItemById } from "@/libs/saleItemApi";
+import { getAllSaleItemOfSeller, refreshAccessToken } from "@/libs/userApi";
 import { getAllBrand } from "@/libs/brandApi";
+import { useTokenStore } from "@/stores/tokenStore";
+import { useRouter } from "vue-router";
+import { jwtDecode } from "jwt-decode";
 const statusStore = useStatusStore();
+const tokenStore = useTokenStore();
+const router = useRouter();
+const params = new URLSearchParams();
 const items = ref([]);
 const brands = ref([]);
-const time = ref();
 const itemId = ref();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const showDialog = ref(false);
-const updateTime = () => {
-  const date = new Date();
-  time.value = date.toLocaleTimeString();
-  setInterval(updateTime, 1000);
-};
+const pageSize = ref(10);
+const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
+const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const isLastPage = ref();
+const isFirstPage = ref();
+const totalPage = ref(0);
+const indexPage = ref(0);
+const tempIndexPage = ref(0);
+
 const getAllSaleItems = async () => {
   try {
-    items.value = await getAllSaleItem(`${BASE_API_DOMAIN}`);
+    if (tokenStore.getAccessToken() === null) {
+      try {
+        const data = await refreshAccessToken(`${BASE_API_DOMAIN}`);
+        const decoded = jwtDecode(data.access_token);
+        tokenStore.setAccessToken(data.access_token);
+        tokenStore.setDecode(decoded);
+      } catch (e) {
+        console.log(e);
+        router.push({ name: "Login" });
+      }
+    }
+
+    params.delete("page");
+    params.delete("size");
+    params.delete("sortField");
+    params.delete("sortDirection");
+
+    params.append(
+      "page",
+      indexPage.value === 9 || indexPage.value === 0
+        ? tempIndexPage.value
+        : indexPage.value
+    );
+    params.append("size", pageSize.value);
+    params.append("sortField", isSort.value.sortFiled);
+    params.append("sortDirection", isSort.value.sortDirection);
+
+    const data = await getAllSaleItemOfSeller(
+      `${BASE_API_DOMAIN}`,
+      tokenStore.getDecode().jti,
+      tokenStore.getAccessToken(),
+      params
+    );
+    items.value = data.content;
+    totalPage.value = data.totalPages;
+    isLastPage.value = data.last;
+    isFirstPage.value = data.first;
   } catch (error) {
     console.log(error);
-    items.value = [];
   }
 };
 
@@ -46,18 +91,39 @@ const deleteSaleItem = async (itemId) => {
     console.log(error);
   }
 };
+
+const clearSort = () => {
+  isSort.value.sortFiled = "createOn";
+  isSort.value.sortDirection = "none";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  getAllSaleItems();
+};
+
+const sortAsc = () => {
+  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortDirection = "asc";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  getAllSaleItems();
+};
+
+const sortDesc = () => {
+  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortDirection = "desc";
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  getAllSaleItems();
+};
+
 onMounted(() => {
-  updateTime();
   getAllSaleItems();
   getAllBrands();
 });
 </script>
 
 <template>
-  <NavBar
-    :search="searchContent"
-    @search-sale-item="getAllSaleItemBySortAndFilter"
-  />
+  <NavBar />
   <Notification v-if="statusStore.getStatus() !== null" />
   <div class="list-container text-white">
     <AlertMessage
@@ -84,14 +150,68 @@ onMounted(() => {
       >
         Filter
       </button>
-      <p class="text-lg">{{ time }}</p>
       <RouterLink
-        @click="statusStore.clearStatusAndMethod()"
+        @click="statusStore.clearEntityAndMethodAndStatusAndMessage"
         :to="{ name: 'BrandList' }"
         class="itbms-manage-brand w-36 h-full flex justify-center items-center hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
       >
         Manage Brand
       </RouterLink>
+    </div>
+    <div class="filter-container mx-28 py-7 flex justify-center border-b">
+      <div class="sort-page p-2 flex items-center gap-1 bg-gray-200 rounded">
+        <div class="page space-x-3 text-black">
+          <label>show</label>
+          <select
+            @change="(indexPage = 0), (tempIndexPage = 0), getAllSaleItems()"
+            v-model="pageSize"
+            class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div>
+          <button
+            @click="sortAsc"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'asc'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)] '
+            "
+          >
+            ↑ A-Z
+          </button>
+        </div>
+        <div>
+          <button
+            @click="clearSort"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'none'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)]'
+            "
+          >
+            Default
+          </button>
+        </div>
+        <div>
+          <button
+            @click="sortDesc"
+            class="p-1.5 rounded cursor-pointer hover:bg-[#0d47a1]"
+            :class="
+              isSort.sortDirection === 'desc'
+                ? 'bg-[#0d47a1]'
+                : 'bg-[rgba(22,22,23,255)]'
+            "
+          >
+            ↓ Z-A
+          </button>
+        </div>
+      </div>
     </div>
     <div class="table w-full px-10 my-10">
       <div class="flex justify-center mb-10">

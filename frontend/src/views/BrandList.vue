@@ -82,7 +82,7 @@ onMounted(() => {
     </div>
     <div class="flex py-7 px-10 border-y border-white">
       <RouterLink
-        @click="statusStore.clearStatusAndMethod()"
+        @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
         :to="{ name: 'SaleItemsList' }"
         class="itbms-item-list hover:text-blue-500 hover:cursor-pointer duration-100"
       >

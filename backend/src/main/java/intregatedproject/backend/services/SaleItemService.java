@@ -11,6 +11,7 @@ import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
 import intregatedproject.backend.utils.SaleItemSpecification;
 import jakarta.persistence.EntityManager;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -93,26 +94,20 @@ public class SaleItemService {
     }
 
 
-    public Page<SaleItem> getAllSortedAndFiltered(List<String> filterBrands, List<Integer> filterStorages, String searchContent, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) {
+    public Page<SaleItem> getAllSortedAndFiltered(Integer userId, List<String> filterBrands, List<Integer> filterStorages, String searchContent, Integer filterPriceLower, Integer filterPriceUpper, String sortField, String sortDirection, Integer page, Integer size) throws BadRequestException {
         filterBrands = filterBrands == null || filterBrands.isEmpty() ? null : filterBrands;
         searchContent = searchContent == null || searchContent.isEmpty() ? null : searchContent;
         size = size <= 0 ? 10 : size;
-        page = (page < 0 ? 0 : page);
+        if (page == null || page < 0) {
+            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+        }
         if (filterPriceLower == null && filterPriceUpper != null) {
             throw new PriceIsNotPresentException("Required parameter 'filterPriceLower' is not present.");
         } else if (filterPriceLower != null && filterPriceUpper == null) {
             throw new PriceIsNotPresentException("Required parameter 'filterPriceUpper' is not present.");
         }
         Sort sort;
-        if ("brand.name".equalsIgnoreCase(sortField) ||
-                "price".equalsIgnoreCase(sortField) ||
-                "model".equalsIgnoreCase(sortField) ||
-                "storageGb".equalsIgnoreCase(sortField) ||
-                "ramGb".equalsIgnoreCase(sortField) ||
-                "description".equalsIgnoreCase(sortField) ||
-                "screenSizeInch".equalsIgnoreCase(sortField) ||
-                "color".equalsIgnoreCase(sortField) ||
-                "quantity".equalsIgnoreCase(sortField)) {
+        if ("brand.name".equalsIgnoreCase(sortField) || "price".equalsIgnoreCase(sortField) || "model".equalsIgnoreCase(sortField) || "storageGb".equalsIgnoreCase(sortField) || "ramGb".equalsIgnoreCase(sortField) || "description".equalsIgnoreCase(sortField) || "screenSizeInch".equalsIgnoreCase(sortField) || "color".equalsIgnoreCase(sortField) || "quantity".equalsIgnoreCase(sortField)) {
             sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
         } else {
             sort = Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id"));
@@ -120,27 +115,8 @@ public class SaleItemService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Specification<SaleItem> searchSpec = Specification.where(SaleItemSpecification.hasColor(searchContent)).or(SaleItemSpecification.hasDescription(searchContent)).or(SaleItemSpecification.hasModel(searchContent));
-        Specification<SaleItem> filterSpec = Specification.where(SaleItemSpecification.hasFilterBrands(filterBrands)).and(SaleItemSpecification.hasFilterStorages(filterStorages)).and(SaleItemSpecification.hasPrices(filterPriceLower, filterPriceUpper)).and(searchSpec);
+        Specification<SaleItem> filterSpec = Specification.where(SaleItemSpecification.hasSeller(userId)).and(SaleItemSpecification.hasFilterBrands(filterBrands)).and(SaleItemSpecification.hasFilterStorages(filterStorages)).and(SaleItemSpecification.hasPrices(filterPriceLower, filterPriceUpper)).and(searchSpec);
         return saleItemRepository.findAll(filterSpec, pageable);
-
-//        if (filterBrands == null && filterStorages == null && filterPriceLower == null) {
-//            return saleItemRepository.findAllWithPage(pageable);
-//        } else if (filterBrands == null && filterStorages == null) {
-//            return saleItemRepository.findAllByPriceBetween(filterPriceLower, filterPriceUpper, pageable);
-//        } else if (filterBrands != null && filterStorages == null && filterPriceLower == null) {
-//            return saleItemRepository.findAllByBrand_NameIn(filterBrands, pageable);
-//        } else if (filterBrands == null && filterPriceLower == null) {
-//            return saleItemRepository.findAllByStorageGb(filterStorages, includeNull, pageable);
-//        } else if (filterBrands != null && filterStorages == null) {
-//            return saleItemRepository.findAllByBrand_NameInAndPriceBetween(filterBrands, filterPriceLower, filterPriceUpper, pageable);
-//        } else if (filterBrands == null) {
-//            return saleItemRepository.findAllByStorageGbAndPrice(filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
-//        } else if (filterPriceLower == null) {
-//            return saleItemRepository.findAllByBrandNameAndStorageGb(filterBrands, filterStorages, includeNull, pageable);
-//        } else {
-//
-//          return saleItemRepository.findAllByBrandNameAndStorageGbAndPrice(filterBrands, filterStorages, includeNull, filterPriceLower, filterPriceUpper, pageable);
-//    }
 
     }
 

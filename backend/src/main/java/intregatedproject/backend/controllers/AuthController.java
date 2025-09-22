@@ -27,7 +27,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin(origins = {"http://localhost:5173", "http://ip24kk2.sit.kmutt.ac.th"})
 public class AuthController {
     @Autowired
     private EmailService emailService;
@@ -100,16 +99,15 @@ public class AuthController {
                     String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
                     String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
 
-                    // access token อยู่ใน body
                     responseToken.setAccess_token(access_token);
 
                     // refresh token อยู่ใน HttpOnly cookie
                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
                             .httpOnly(true)       // JS อ่านไม่ได้
-                            .secure(true)         // เฉพาะ HTTPS
-                            .path("/v2/auth/refresh") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                            .secure(false)         // เฉพาะ HTTPS (true)
+                            .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
                             .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
-                            .sameSite("Strict")   // ป้องกัน CSRF
+                            .sameSite("Lax")    // ป้องกัน CSRF
                             .build();
 
                     return ResponseEntity.ok()
@@ -135,15 +133,18 @@ public class AuthController {
                 }
             }
         }
+
+        System.out.println("refreshToken: " + refreshToken);
         if (refreshToken == null) {
-            throw new BadRequestException("No access token.");
+            throw new BadRequestException("No refresh token.");
         }
 
         Claims claims = jwtUtil.validateToken(refreshToken);
+        System.out.println("claims: " + claims);
         if (claims == null) {
             throw new BadRequestException("Invalid refresh token.");
         }
-        User user = userService.getUserById(Integer.valueOf(claims.getId()));
+        User user = userService.getUserById(Integer.valueOf(claims.getSubject()));
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("User  is not active.");
         }
@@ -151,5 +152,6 @@ public class AuthController {
         responseToken.setAccess_token(newAccessToken);
         return ResponseEntity.ok(responseToken);
     }
+
 }
 

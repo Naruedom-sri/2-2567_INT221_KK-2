@@ -12,11 +12,13 @@ import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.Token.JwtUtils;
 
 import io.jsonwebtoken.Claims;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,40 +36,43 @@ public class UserController {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
-                                                              @RequestParam("token") String accessToken,
-                                                              @RequestParam Integer page,
+                                                              Authentication authentication,
+                                                              @RequestParam(required = false) Integer page,
                                                               @RequestParam(defaultValue = "10") Integer size,
-                                                              @RequestParam(defaultValue = "createdOn") String sortField,
-                                                              @RequestParam(defaultValue = "asc") String sortDirection) {
-        Claims claims = jwtUtils.validateToken(accessToken);
-        if (claims == null) {
-            throw new UnauthorizedException("Invalid token.");
+                                                              @RequestParam(defaultValue = "id") String sortField,
+                                                              @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
+        if (id <= 0) {
+            throw new BadRequestException("Missing or invalid request parameters.");
         }
-        User user = userService.getUserById(Integer.valueOf(claims.getId()));
-        if (!user.getId().equals(id)) {
+        if (authentication == null) {
+            throw new UnauthorizedException("invalid token.");
+        }
+
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+
+        if (!user.getId().equals(userIdFromToken)) {
             throw new ForbiddenException("Request seller id not matched with id in access token.");
         }
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-//        Page<SaleItem> pageResult = saleItemService.getAllSortedAndFiltered(null, null, null, null, null, sortField, sortDirection, page, size);
-//        List<SaleItemSellerDto> saleItemsDto = pageResult.getContent().stream()
-//                .map(saleItem -> modelMapper.map(saleItem, SaleItemSellerDto.class))
-//                .collect(Collectors.toList());
-//        PageSellerDto dto = new PageSellerDto();
-//        dto.setContent(saleItemsDto);
-//        dto.setPage(page);
-//        dto.setSize(pageResult.getSize());
-//        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
-//        dto.setFirst(pageResult.isFirst());
-//        dto.setLast(pageResult.isLast());
-//        dto.setTotalPages(pageResult.getTotalPages());
-//        dto.setTotalElements((int) pageResult.getTotalElements());
-        return null;
+        Page<SaleItem> pageResult = saleItemService.getAllSortedAndFiltered(user.getId(), null, null, null, null, null, sortField, sortDirection, page, size);
+        List<ResponseSaleItemDto> saleItemsDto = pageResult.getContent().stream()
+                .map(saleItem -> modelMapper.map(saleItem, ResponseSaleItemDto.class))
+                .collect(Collectors.toList());
+        PageSellerDto dto = new PageSellerDto();
+        dto.setContent(saleItemsDto);
+        dto.setPage(page);
+        dto.setSize(pageResult.getSize());
+        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
+        dto.setFirst(pageResult.isFirst());
+        dto.setLast(pageResult.isLast());
+        dto.setTotalPages(pageResult.getTotalPages());
+        dto.setTotalElements((int) pageResult.getTotalElements());
+        return ResponseEntity.ok(dto);
     }
 }   

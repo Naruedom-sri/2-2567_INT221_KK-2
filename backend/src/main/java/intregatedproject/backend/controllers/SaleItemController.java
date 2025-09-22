@@ -6,6 +6,7 @@ import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
 import intregatedproject.backend.services.FileService;
 import intregatedproject.backend.services.SaleItemService;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -148,13 +149,13 @@ public class SaleItemController {
             @RequestParam(required = false) String searchContent,
             @RequestParam(required = false) Integer filterPriceLower,
             @RequestParam(required = false) Integer filterPriceUpper,
-            @RequestParam Integer page,
+            @RequestParam (required = false) Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "createdOn") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection
-    ) {
+    ) throws BadRequestException {
         List<Integer> covertFilterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages.stream().map(s -> Objects.equals(s, "null") ? null : Integer.parseInt(s)).toList();
-        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(filterBrands, covertFilterStorages, searchContent, filterPriceLower, filterPriceUpper, sortField, sortDirection, page, size);
+        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(null,filterBrands, covertFilterStorages, searchContent, filterPriceLower, filterPriceUpper, sortField, sortDirection, page, size);
         List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream()
                 .map(saleItem -> modelMapper.map(saleItem, ResponseSaleItemDetailDto.class))
                 .collect(Collectors.toList());
