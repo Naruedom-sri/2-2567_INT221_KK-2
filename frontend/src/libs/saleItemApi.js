@@ -137,32 +137,34 @@ const updateSaleItem = async (url, id, formData) => {
   return data;
 };
 
-const createSaleItemWSeller = async (url, id, formData) => {
+const createSaleItemWSeller = async (url, id, accessToken, formData) => {
   const statusStore = useStatusStore();
+
   const response = await fetch(`${url}/v2/sellers/${id}/sale-items`, {
     method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
     body: formData,
   });
-  if (response.status !== 201) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "sale-items",
-      "add",
-      response.status,
-      "The sale-items could not be added."
-    );
-    throw new Error(
-      `Can't create sale-items with status :  ${response.status} and body: ${response.json}`
-    );
+
+  if (!response.ok) {
+    // try parse message (may throw)
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
+
+    statusStore.setEntityAndMethodAndStatusAndMessage("sale-items", "add", response.status, errorMessage || "The sale-items could not be added.");
+    throw new Error(`Can't create sale-items (status: ${response.status}) - ${errorMessage}`);
   }
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "sale-items",
-    "add",
-    response.status,
-    "The sale item has been successfully added."
-  );
+
   const data = await response.json();
+  statusStore.setEntityAndMethodAndStatusAndMessage("sale-items", "add", response.status, "The sale item has been successfully added.");
   return data;
 };
+
 
 export {
   getAllSaleItem,
@@ -175,3 +177,4 @@ export {
   updateSaleItem,
   createSaleItemWSeller
 };
+
