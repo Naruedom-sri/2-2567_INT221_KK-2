@@ -8,9 +8,6 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
@@ -57,7 +54,5 @@ public class Seller {
     @Column(name = "nationalIdPhotoBack", nullable = false)
     private String nationalIdPhotoBack;
 
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SaleItem> saleItems= new ArrayList<>();
 
 }

@@ -11,7 +11,9 @@ import {
   getSaleItemById,
 } from "@/libs/saleItemApi";
 import { getAllBrand } from "@/libs/brandApi";
+import { useTokenStore } from "@/stores/tokenStore";
 const statusStore = useStatusStore();
+const tokenStore = useTokenStore();
 const items = ref([]);
 const brands = ref([]);
 const prices = ref([
@@ -25,7 +27,7 @@ const prices = ref([
 const storages = ref([32, 64, 128, 256, 512, 1, "Not specified"]);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const countImg = ref(1);
-
+const params = new URLSearchParams();
 const brandFilterList = ref([]);
 const priceFilterList = ref([]);
 const storageFilterList = ref([]);
@@ -41,7 +43,6 @@ const isLastPage = ref();
 const isFirstPage = ref();
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
-const params = new URLSearchParams();
 const minPrice = ref("");
 const maxPrice = ref("");
 const searchContent = ref("");
@@ -461,8 +462,14 @@ onUnmounted(() => {
         :class="countImg === 2 ? 'object-top' : ''"
       />
     </div>
-
-    <div class="filter-container mx-28 py-7 flex justify-between border-b">
+    <div v-if="tokenStore.getDecode()?.role !== 'BUYER'" class="flex justify-end mx-28 pt-7 pb-3">
+      <RouterLink
+        :to="{ name: 'SaleItemsList' }"
+        class="py-3 px-5 rounded bg-white text-black"
+        >My Product</RouterLink
+      >
+    </div>
+    <div class="filter-container mx-28 pb-7 flex justify-between border-b">
       <div
         class="brand-price-filter-container gap-2 p-2 flex bg-gray-300 rounded"
       >
@@ -606,14 +613,6 @@ onUnmounted(() => {
             ↓ Z-A
           </button>
         </div>
-        <div>
-          <RouterLink
-            :to="{ name: 'AddSaleItems' }"
-            class="itbms-sale-item-add py-1.5 px-3 flex items-center justify-center bg-[rgba(22,22,23,255)] rounded duration-200 over:cursor-pointer hover:bg-[#0d47a1] hover:text-white"
-          >
-            +
-          </RouterLink>
-        </div>
       </div>
     </div>
     <div
@@ -689,7 +688,7 @@ onUnmounted(() => {
             }}</span>
           </p>
           <button
-            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-black hover:text-white hover:cursor-pointer duration-300"
+            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
           >
             Add to Cart

@@ -3,8 +3,10 @@ import { ref, watch } from "vue";
 import { loginUser } from "@/libs/userApi";
 import { useRouter } from "vue-router";
 import { useStatusStore } from "@/stores/statusStore";
-import { useUserStore } from "@/stores/ีuserStore";
+import { useTokenStore } from "@/stores/tokenStore";
+import { jwtDecode } from "jwt-decode";
 const statusStore = useStatusStore();
+const tokenStore = useTokenStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
 const password = ref("");
@@ -12,13 +14,21 @@ const isDisable = ref(true);
 const isShowError = ref(false);
 const isShowPassword = ref(false);
 const router = useRouter();
-const userData = useUserStore();
+
 const login = async () => {
   try {
     const data = await loginUser(BASE_API_DOMAIN, {
       email: email.value.trim(),
       password: password.value,
     });
+    const decoded = jwtDecode(data.access_token);
+    tokenStore.setAccessToken(data.access_token);
+    tokenStore.setDecode(decoded);
+    if (decoded.role === "SELLER") {
+      router.push({ name: "SaleItemsList" });
+    } else {
+      router.push({ name: "SaleItemsGallery" });
+    }
     // บันทึกสถานะผู้ใช้แบบเรียบง่ายเพื่อให้ NavBar ตรวจสอบและแสดงไอคอนโปรไฟล์
     sessionStorage.setItem("isAuthenticated", "true");
     sessionStorage.setItem("userEmail", email.value.trim());
@@ -38,6 +48,7 @@ const login = async () => {
     isShowError.value = true;
   }
 };
+
 watch(
   [email, password],
   () => {

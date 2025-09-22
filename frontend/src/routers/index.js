@@ -14,7 +14,9 @@ import VerifyEmail from "@/views/VerifyEmail.vue";
 import Login from "@/views/Login.vue";
 import Profile from "@/views/Profile.vue";
 import EditProfile from "@/views/EditProfile.vue";
+import { useTokenStore } from "@/stores/tokenStore";
 const history = createWebHistory("/kk2/");
+
 const routes = [
   {
     path: "/sale-items",
@@ -41,11 +43,11 @@ const routes = [
     name: "VerifyEmailWithToken",
     component: VerifyEmail,
   },
-  {
-    path: "/verify-email",
-    name: "VerifyEmail",
-    component: VerifyEmail,
-  },
+  // {
+  //   path: "/verify-email",
+  //   name: "VerifyEmail",
+  //   component: VerifyEmail,
+  // },
   {
     path: "/profile",
     name: "Profile",
@@ -124,6 +126,26 @@ const router = createRouter({
     return { top: 0 };
   },
   linkExactActiveClass: "opacity-100",
+});
+
+router.beforeEach((to, from, next) => {
+  const tokenStore = useTokenStore();
+  const userRole = tokenStore.getDecode()?.role;
+
+  if (userRole === "BUYER") {
+    if (
+      to.name === "SaleItemsList" ||
+      to.name === "AddBrand" ||
+      to.name === "EditBrand" ||
+      to.name === "BrandList" ||
+      to.name === "EditSaleItems" ||
+      to.name === "AddSaleItems"
+    ) {
+      return next({ name: "SaleItemsGallery" });
+    }
+  }
+
+  next(); // อนุญาต navigation ตามปกติ
 });
 
 export default router;

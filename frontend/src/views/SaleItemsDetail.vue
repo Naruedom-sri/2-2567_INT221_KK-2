@@ -12,6 +12,7 @@ import {
   getImageOfSaleItem,
   getSaleItemById,
 } from "@/libs/saleItemApi";
+import { useTokenStore } from "@/stores/tokenStore";
 
 const {
   params: { itemId },
@@ -19,6 +20,7 @@ const {
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const statusStore = useStatusStore();
+const tokenStore = useTokenStore();
 const item = ref({});
 const router = useRouter();
 const showDialog = ref(false);
@@ -264,7 +266,10 @@ onUnmounted(() => {
           </button>
         </div>
         <div class="btn-add-buy mt-10">
-          <div class="flex justify-between gap-4 space-y-5">
+          <div
+            v-if="tokenStore.getDecode()?.role !== 'BUYER'"
+            class="flex justify-between gap-4 space-y-5"
+          >
             <button
               @click="showDialog = true"
               class="itbms-delete-button w-full flex-1 py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
@@ -285,7 +290,7 @@ onUnmounted(() => {
             >
           </div>
           <button
-            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-[#0d47a1] hover:text-white duration-200"
+            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
           >
             Add to Cart
           </button>

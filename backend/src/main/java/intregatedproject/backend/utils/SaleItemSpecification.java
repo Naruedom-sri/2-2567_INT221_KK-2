@@ -26,6 +26,14 @@ public class SaleItemSpecification {
             }
         };
     }
+    public static Specification<SaleItem> hasSeller(Integer userId) {
+        return (root, query, criteriaBuilder) -> {
+            if ( userId == null ||  userId == 0) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.join("user").get("id").in(userId);
+        };
+    }
     public static Specification<SaleItem> hasDescription(String searchContent) {
         return (root, query, criteriaBuilder) -> {
           if (searchContent == null || searchContent.isBlank()) {

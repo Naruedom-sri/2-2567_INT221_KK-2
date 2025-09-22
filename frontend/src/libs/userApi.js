@@ -4,6 +4,7 @@ const loginUser = async (url, newData) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/login`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-type": "application/json; charset=UTF-8",
     },
@@ -51,6 +52,7 @@ const loginUser = async (url, newData) => {
 };
 
 const register = async (url, form) => {
+  const statusStore = useStatusStore();
   const res = await fetch(`${url}/v2/auth/register`, {
     method: "POST",
     body: form,
@@ -120,3 +122,65 @@ const getUserById = async (url, id, token = null) => {
 
 // แก้ไข: export ฟังก์ชันใหม่ด้วย
 export { loginUser, register, getUserById };
+const refreshAccessToken = async (url) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/auth/refresh`, {
+    method: "POST",
+    credentials: "include", // ส่ง cookie refresh token ไป
+  });
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "post",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't create new access token (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return response.json();
+};
+
+const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(
+    `${url}/v2/sellers/${id}/sale-items?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't fetch (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return response.json();
+};
+
+export {  getAllSaleItemOfSeller, refreshAccessToken };
