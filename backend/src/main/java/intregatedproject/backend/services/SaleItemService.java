@@ -37,6 +37,8 @@ public class SaleItemService {
     private SaleItemImageRepository saleItemImageRepository;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private UserService userService;
 
     public List<SaleItem> getAllSaleItems() {
         try {
@@ -56,7 +58,7 @@ public class SaleItemService {
         }
     }
 
-    private void covertDtoToEntity(RequestSaleItemDto saleItemDto, SaleItem item) {
+    private void covertDtoToEntity(RequestSaleItemDto saleItemDto, SaleItem item)  {
         item.setModel(saleItemDto.getModel());
         item.setRamGb(saleItemDto.getRamGb());
         item.setStorageGb(saleItemDto.getStorageGb());
@@ -67,6 +69,20 @@ public class SaleItemService {
         item.setQuantity(saleItemDto.getQuantity());
         Brand brand = brandService.getBrandById(saleItemDto.getBrandId());
         item.setBrand(brand);
+    }
+
+    private void covertDtoToEntity(RequestSaleItemDto saleItemDto, SaleItem item,int id ) {
+        item.setModel(saleItemDto.getModel());
+        item.setRamGb(saleItemDto.getRamGb());
+        item.setStorageGb(saleItemDto.getStorageGb());
+        item.setPrice(saleItemDto.getPrice());
+        item.setDescription(saleItemDto.getDescription());
+        item.setScreenSizeInch(saleItemDto.getScreenSizeInch());
+        item.setColor(saleItemDto.getColor());
+        item.setQuantity(saleItemDto.getQuantity());
+        Brand brand = brandService.getBrandById(saleItemDto.getBrandId());
+        item.setBrand(brand);
+        item.setSeller(userService.getUserById(id).getSeller());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -145,7 +161,7 @@ public class SaleItemService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files) {
+    public SaleItem createSaleItemImage(RequestSaleItemDto saleItemDto, List<MultipartFile> files, int id) {
         // กันซ้ำ id ตามที่คุณทำไว้เดิม
         if (saleItemDto.getId() != null && saleItemRepository.existsById(saleItemDto.getId())) {
             throw new RuntimeException("Sale item with id " + saleItemDto.getId() + " already exists");
@@ -153,7 +169,7 @@ public class SaleItemService {
 
         // 1) เซฟตัวสินค้าเพื่อให้ได้ PK ก่อน
         var newSaleItem = new SaleItem();
-        covertDtoToEntity(saleItemDto, newSaleItem);
+        covertDtoToEntity(saleItemDto, newSaleItem,id);
         var savedSaleItem = saleItemRepository.save(newSaleItem);
 
         // 2) เก็บไฟล์ลง storage รอบเดียวด้วย multiStore -> ได้ "ชื่อไฟล์ที่ถูกเซฟจริง" กลับมาตามลำดับ

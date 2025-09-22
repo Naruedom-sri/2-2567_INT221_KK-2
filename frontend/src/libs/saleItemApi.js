@@ -137,6 +137,33 @@ const updateSaleItem = async (url, id, formData) => {
   return data;
 };
 
+const createSaleItemWSeller = async (url, id, formData) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/sellers/${id}/sale-items`, {
+    method: "POST",
+    body: formData,
+  });
+  if (response.status !== 201) {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "sale-items",
+      "add",
+      response.status,
+      "The sale-items could not be added."
+    );
+    throw new Error(
+      `Can't create sale-items with status :  ${response.status} and body: ${response.json}`
+    );
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "sale-items",
+    "add",
+    response.status,
+    "The sale item has been successfully added."
+  );
+  const data = await response.json();
+  return data;
+};
+
 export {
   getAllSaleItem,
   getAllSaleItemV2,

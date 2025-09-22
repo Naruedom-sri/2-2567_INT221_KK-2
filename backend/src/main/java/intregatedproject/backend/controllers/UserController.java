@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/itb-mshop")
@@ -55,6 +56,9 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
+
+
+
 //        Page<SaleItem> pageResult = saleItemService.getAllSortedAndFiltered(null, null, null, null, null, sortField, sortDirection, page, size);
 //        List<SaleItemSellerDto> saleItemsDto = pageResult.getContent().stream()
 //                .map(saleItem -> modelMapper.map(saleItem, SaleItemSellerDto.class))

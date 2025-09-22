@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
