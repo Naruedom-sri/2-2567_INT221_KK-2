@@ -7,11 +7,7 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.SaleItemService;
-
 import intregatedproject.backend.services.UserService;
-import intregatedproject.backend.utils.Token.JwtUtils;
-
-import io.jsonwebtoken.Claims;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

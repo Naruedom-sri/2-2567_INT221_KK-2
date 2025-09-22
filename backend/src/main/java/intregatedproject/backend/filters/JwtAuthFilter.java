@@ -14,7 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.util.ArrayList;
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {

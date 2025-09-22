@@ -109,20 +109,20 @@ public class SaleItemController {
         return ResponseEntity.ok().contentType(MediaType.valueOf(fileService.getFileType(file))).body(file);
     }
 
-    @PostMapping(value = "/v2/sale-items",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
-            @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+    // @PostMapping(value = "/v2/sale-items",
+    //         consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItemImages(
+    //         @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
+    //         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
-        // สร้างสินค้าใหม่พร้อมอัปโหลดรูปภาพหลายไฟล์ในครั้งเดียว
-        // ฟิลด์สินค้า: saleItem.xxx
-        // รูปภาพ (หลายไฟล์): key = images (เป็น MultipartFile list)
-        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images);
+    //     // สร้างสินค้าใหม่พร้อมอัปโหลดรูปภาพหลายไฟล์ในครั้งเดียว
+    //     // ฟิลด์สินค้า: saleItem.xxx
+    //     // รูปภาพ (หลายไฟล์): key = images (เป็น MultipartFile list)
+    //     SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images);
 
-        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+    //     ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    // }
 
     @PutMapping(value = "/v2/sale-items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseSaleItemImageDtoV2> updateSaleItem(
@@ -149,7 +149,7 @@ public class SaleItemController {
             @RequestParam(required = false) String searchContent,
             @RequestParam(required = false) Integer filterPriceLower,
             @RequestParam(required = false) Integer filterPriceUpper,
-            @RequestParam (required = false) Integer page,
+            @RequestParam Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "createdOn") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection

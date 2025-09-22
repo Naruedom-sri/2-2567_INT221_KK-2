@@ -12,9 +12,7 @@ import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
