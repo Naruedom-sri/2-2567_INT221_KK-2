@@ -183,9 +183,4 @@ VALUES (
 
 
 INSERT INTO sale_items (id, brandId,userId, model, description, quantity, price, screenSizeInch, ramGb, storageGb, color) VALUES
-<<<<<<< HEAD
 (86, 10,2, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
-
-=======
-(86, 10,2, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
->>>>>>> ca16dd018491398bd16a08bc5854edd33ba462aa
