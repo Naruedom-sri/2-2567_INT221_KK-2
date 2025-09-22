@@ -4,8 +4,14 @@ import intregatedproject.backend.dtos.saleitems.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
+import intregatedproject.backend.entities.User;
+import intregatedproject.backend.exceptions.users.ForbiddenException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.FileService;
 import intregatedproject.backend.services.SaleItemService;
+import intregatedproject.backend.services.UserService;
+import intregatedproject.backend.utils.Token.JwtUtils;
+import io.jsonwebtoken.Claims;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +34,10 @@ import java.util.stream.Collectors;
 public class SaleItemController {
     @Autowired
     private SaleItemService service;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private JwtUtils jwtUtils;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -124,6 +134,33 @@ public class SaleItemController {
     //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
     // }
 
+    @PostMapping(value = "/v2/sellers/{id}/sale-items",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItem(
+            @RequestParam("token") String accessToken,
+            @PathVariable int id,
+            @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+
+        Claims claims = jwtUtils.validateToken(accessToken);
+        if (claims == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+        User user = userService.getUserById(Integer.valueOf(claims.getId()));
+        if (!user.getId().equals(id)) {
+            throw new ForbiddenException("Request seller id not matched with id in access token.");
+        }
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images, id);
+
+        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
     @PutMapping(value = "/v2/sale-items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseSaleItemImageDtoV2> updateSaleItem(
             @PathVariable int id,
@@ -155,7 +192,7 @@ public class SaleItemController {
             @RequestParam(defaultValue = "asc") String sortDirection
     ) throws BadRequestException {
         List<Integer> covertFilterStorages = filterStorages == null || filterStorages.isEmpty() ? null : filterStorages.stream().map(s -> Objects.equals(s, "null") ? null : Integer.parseInt(s)).toList();
-        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(null,filterBrands, covertFilterStorages, searchContent, filterPriceLower, filterPriceUpper, sortField, sortDirection, page, size);
+        Page<SaleItem> pageResult = service.getAllSortedAndFiltered(null, filterBrands, covertFilterStorages, searchContent, filterPriceLower, filterPriceUpper, sortField, sortDirection, page, size);
         List<ResponseSaleItemDetailDto> saleItemsDto = pageResult.getContent().stream()
                 .map(saleItem -> modelMapper.map(saleItem, ResponseSaleItemDetailDto.class))
                 .collect(Collectors.toList());
