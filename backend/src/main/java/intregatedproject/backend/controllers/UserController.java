@@ -1,7 +1,8 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.saleitems.*;
-import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.dtos.users.ResponseBuyerDto;
+import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
@@ -14,15 +15,12 @@ import intregatedproject.backend.utils.Token.JwtUtils;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/itb-mshop")
@@ -70,4 +68,39 @@ public class UserController {
 //        dto.setTotalElements((int) pageResult.getTotalElements());
         return null;
     }
-}   
+
+    @GetMapping("/v2/users/{id}")
+    public ResponseEntity<Object> getUserById(@PathVariable int id,
+                                              @RequestHeader("Authorization") String authorizationHeader) {
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing or invalid Authorization header");
+        }
+
+        String accessToken = authorizationHeader.substring(7);
+
+        Claims claims = jwtUtils.validateToken(accessToken);
+        if (claims == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+
+        User userFromToken = userService.getUserById(Integer.valueOf(claims.getId()));
+
+        if (!userFromToken.getId().equals(id)) {
+            throw new ForbiddenException("Request user id not matched with id in access token.");
+        }
+
+        if (Objects.equals(userFromToken.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+
+        User user = userService.getUserById(id);
+        if ("SELLER".equalsIgnoreCase(user.getRole())) {
+            ResponseSellerDto sellerDto = modelMapper.map(user, ResponseSellerDto.class);
+            return ResponseEntity.ok(sellerDto);
+        } else {
+            ResponseBuyerDto buyerDto = modelMapper.map(user, ResponseBuyerDto.class);
+            return ResponseEntity.ok(buyerDto);
+        }
+    }
+}

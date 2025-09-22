@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { loginUser } from "@/libs/userApi";
 import { useRouter } from "vue-router";
 import { useStatusStore } from "@/stores/statusStore";
+import { useUserStore } from "@/stores/ีuserStore";
 const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
@@ -11,12 +12,26 @@ const isDisable = ref(true);
 const isShowError = ref(false);
 const isShowPassword = ref(false);
 const router = useRouter();
+const userData = useUserStore();
 const login = async () => {
   try {
     const data = await loginUser(BASE_API_DOMAIN, {
       email: email.value.trim(),
       password: password.value,
     });
+    // บันทึกสถานะผู้ใช้แบบเรียบง่ายเพื่อให้ NavBar ตรวจสอบและแสดงไอคอนโปรไฟล์
+    sessionStorage.setItem("isAuthenticated", "true");
+    sessionStorage.setItem("userEmail", email.value.trim());
+    // พยายามอ่าน nickname/role จาก response ถ้ามี, ถ้าไม่มีใช้ส่วนก่อน @ ของอีเมลเป็น fallback
+    const nicknameFromApi =
+      data?.data?.nickname || data?.nickname || email.value.split("@")[0];
+    const roleFromApi = data?.data?.role || data?.role || "buyer";
+    sessionStorage.setItem("userNickname", nicknameFromApi);
+    sessionStorage.setItem("userRole", roleFromApi);
+    // อัปเดต user store เบื้องต้น (ถ้าต้องการให้ข้อมูลพร้อมใช้ในหน้าอื่น)
+    userData.nickname = nicknameFromApi;
+    userData.email = email.value.trim();
+    userData.role = roleFromApi;
     router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);

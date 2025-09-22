@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
 const route = useRoute();
@@ -28,6 +28,33 @@ onMounted(() => {
   const savedSearch = sessionStorage.getItem("searchContent");
   if (savedSearch) searchSaleItem.value = savedSearch;
 });
+
+const isAuthenticated = ref(Boolean(sessionStorage.getItem("isAuthenticated")));
+const userNickname = ref(sessionStorage.getItem("userNickname") || "Account");
+const isProfileOpen = ref(false);
+
+function goToProfile() {
+  router.push({ name: "Profile" });
+  isProfileOpen.value = false;
+}
+
+function logout() {
+  sessionStorage.removeItem("isAuthenticated");
+  sessionStorage.removeItem("userEmail");
+  sessionStorage.removeItem("userNickname");
+  sessionStorage.removeItem("userRole");
+  isAuthenticated.value = false;
+  isProfileOpen.value = false;
+  router.push({ name: "Login" });
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    isAuthenticated.value = Boolean(sessionStorage.getItem("isAuthenticated"));
+    userNickname.value = sessionStorage.getItem("userNickname") || "Account";
+  }
+);
 </script>
 
 <template>
@@ -74,7 +101,7 @@ onMounted(() => {
           About Us
         </RouterLink>
       </div>
-      <div class="symbol w-56 flex items-center gap-7">
+      <div class="symbol w-50 flex items-center gap-7">
         <img
           @click="isSearch = !isSearch"
           src="/src/assets/imgs/search-symbol.png"
@@ -93,18 +120,41 @@ onMounted(() => {
         />
       </div>
       <div class="register-login w-28 flex justify-center items-center gap-3">
-        <RouterLink
-          :to="{ name: 'Login' }"
-          class="opacity-85 hover:opacity-100 duration-200"
-          >Login</RouterLink
-        >
-        <p>/</p>
-        <RouterLink
-          :to="{ name: 'Register' }"
-          class="itbms-register-button opacity-85 hover:opacity-100 duration-200"
-        >
-          Signup
-        </RouterLink>
+        <!-- ถ้า logged in ให้โชว์ไอคอนโปรไฟล์ -->
+        <template v-if="isAuthenticated">
+          <div class="relative">
+            <div class="flex gap-2">
+              <img
+              @click="isProfileOpen = !isProfileOpen"
+              src="/src/assets/imgs/account-symbol4.png"
+              alt="account"
+              class="w-7 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+            />
+            <!-- แก้ไข: ใช้ตัวแปร userNickname ที่ถูกต้อง -->
+            <p class="text-sm px-2 py-1">{{ userNickname }}</p>
+            </div>
+            <div v-if="isProfileOpen" class="absolute mt-2 bg-white text-black p-2 rounded shadow" style="z-index: 9999; pointer-events: auto;">
+              <!-- แก้ไข: เพิ่ม type="button" และ @click.stop เพื่อให้ปุ่มไม่เป็น submit และหยุดการแพร่ของ event -->
+              <button type="button" @click.stop="goToProfile" class="block w-full text-left px-2 py-1 hover:bg-gray-100">Profile</button>
+              <!-- <button type="button" @click.stop="goToEdit" class="block w-full text-left px-2 py-1 hover:bg-gray-100">Edit Profile</button> -->
+              <button type="button" @click.stop="logout" class="block w-full text-left px-2 py-1 text-red-600 hover:bg-gray-100">Logout</button>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <RouterLink
+            :to="{ name: 'Login' }"
+            class="opacity-85 hover:opacity-100 duration-200"
+            >Login</RouterLink
+          >
+          <p>/</p>
+          <RouterLink
+            :to="{ name: 'Register' }"
+            class="itbms-register-button opacity-85 hover:opacity-100 duration-200"
+          >
+            Signup
+          </RouterLink>
+        </template>
       </div>
     </div>
   </div>

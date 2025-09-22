@@ -1,6 +1,7 @@
 import { useStatusStore } from "@/stores/statusStore";
-const statusStore = useStatusStore();
+
 const loginUser = async (url, newData) => {
+  const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/login`, {
     method: "POST",
     headers: {
@@ -81,4 +82,41 @@ const register = async (url, form) => {
   return res.json();
 };
 
-export { loginUser, register };
+const getUserById = async (url, id, token = null) => {
+  const statusStore = useStatusStore();
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const response = await fetch(`${url}/v2/users/${id}`, {
+    method: "GET",
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(`Can't get user (status: ${response.status}) - ${errorMessage}`);
+  }
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "get",
+    response.status,
+    "Get user successfully."
+  );
+  return response.json();
+};
+
+// แก้ไข: export ฟังก์ชันใหม่ด้วย
+export { loginUser, register, getUserById };

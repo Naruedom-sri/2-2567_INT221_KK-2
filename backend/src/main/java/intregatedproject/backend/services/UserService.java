@@ -1,7 +1,6 @@
 package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
-import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
@@ -12,9 +11,7 @@ import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,9 +31,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Integer id) {
-        return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
-    }
+        public User getUserById(Integer id) {
+            return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
+        }
 
     private void convertToEntityBuyer(RequestRegisterDto userDto, User user, Buyer buyer) {
         user.setNickname(userDto.getNickname());

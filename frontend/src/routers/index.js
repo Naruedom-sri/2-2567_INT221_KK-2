@@ -12,6 +12,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Register from "@/views/Register.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import Login from "@/views/Login.vue";
+import Profile from "@/views/Profile.vue";
+import EditProfile from "@/views/EditProfile.vue";
 const history = createWebHistory("/kk2/");
 const routes = [
   {
@@ -43,6 +45,16 @@ const routes = [
     path: "/verify-email",
     name: "VerifyEmail",
     component: VerifyEmail,
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+  },
+   {
+    path: "/profile/edit",
+    name: "EditProfile",
+    component: EditProfile,
   },
   {
     path: "/sale-items/:itemId",
