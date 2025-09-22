@@ -44,7 +44,7 @@ CREATE TABLE sellers (
 CREATE TABLE sale_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     brandId INT NOT NULL,
-    sellerId INT,
+    userId INT,
     model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
     description TEXT CHARACTER SET utf8mb4 NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
@@ -56,7 +56,7 @@ CREATE TABLE sale_items (
     createdOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId),
-    CONSTRAINT fk_seller FOREIGN KEY (sellerId) REFERENCES sellers(sellerId) ON DELETE CASCADE
+    CONSTRAINT fk_seller FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
 
@@ -70,7 +70,15 @@ CREATE TABLE IF NOT EXISTS sale_item_images (
 	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
 );
 
-
+INSERT INTO users (nickname, fullname, email, password, role, status)
+VALUES (
+    'Somchai',
+    'Somchai Jaidee',
+    'itbkk.somchai@ad.sit.kmutt.ac.th',
+    'itProj24/SOM',
+    'BUYER',
+    'ACTIVE'
+);
 
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),
@@ -93,6 +101,9 @@ INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (18, 'Lenovo', 'China', 'https://www.lenovo.com', 1),
 (19, 'Honor', 'China', 'https://www.hihonor.com', 1),
 (20, 'Nothing', 'United Kingdom', 'https://nothing.tech', 1);
+
+
+
 
 INSERT INTO sale_items (id, brandId, model, description, quantity, price, screenSizeInch, ramGb, storageGb, color) VALUES
 (1, 2, 'iPhone 14 Pro Max', 'ไอโฟนเรือธงรุ่นล่าสุด มาพร้อม Dynamic Island จอใหญ่สุดในตระกูล กล้องระดับโปร', 5, 42900, 6.7, 6, 512, 'Space Black'),
@@ -157,11 +168,19 @@ INSERT INTO sale_items (id, brandId, model, description, quantity, price, screen
 (85, 10, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');
 
 INSERT INTO users (nickname, fullname, email, password, role, status)
+VALUES ('sally', 'Sally Smith', 'sally@example.com', '11111', 'SELLER', 'ACTIVE');
+
+INSERT INTO sellers (userId, mobileNumber, bankAccountNumber, bankName, nationalIdNumber, nationalIdPhotoFront, nationalIdPhotoBack)
 VALUES (
-    'Somchai',
-    'Somchai Jaidee',
-    'itbkk.somchai@ad.sit.kmutt.ac.th',
-    'itProj24/SOM',
-    'BUYER',
-    'ACTIVE'
+    LAST_INSERT_ID(), 
+    '0812345678', 
+    '123456789012345', 
+    'Bangkok Bank', 
+    '1234567890123', 
+    '/images/nid_front_sally.jpg', 
+    '/images/nid_back_sally.jpg'
 );
+
+
+INSERT INTO sale_items (id, brandId,userId, model, description, quantity, price, screenSizeInch, ramGb, storageGb, color) VALUES
+(86, 10,2, 'Reno6 Pro', 'Classic premium', 7, 16500, 6.55, 12, 256, 'Arctic Blue');

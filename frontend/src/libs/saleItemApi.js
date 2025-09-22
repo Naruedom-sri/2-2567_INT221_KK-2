@@ -173,4 +173,5 @@ export {
   deleteSaleItemById,
   createSaleItem,
   updateSaleItem,
+  createSaleItemWSeller
 };
