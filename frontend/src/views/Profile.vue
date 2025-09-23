@@ -45,6 +45,23 @@ const fetchUserData = async () => {
   }
 };
 
+const maskShowMiddleThreeBeforeLast = (value) => {
+  if (value === null || value === undefined) return "";
+  const s = String(value);
+  const len = s.length;
+  if (len < 4) {
+    return "x".repeat(len);
+  }
+  const prefixLen = Math.max(0, len - 4); // number of leading x's
+  const prefix = "x".repeat(prefixLen);
+  const middle = s.slice(len - 4, len - 1); // three chars before last
+  const suffix = "x";
+  return prefix + middle + suffix;
+};
+
+const maskMobile = (mobile) => maskShowMiddleThreeBeforeLast(mobile);
+const maskBankAccount = (acct) => maskShowMiddleThreeBeforeLast(acct);
+
 onMounted(() => {
   fetchUserData();
 });
@@ -80,8 +97,8 @@ onMounted(() => {
         </div>
 
         <div v-if="userStore.role === 'SELLER'" class="text-center gap-1 flex flex-col mt-1">
-          <p><strong>Mobile:</strong> {{ userStore.mobileNumber }}</p>
-          <p><strong>Bank Account No:</strong> {{ userStore.bankAccountNumber }}</p>
+          <p><strong>Mobile:</strong> {{ maskMobile(userStore.mobileNumber) }}</p>
+          <p><strong>Bank Account No:</strong> {{ maskBankAccount(userStore.bankAccountNumber) }}</p>
           <p><strong>Bank Name:</strong> {{ userStore.bankName }}</p>
         </div>
 

@@ -148,13 +148,6 @@ const getUserById = async (url, id, token) => {
       `Can't get user (status: ${response.status}) - ${errorMessage}`
     );
   }
-
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
-    "get",
-    response.status,
-    "Get user successfully."
-  );
   return response.json();
 };
 

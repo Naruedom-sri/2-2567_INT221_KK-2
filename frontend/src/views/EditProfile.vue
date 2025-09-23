@@ -63,6 +63,23 @@ const isUnchanged = computed(() => {
   return (form.nickname === (userData.nickname || "")) &&
          (form.fullName === (userData.fullname || ""));
 });
+
+const maskShowMiddleThreeBeforeLast = (value) => {
+  if (value === null || value === undefined) return "";
+  const s = String(value);
+  const len = s.length;
+  if (len < 4) {
+    return "x".repeat(len);
+  }
+  const prefixLen = Math.max(0, len - 4); // number of leading x's
+  const prefix = "x".repeat(prefixLen);
+  const middle = s.slice(len - 4, len - 1); // three chars before last
+  const suffix = "x";
+  return prefix + middle + suffix;
+};
+
+const maskMobile = (mobile) => maskShowMiddleThreeBeforeLast(mobile);
+const maskBankAccount = (acct) => maskShowMiddleThreeBeforeLast(acct);
 </script>
 
 <template>
@@ -95,11 +112,11 @@ const isUnchanged = computed(() => {
         <div v-if="userData.role === 'SELLER'">
           <div class="form-row">
             <label><strong>Mobile:</strong></label>
-            <input v-model="userData.mobileNumber" type="text" readonly />
+            <input :value="maskMobile(userData.mobileNumber)" type="text" readonly />
           </div>
           <div class="form-row">
             <label><strong>Bank Account No:</strong></label>
-            <input v-model="userData.bankAccountNumber" type="text" readonly />
+            <input :value="maskBankAccount(userData.bankAccountNumber)" type="text" readonly />
           </div>
           <div class="form-row">
             <label><strong>Bank Name:</strong></label>
