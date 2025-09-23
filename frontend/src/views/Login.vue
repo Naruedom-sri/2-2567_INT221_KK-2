@@ -103,7 +103,12 @@ watch(
               @click="isShowPassword = !isShowPassword"
               class="px-4 text-xs"
             >
-              {{ isShowPassword ? "Hide" : "Show" }}
+              <span v-if="isShowPassword">
+                <img src="/src/assets/imgs/eye-off.png" class="w-7 opacity-50" />
+              </span>
+              <span v-else>
+                <img src="/src/assets/imgs/eye-open.png" class="w-7 opacity-50" />
+              </span>
             </button>
           </div>
         </div>
