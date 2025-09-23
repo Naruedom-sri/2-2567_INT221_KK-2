@@ -130,7 +130,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const tokenStore = useTokenStore();
   const userRole = tokenStore.getDecode()?.role;
-
   if (userRole === "BUYER") {
     if (
       to.name === "SaleItemsList" ||
