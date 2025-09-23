@@ -23,12 +23,6 @@ CREATE TABLE users (
 	updatedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE buyers (
-	buyerId INT AUTO_INCREMENT PRIMARY KEY,
-	userId int NOT NULL UNIQUE,
-    CONSTRAINT fk_buyer_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
-);
-
 CREATE TABLE sellers (
 	sellerId INT AUTO_INCREMENT PRIMARY KEY AUTO_INCREMENT,
     userId int NOT NULL UNIQUE, 
@@ -163,5 +157,3 @@ INSERT INTO sale_items (id,sellerId,brandId,model,description,quantity,price,scr
 (83,4,10,'Find X5 Lite','Previous gen lite',8,14850,'6.43','8','128','Starry Black'),
 (84,3,10,'A77','Budget friendly',20,8250,'6.56','6','128','Ocean Blue'),
 (85,4,10,'Reno6 Pro','Classic premium',7,16500,'6.55','12','256','Arctic Blue');
-
-
