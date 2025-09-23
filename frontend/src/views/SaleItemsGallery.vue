@@ -469,7 +469,7 @@ onUnmounted(() => {
         >My Product</RouterLink
       >
     </div>
-    <div class="filter-container mx-28 pb-7 flex justify-between border-b">
+    <div class="filter-container mx-28 py-7 flex justify-between border-b">
       <div
         class="brand-price-filter-container gap-2 p-2 flex bg-gray-300 rounded"
       >

@@ -18,7 +18,7 @@ const loginUser = async (url, newData) => {
     } catch {
       errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
     }
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "user",
         "login",
@@ -54,6 +54,7 @@ const logoutUser = async (url, accessToken) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/logout`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-type": "application/json; charset=UTF-8",
       Authorization: `Bearer ${accessToken}`,
@@ -143,7 +144,9 @@ const getUserById = async (url, id, token) => {
       response.status,
       errorMessage
     );
-    throw new Error(`Can't get user (status: ${response.status}) - ${errorMessage}`);
+    throw new Error(
+      `Can't get user (status: ${response.status}) - ${errorMessage}`
+    );
   }
 
   statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -179,7 +182,9 @@ const editProfile = async (url, id, token, form) => {
       response.status,
       errorMessage
     );
-    throw new Error(`Can't edit user (status: ${response.status}) - ${errorMessage}`);
+    throw new Error(
+      `Can't edit user (status: ${response.status}) - ${errorMessage}`
+    );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
@@ -251,4 +256,12 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken, getUserById, logoutUser, editProfile };
+export {
+  loginUser,
+  register,
+  getAllSaleItemOfSeller,
+  refreshAccessToken,
+  getUserById,
+  logoutUser,
+  editProfile,
+};

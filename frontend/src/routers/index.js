@@ -25,8 +25,7 @@ const routes = [
   },
   {
     path: "/",
-    name: "LandingPage",
-    component: LandingPage,
+    redirect: { name: "Login" },
   },
   {
     path: "/home",
@@ -43,17 +42,17 @@ const routes = [
     name: "VerifyEmailWithToken",
     component: VerifyEmail,
   },
-  // {
-  //   path: "/verify-email",
-  //   name: "VerifyEmail",
-  //   component: VerifyEmail,
-  // },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail,
+  },
   {
     path: "/profile",
     name: "Profile",
     component: Profile,
   },
-   {
+  {
     path: "/profile/edit",
     name: "EditProfile",
     component: EditProfile,
