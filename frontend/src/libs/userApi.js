@@ -18,7 +18,7 @@ const loginUser = async (url, newData) => {
     } catch {
       errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
     }
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "user",
         "login",

@@ -166,10 +166,12 @@ public class AuthController {
         if (claims == null) {
             throw new BadRequestException("Invalid refresh token.");
         }
+
         User user = userService.getUserById(Integer.valueOf(claims.getSubject()));
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("User  is not active.");
         }
+
         String newAccessToken = jwtUtil.generateAccessToken(user, request);
         responseToken.setAccess_token(newAccessToken);
         return ResponseEntity.ok(responseToken);
