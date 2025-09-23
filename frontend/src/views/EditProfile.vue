@@ -1,7 +1,7 @@
 <script setup>
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/ีuserStore";
+import { useUserStore } from "@/stores/userStore";
 
 const router = useRouter();
 const userData = useUserStore();
@@ -42,46 +42,47 @@ function cancelEdit() {
 
 <template>
   <div class="min-h-screen grid place-items-center bg-gray-0">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6">
-      <div class="p-6px text-black">
-        <h2>Edit Profile</h2>
-
+    <div class="w-full max-w-2xl rounded-2xl bg-white pt-10 pb-6 px-6 relative">
+      <label class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <img src="/src/assets/imgs/account-symbol4.png" class="w-25 h-25 rounded-full border-0 border-white object-cover"/>
+      </label>
+      <div class="p-5 text-black">
         <div class="form-row">
-          <label>Nickname:</label>
+          <label><strong>Nickname:</strong></label>
           <input v-model="form.nickname" type="text" />
         </div>
 
         <div class="form-row">
-          <label>Email:</label>
+          <label><strong>Email:</strong></label>
           <input v-model="form.email" type="email" />
         </div>
 
         <div class="form-row">
-          <label>Fullname:</label>
+          <label><strong>Fullname:</strong></label>
           <input v-model="form.fullname" type="text" />
         </div>
 
         <div class="form-row">
-          <label>Type:</label>
+          <label><strong>Type:</strong></label>
           <p>{{ form.role }}</p>
         </div>
 
         <div v-if="form.role === 'seller'">
           <div class="form-row">
-            <label>Mobile</label>
+            <label><strong>Mobile:</strong></label>
             <input v-model="form.sellerMobileNumber" type="text" />
           </div>
           <div class="form-row">
-            <label>Bank Account No</label>
+            <label><strong>Bank Account No:</strong></label>
             <input v-model="form.sellerBankAccountNumber" type="text" />
           </div>
           <div class="form-row">
-            <label>Bank Name</label>
+            <label><strong>Bank Name:</strong></label>
             <input v-model="form.sellerBankName" type="text" />
           </div>
         </div>
 
-        <div class="actions">
+        <div class="mt-4 flex gap-4 justify-center">
           <button
             @click="saveProfile"
             class="border-2 border-gray-500 rounded-md px-3 py-1 bg-gray-300 hover:bg-gray-400"
@@ -107,9 +108,9 @@ function cancelEdit() {
   display: flex;
   flex-direction: column;
 }
-.actions {
+/* .actions {
   margin-top: 12px;
   display: flex;
   gap: 8px;
-}
+} */
 </style>

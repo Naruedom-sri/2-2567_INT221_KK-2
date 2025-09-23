@@ -29,20 +29,16 @@ const login = async () => {
     } else {
       router.push({ name: "SaleItemsGallery" });
     }
-    // บันทึกสถานะผู้ใช้แบบเรียบง่ายเพื่อให้ NavBar ตรวจสอบและแสดงไอคอนโปรไฟล์
-    sessionStorage.setItem("isAuthenticated", "true");
-    sessionStorage.setItem("userEmail", email.value.trim());
-    // พยายามอ่าน nickname/role จาก response ถ้ามี, ถ้าไม่มีใช้ส่วนก่อน @ ของอีเมลเป็น fallback
-    const nicknameFromApi =
-      data?.data?.nickname || data?.nickname || email.value.split("@")[0];
-    const roleFromApi = data?.data?.role || data?.role || "buyer";
-    sessionStorage.setItem("userNickname", nicknameFromApi);
-    sessionStorage.setItem("userRole", roleFromApi);
-    // อัปเดต user store เบื้องต้น (ถ้าต้องการให้ข้อมูลพร้อมใช้ในหน้าอื่น)
-    userData.nickname = nicknameFromApi;
-    userData.email = email.value.trim();
-    userData.role = roleFromApi;
-    router.push({ name: "SaleItemsGallery" });
+    // // บันทึกสถานะผู้ใช้แบบเรียบง่ายเพื่อให้ NavBar ตรวจสอบและแสดงไอคอนโปรไฟล์
+    // sessionStorage.setItem("isAuthenticated", "true");
+    // sessionStorage.setItem("userEmail", email.value.trim());
+    // // ถ้าไม่มีข้อมูลชื่อจริง ให้ใช้อีเมลก่อน @ เป็น nickname ชั่วคราว
+    // // const nickname = userData.nickname
+    // sessionStorage.setItem("userNickname", userData.nickname);
+    // // ค่า role เริ่มต้น (ปรับถ้า API ส่งมา)
+    // sessionStorage.setItem("userRole", "buyer");
+
+    // router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
     isShowError.value = true;

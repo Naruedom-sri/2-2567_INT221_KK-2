@@ -120,8 +120,6 @@ const getUserById = async (url, id, token = null) => {
   return response.json();
 };
 
-// แก้ไข: export ฟังก์ชันใหม่ด้วย
-export { loginUser, register, getUserById };
 const refreshAccessToken = async (url) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/refresh`, {
@@ -183,4 +181,4 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export {  getAllSaleItemOfSeller, refreshAccessToken };
+export {  getAllSaleItemOfSeller, refreshAccessToken, loginUser, register, getUserById };

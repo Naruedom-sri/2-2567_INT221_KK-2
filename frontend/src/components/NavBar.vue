@@ -1,6 +1,6 @@
 <script setup>
 import { useTokenStore } from "@/stores/tokenStore";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 const tokenStore = useTokenStore();
 const router = useRouter();
@@ -31,8 +31,8 @@ onMounted(() => {
   if (savedSearch) searchSaleItem.value = savedSearch;
 });
 
-const isAuthenticated = ref(Boolean(sessionStorage.getItem("isAuthenticated")));
-const userNickname = ref(sessionStorage.getItem("userNickname") || "Account");
+// const isAuthenticated = ref(Boolean(sessionStorage.getItem("isAuthenticated")));
+// const userNickname = ref(sessionStorage.getItem("userNickname") || "Account");
 const isProfileOpen = ref(false);
 
 function goToProfile() {
@@ -50,13 +50,13 @@ function logout() {
   router.push({ name: "Login" });
 }
 
-watch(
-  () => route.fullPath,
-  () => {
-    isAuthenticated.value = Boolean(sessionStorage.getItem("isAuthenticated"));
-    userNickname.value = sessionStorage.getItem("userNickname") || "Account";
-  }
-);
+// watch(
+//   () => route.fullPath,
+//   () => {
+//     isAuthenticated.value = Boolean(sessionStorage.getItem("isAuthenticated"));
+//     userNickname.value = sessionStorage.getItem("userNickname") || "Account";
+//   }
+// );
 </script>
 
 <template>
@@ -116,7 +116,7 @@ watch(
           alt="cart"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
-        <div class="flex justify-center items-center gap-2">
+        <!-- <div class="flex justify-center items-center gap-2"> -->
           <!-- <img
             src="/src/assets/imgs/account-symbol.png"
             alt="account"
@@ -126,7 +126,7 @@ watch(
             {{ tokenStore.getDecode()?.nickname }}
           </p> -->
           
-        </div>
+        <!-- </div> -->
       </div>
       <div
         v-if="tokenStore.getAccessToken() === null"

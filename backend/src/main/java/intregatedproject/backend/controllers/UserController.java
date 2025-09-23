@@ -11,7 +11,6 @@ import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.Token.JwtUtils;
-import io.jsonwebtoken.Claims;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,31 +79,26 @@ public class UserController {
 
     @GetMapping("/v2/users/{id}")
     public ResponseEntity<Object> getUserById(@PathVariable int id,
-                                              @RequestHeader("Authorization") String authorizationHeader) {
+                                              Authentication authentication) {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("Missing or invalid Authorization header");
-        }
-
-        String accessToken = authorizationHeader.substring(7);
-
-        Claims claims = jwtUtils.validateToken(accessToken);
-        if (claims == null) {
+//        if (id <= 0) {
+//            throw new BadRequestException("Missing or invalid request parameters.");
+//        }
+        if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }
 
-        User userFromToken = userService.getUserById(Integer.valueOf(claims.getId()));
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
 
-        if (!userFromToken.getId().equals(id)) {
+        if (!user.getId().equals(userIdFromToken)) {
             throw new ForbiddenException("Request user id not matched with id in access token.");
         }
-
-        if (Objects.equals(userFromToken.getStatus(), "INACTIVE")) {
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
 
-        User user = userService.getUserById(id);
-        if ("SELLER".equalsIgnoreCase(user.getRole())) {
+        if ("seller".equalsIgnoreCase(user.getRole())) {
             ResponseSellerDto sellerDto = modelMapper.map(user, ResponseSellerDto.class);
             return ResponseEntity.ok(sellerDto);
         } else {
