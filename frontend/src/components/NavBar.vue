@@ -2,11 +2,13 @@
 import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { logoutUser } from "@/libs/userApi";
 const tokenStore = useTokenStore();
 const router = useRouter();
 const route = useRoute();
 const isSearch = ref(false);
 const searchSaleItem = ref("");
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const emit = defineEmits(["searchSaleItem"]);
 
 const handleSearchClick = (isClear) => {
@@ -109,9 +111,10 @@ onMounted(() => {
             class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
             @click="goToProfile"
           />
-          <p 
-          class="opacity-85 hover:opacity-100 hover:cursor-pointer" 
-          @click="goToProfile">
+          <p
+            class="opacity-85 hover:opacity-100 hover:cursor-pointer"
+            @click="goToProfile"
+          >
             {{ tokenStore.getDecode()?.nickname }}
           </p>
         </div>

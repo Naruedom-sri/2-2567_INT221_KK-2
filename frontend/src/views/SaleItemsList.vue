@@ -26,6 +26,7 @@ const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
 const totalPage = ref(0);
+const totalSaleItems = ref(0);
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 
@@ -64,7 +65,16 @@ const getAllSaleItems = async () => {
       tokenStore.getAccessToken(),
       params
     );
+
+    sessionStorage.setItem("pageSize", String(pageSize.value));
+    sessionStorage.setItem("indexPage", String(indexPage.value));
+    sessionStorage.setItem("tempIndexPage", String(tempIndexPage.value));
+    sessionStorage.setItem("sortField", isSort.value.sortFiled);
+    sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
+    sessionStorage.setItem("pageList", JSON.stringify(pageList.value));
+    
     items.value = data.content;
+    totalSaleItems.value = data.totalElements;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
@@ -116,7 +126,98 @@ const sortDesc = () => {
   getAllSaleItems();
 };
 
+const nextNavPage = () => {
+  if (
+    !isLastPage.value &&
+    pageList.value[indexPage.value] !== totalPage.value
+  ) {
+    pageList.value.push(pageList.value[indexPage.value] + 1);
+    pageList.value.shift();
+  }
+};
+
+const previousNavPage = () => {
+  if (!isFirstPage.value && pageList.value[indexPage.value] !== 1) {
+    pageList.value.unshift(pageList.value[indexPage.value] - 1);
+    pageList.value.pop();
+  }
+};
+
+const nextPage = () => {
+  indexPage.value += 1;
+  tempIndexPage.value += 1;
+  if (indexPage.value >= 9) {
+    if (indexPage.value !== 9) {
+      indexPage.value = 9;
+      nextNavPage();
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    } else {
+      indexPage.value = 9;
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    }
+  }
+  getAllSaleItems();
+};
+
+const previousPage = () => {
+  indexPage.value -= 1;
+  tempIndexPage.value -= 1;
+  if (indexPage.value <= 0) {
+    if (indexPage.value !== 0) {
+      indexPage.value = 0;
+      previousNavPage();
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    } else {
+      indexPage.value = 0;
+      tempIndexPage.value = pageList.value[indexPage.value] - 1;
+    }
+  }
+  getAllSaleItems();
+};
+
+const clickPageNumber = (numPage) => {
+  indexPage.value = pageList.value.findIndex((page) => page === numPage);
+  tempIndexPage.value = numPage - 1;
+  getAllSaleItems();
+};
+
+const firstPage = () => {
+  indexPage.value = 0;
+  tempIndexPage.value = 0;
+  pageList.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  getAllSaleItems();
+};
+
+const lastPage = () => {
+  tempIndexPage.value = totalPage.value - 1;
+  indexPage.value = totalPage.value - 1;
+  if (totalPage.value > 10) {
+    pageList.value = [];
+    let tempTotalPage = totalPage.value;
+    for (let index = 0; index < 10; index++) {
+      pageList.value.unshift(tempTotalPage--);
+    }
+    indexPage.value = pageList.value.findIndex(
+      (page) => page === totalPage.value
+    );
+  }
+  getAllSaleItems();
+};
+
 onMounted(() => {
+  const savedSize = sessionStorage.getItem("pageSize");
+  const savedSortField = sessionStorage.getItem("sortField");
+  const savedSortDirection = sessionStorage.getItem("sortDirection");
+  const savedIndexPage = sessionStorage.getItem("indexPage");
+  const savedTempIndexPage = sessionStorage.getItem("tempIndexPage");
+  const savedPageList = sessionStorage.getItem("pageList");
+
+  if (savedPageList) pageList.value = JSON.parse(savedPageList);
+  if (savedSize) pageSize.value = parseInt(savedSize);
+  if (savedSortField) isSort.value.sortFiled = savedSortField;
+  if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
+  if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
+  if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
   getAllSaleItems();
   getAllBrands();
 });
@@ -125,7 +226,7 @@ onMounted(() => {
 <template>
   <NavBar />
   <Notification v-if="statusStore.getStatus() !== null" />
-  <div class="list-container text-white">
+  <div class="list-container text-white text-sm">
     <AlertMessage
       v-if="showDialog"
       title="Delete Confirmation"
@@ -213,7 +314,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="table w-full px-10 my-10">
+    <div class="table w-full px-10 mt-10">
       <div class="flex justify-center mb-10">
         <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
           <img
@@ -224,7 +325,7 @@ onMounted(() => {
           <div class="self-center space-y-2">
             <h1 class="text-2xl">Available Model</h1>
             <p class="w-fit mx-auto p-1 rounded-full text-xl bg-blue-500">
-              {{ items.length }}
+              {{ totalSaleItems }}
             </p>
           </div>
         </div>
@@ -281,6 +382,75 @@ onMounted(() => {
       >
         no sale item
       </h1>
+      <div
+        v-show="items.length !== 0 && totalPage > 1"
+        class="nav-page my-5 gap-1 flex items-center justify-center col-span-5 text-white"
+      >
+        <button
+          @click="firstPage"
+          :disabled="isFirstPage"
+          class="itbms-page-first px-3 py-1 rounded duration-200"
+          :class="
+            isFirstPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
+          "
+        >
+          First
+        </button>
+        <button
+          @click="previousPage"
+          :disabled="isFirstPage"
+          class="itbms-page-prev px-3 py-1 rounded duration-200"
+          :class="
+            isFirstPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
+          "
+        >
+          <
+        </button>
+        <div
+          @click="clickPageNumber(page)"
+          v-for="(page, index) in totalPage > 10 ? pageList : totalPage"
+          :key="index"
+          class="px-3 py-1 rounded hover:cursor-pointer hover:bg-white hover:text-black duration-200"
+          :class="`itbms-page-${pageList.findIndex(
+            (pageNum) => pageNum === page
+          )}`"
+          v-bind:class="
+            indexPage === pageList.findIndex((pageNum) => pageNum === page)
+              ? 'bg-white text-black rounded'
+              : ''
+          "
+        >
+          <p>{{ page }}</p>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="isLastPage"
+          class="itbms-page-next px-3 py-1 rounded duration-200"
+          :class="
+            isLastPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black '
+          "
+        >
+          >
+        </button>
+        <button
+          @click="lastPage"
+          :disabled="isLastPage"
+          class="itbms-page-last px-3 py-1 rounded duration-200"
+          :class="
+            isLastPage
+              ? 'opacity-60'
+              : 'hover:cursor-pointer hover:bg-white hover:text-black'
+          "
+        >
+          Last
+        </button>
+      </div>
     </div>
   </div>
 
@@ -290,7 +460,7 @@ onMounted(() => {
 <style scoped>
 th,
 td {
-  border: 1px solid;
+  border: 1px solid gray;
   text-align: center;
   padding: 10px 0;
 }

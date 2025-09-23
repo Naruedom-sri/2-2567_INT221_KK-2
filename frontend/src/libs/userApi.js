@@ -143,7 +143,9 @@ const getUserById = async (url, id, token) => {
       response.status,
       errorMessage
     );
-    throw new Error(`Can't get user (status: ${response.status}) - ${errorMessage}`);
+    throw new Error(
+      `Can't get user (status: ${response.status}) - ${errorMessage}`
+    );
   }
 
   statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -178,7 +180,9 @@ const editProfile = async (url, id, token, form) => {
       response.status,
       errorMessage
     );
-    throw new Error(`Can't edit user (status: ${response.status}) - ${errorMessage}`);
+    throw new Error(
+      `Can't edit user (status: ${response.status}) - ${errorMessage}`
+    );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
@@ -250,4 +254,12 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken, getUserById, logoutUser };
+export {
+  loginUser,
+  register,
+  getAllSaleItemOfSeller,
+  refreshAccessToken,
+  getUserById,
+  logoutUser,
+  editProfile,
+};
