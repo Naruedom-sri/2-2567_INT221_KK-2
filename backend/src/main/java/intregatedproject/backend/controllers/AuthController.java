@@ -107,7 +107,7 @@ public class AuthController {
                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
                             .httpOnly(true)       // JS อ่านไม่ได้
                             .secure(false)         // เฉพาะ HTTPS (true)
-                            .path("/v2/auth/refresh") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                            .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
                             .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
                             .sameSite("Lax")    // ป้องกัน CSRF
                             .build();
@@ -136,7 +136,7 @@ public class AuthController {
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(false)
-                .path("/v2/auth/refresh")     // must match the original path
+                .path("/")     // must match the original path
                 .maxAge(0)     // delete immediately
                 .build();
         response.addHeader("Set-Cookie", deleteCookie.toString());

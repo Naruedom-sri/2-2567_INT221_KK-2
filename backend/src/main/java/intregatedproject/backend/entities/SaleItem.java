@@ -31,7 +31,7 @@ public class SaleItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "sellerId")
     private User user;
 
     @Size(max = 60)
