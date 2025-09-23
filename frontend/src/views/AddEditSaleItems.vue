@@ -7,18 +7,20 @@ import Footer from "@/components/Footer.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import { getAllBrand } from "@/libs/brandApi";
 import {
-  createSaleItem,
+  createSaleItemSeller,
   getImageOfSaleItem,
   getSaleItemByIdForEdit,
   updateSaleItem,
 } from "@/libs/saleItemApi";
 import { useStatusStore } from "@/stores/statusStore";
+import { useTokenStore } from "@/stores/tokenStore";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
   isEditing: Boolean,
 });
 const statusStore = useStatusStore();
+const tokenStore = useTokenStore();
 const {
   params: { itemId },
 } = useRoute();
@@ -422,7 +424,12 @@ const addUpdateNewSaleItem = async () => {
     }
 
     if (!props.isEditing) {
-      const data = await createSaleItem(`${BASE_API_DOMAIN}`, formData);
+      const data = await createSaleItemSeller(
+        `${BASE_API_DOMAIN}`,
+        tokenStore.getDecode().jti,
+        tokenStore.getAccessToken(),
+        formData
+      );
     } else {
       const data = await updateSaleItem(`${BASE_API_DOMAIN}`, itemId, formData);
     }

@@ -15,11 +15,13 @@ import intregatedproject.backend.utils.Token.TokenType;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -105,7 +107,7 @@ public class AuthController {
                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
                             .httpOnly(true)       // JS อ่านไม่ได้
                             .secure(false)         // เฉพาะ HTTPS (true)
-                            .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                            .path("/v2/auth/refresh") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
                             .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
                             .sameSite("Lax")    // ป้องกัน CSRF
                             .build();
@@ -119,6 +121,26 @@ public class AuthController {
             }
         }
         throw new UnauthorizedException("Email or password is incorrect.");
+    }
+
+    @PostMapping("/v2/auth/logout")
+    public ResponseEntity<ResponseToken> logoutUser(Authentication authentication, HttpServletResponse response) {
+        if (authentication == null) {
+            throw new UnauthorizedException("invalid token.");
+        }
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(userIdFromToken);
+        if (user.getStatus().equals("INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+        ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/v2/auth/refresh")     // must match the original path
+                .maxAge(0)     // delete immediately
+                .build();
+        response.addHeader("Set-Cookie", deleteCookie.toString());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PostMapping("/v2/auth/refresh")

@@ -3,7 +3,7 @@ const loginUser = async (url, newData) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/login`, {
     method: "POST",
-    credentials: "include", 
+    credentials: "include",
     headers: {
       "Content-type": "application/json; charset=UTF-8",
     },
@@ -48,6 +48,42 @@ const loginUser = async (url, newData) => {
     "Login successfully."
   );
   return response.json();
+};
+
+const logoutUser = async (url, accessToken) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/auth/logout`, {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (response.status !== 204) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "logout",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't logout (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "logout",
+    response.status,
+    "Logout successfully."
+  );
 };
 
 const register = async (url, form) => {
@@ -99,7 +135,7 @@ const refreshAccessToken = async (url) => {
     }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "user",
-      "post",
+      "refresh",
       response.status,
       errorMessage
     );
@@ -144,4 +180,10 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken };
+export {
+  loginUser,
+  register,
+  getAllSaleItemOfSeller,
+  refreshAccessToken,
+  logoutUser,
+};

@@ -1,8 +1,10 @@
 <script setup>
+import { logoutUser } from "@/libs/userApi";
 import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 const tokenStore = useTokenStore();
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
 const route = useRoute();
 const isSearch = ref(false);
@@ -23,6 +25,14 @@ const handleSearchClick = (isClear) => {
     sessionStorage.setItem("indexPage", String(0));
     sessionStorage.setItem("tempIndexPage", String(0));
     router.push({ name: "SaleItemsGallery" });
+  }
+};
+const logout = async () => {
+  try {
+    await logoutUser(`${BASE_API_DOMAIN}`, tokenStore.getAccessToken());
+    router.push({ name: "Login" });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -118,7 +128,10 @@ onMounted(() => {
         </RouterLink>
       </div>
       <div v-else class="logout w-28 flex justify-center items-center gap-3">
-        <button class="opacity-85 hover:opacity-100 duration-200">
+        <button
+          @click="logout"
+          class="opacity-85 hover:opacity-100 duration-200"
+        >
           Logout
         </button>
       </div>

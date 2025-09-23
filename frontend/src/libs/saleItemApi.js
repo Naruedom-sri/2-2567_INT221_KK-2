@@ -4,7 +4,9 @@ const getAllSaleItem = async (url) => {
   const response = await fetch(`${url}/v1/sale-items`);
   if (!response.ok) {
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json()}`
+      `Can't fetch sale-items with status: ${
+        response.status
+      } and with body: ${response.json()}`
     );
   }
   const data = await response.json();
@@ -15,7 +17,9 @@ const getAllSaleItemV2 = async (url, params) => {
   const response = await fetch(`${url}/v2/sale-items?${params.toString()}`);
   if (!response.ok) {
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json()}`
+      `Can't fetch sale-items with status: ${
+        response.status
+      } and with body: ${response.json()}`
     );
   }
   const data = await response.json();
@@ -137,9 +141,8 @@ const updateSaleItem = async (url, id, formData) => {
   return data;
 };
 
-const createSaleItemWSeller = async (url, id, accessToken, formData) => {
+const createSaleItemSeller = async (url, id, accessToken, formData) => {
   const statusStore = useStatusStore();
-
   const response = await fetch(`${url}/v2/sellers/${id}/sale-items`, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -156,15 +159,24 @@ const createSaleItemWSeller = async (url, id, accessToken, formData) => {
       errorMessage = await response.text().catch(() => "");
     }
 
-    statusStore.setEntityAndMethodAndStatusAndMessage("sale-items", "add", response.status, errorMessage || "The sale-items could not be added.");
-    throw new Error(`Can't create sale-items (status: ${response.status}) - ${errorMessage}`);
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "sale-items",
+      "post",
+      response.status,
+      errorMessage || "The sale-items could not be added."
+    );
+    throw new Error(
+      `Can't create sale-items (status: ${response.status}) - ${errorMessage}`
+    );
   }
-
-  const data = await response.json();
-  statusStore.setEntityAndMethodAndStatusAndMessage("sale-items", "add", response.status, "The sale item has been successfully added.");
-  return data;
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "sale-items",
+    "post",
+    response.status,
+    "The sale item has been successfully added."
+  );
+  return response.json();
 };
-
 
 export {
   getAllSaleItem,
@@ -175,6 +187,5 @@ export {
   deleteSaleItemById,
   createSaleItem,
   updateSaleItem,
-  createSaleItemWSeller
+  createSaleItemSeller,
 };
-
