@@ -30,17 +30,24 @@ async function saveProfile() {
     }
   }
 
+  const payload = {
+    nickname: (form.nickname || "").trim(),
+    fullName: (form.fullName || "").trim()
+  };
+
    try {
     await editProfile(
       BASE_API_DOMAIN,
       tokenStore.getDecode().jti, 
       tokenStore.getAccessToken(),{
-        nickname: form.nickname,
-        fullName: form.fullName
+        nickname: payload.nickname,
+        fullName: payload.fullName
       }
     );
 
-    Object.assign(userData, form);
+    Object.assign(userData, payload);
+    form.nickname = payload.nickname;
+    form.fullName = payload.fullName;
 
     router.push({ name: "Profile" });
   } catch (error) {
