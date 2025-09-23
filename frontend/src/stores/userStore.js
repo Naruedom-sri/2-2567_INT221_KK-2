@@ -7,9 +7,9 @@ export const useUserStore = defineStore("user", () => {
   const nickname = ref("");
   const fullname = ref("");
 
-  const sellerMobileNumber = ref("");
-  const sellerBankName = ref("");
-  const sellerBankAccountNumber = ref("");
+  const mobileNumber = ref("");
+  const bankName = ref("");
+  const bankAccountNumber = ref("");
 
   const setUser = (userData) => {
     role.value = userData.role || "";
@@ -17,14 +17,14 @@ export const useUserStore = defineStore("user", () => {
     nickname.value = userData.nickname || "";
     fullname.value = userData.fullName || "";
 
-    if (role.value === "seller") {
-      sellerMobileNumber.value = userData.sellerMobileNumber || "";
-      sellerBankName.value = userData.sellerBankName || "";
-      sellerBankAccountNumber.value = userData.sellerBankAccountNumber || "";
+    if (role.value === "SELLER") {
+      mobileNumber.value = userData.mobileNumber || "";
+      bankName.value = userData.bankName || "";
+      bankAccountNumber.value = userData.bankAccountNumber || "";
     } else {
-      sellerMobileNumber.value = "";
-      sellerBankName.value = "";
-      sellerBankAccountNumber.value = "";
+      mobileNumber.value = "";
+      bankName.value = "";
+      bankAccountNumber.value = "";
     }
   };
 
@@ -43,9 +43,9 @@ export const useUserStore = defineStore("user", () => {
     email,
     nickname,
     fullname,
-    sellerMobileNumber,
-    sellerBankName,
-    sellerBankAccountNumber,
+    mobileNumber,
+    bankName,
+    bankAccountNumber,
     setUser,
     clearUser,
   };

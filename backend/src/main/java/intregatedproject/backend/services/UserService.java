@@ -1,6 +1,6 @@
 package intregatedproject.backend.services;
 
-import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.*;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
@@ -121,5 +121,42 @@ public class UserService {
         return savedUser;
     }
 
+    public ResponseBuyerDto updateBuyerProfile(Integer id, RequestEditUserDto request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        user.setNickname(request.getNickname());
+        user.setFullName(request.getFullName());
+        // role ไม่ต้องแก้ ให้ใช้ของเดิม (buyer)
+
+        User saved = userRepository.save(user);
+
+        ResponseBuyerDto dto = new ResponseBuyerDto();
+        dto.setNickname(saved.getNickname());
+        dto.setEmail(saved.getEmail());
+        dto.setFullName(saved.getFullName());
+        dto.setRole(saved.getRole());
+        return dto;
+    }
+
+    public ResponseSellerDto updateSellerProfile(Integer id, RequestEditUserDto request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setNickname(request.getNickname());
+        user.setFullName(request.getFullName());
+        // role ไม่ต้องแก้ ให้ใช้ของเดิม (seller)
+
+        User saved = userRepository.save(user);
+
+        ResponseSellerDto dto = new ResponseSellerDto();
+        dto.setNickname(saved.getNickname());
+        dto.setEmail(saved.getEmail());
+        dto.setFullName(saved.getFullName());
+        dto.setRole(saved.getRole());
+        dto.setMobileNumber(saved.getSeller().getMobileNumber());
+        dto.setBankAccountNumber(saved.getSeller().getBankAccountNumber());
+        dto.setBankName(saved.getSeller().getBankName());
+        return dto;
+    }
 }

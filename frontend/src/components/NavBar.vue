@@ -2,6 +2,8 @@
 import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { logoutUser } from "@/libs/userApi";
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const tokenStore = useTokenStore();
 const router = useRouter();
 const route = useRoute();
@@ -136,7 +138,7 @@ onMounted(() => {
       <div v-else class="logout w-28 flex justify-center items-center gap-3">
         <button
           @click="logout"
-          class="opacity-85 hover:opacity-100 duration-200"
+          class="opacity-85 hover:opacity-100 duration-200 hover:cursor-pointer"
         >
           Logout
         </button>

@@ -29,16 +29,6 @@ const login = async () => {
     } else {
       router.push({ name: "SaleItemsGallery" });
     }
-    // // บันทึกสถานะผู้ใช้แบบเรียบง่ายเพื่อให้ NavBar ตรวจสอบและแสดงไอคอนโปรไฟล์
-    // sessionStorage.setItem("isAuthenticated", "true");
-    // sessionStorage.setItem("userEmail", email.value.trim());
-    // // ถ้าไม่มีข้อมูลชื่อจริง ให้ใช้อีเมลก่อน @ เป็น nickname ชั่วคราว
-    // // const nickname = userData.nickname
-    // sessionStorage.setItem("userNickname", userData.nickname);
-    // // ค่า role เริ่มต้น (ปรับถ้า API ส่งมา)
-    // sessionStorage.setItem("userRole", "buyer");
-
-    // router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
     isShowError.value = true;

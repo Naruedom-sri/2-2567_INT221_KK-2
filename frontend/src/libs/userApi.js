@@ -160,9 +160,10 @@ const editProfile = async (url, id, token, form) => {
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "PUT",
     headers: {
+       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: form,
+    body: JSON.stringify(form),
   });
   if (!response.ok) {
     let errorMessage = "";
@@ -250,4 +251,4 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken, getUserById, logoutUser };
+export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken, getUserById, logoutUser, editProfile };

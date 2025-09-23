@@ -1,13 +1,19 @@
 <script setup>
-import { onMounted, computed } from "vue";
+import { onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
-import { getUserById } from "@/libs/userApi";
+import { getUserById, refreshAccessToken } from "@/libs/userApi";
 import { useTokenStore } from "@/stores/tokenStore";
+import { useRouter } from "vue-router";
+import { jwtDecode } from "jwt-decode";
+
+const router = useRouter();
 const userStore = useUserStore();
 const tokenStore = useTokenStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
-const isSeller = computed(() => userStore.role.toLowerCase() === "seller");
+// const isSeller = computed(() => userStore.role.toLowerCase() === "seller");
+// console.log(isSeller.value);
+
 // const isBuyer = computed(() => userStore.role.toLowerCase() === "buyer");
 
 const fetchUserData = async () => {
@@ -51,13 +57,21 @@ onMounted(() => {
           class="w-20 h-20 rounded-full border-0 border-white object-cover"
         />
       </label>
-      <div class="text-black">
-        <div class="p-5 text-center">
+      <div class="text-black flex flex-col justify-center items-center">
+        <div class="pt-7 text-center">
           <p><strong>Nickname:</strong> {{ userStore.nickname }}</p>
           <p><strong>Email:</strong> {{ userStore.email }}</p>
           <p><strong>Fullname:</strong> {{ userStore.fullname }}</p>
           <p><strong>Type:</strong> {{ userStore.role }}</p>
-          <div class="mt-4">
+        </div>
+
+        <div v-if="userStore.role === 'SELLER'" class="text-center">
+          <p><strong>Mobile:</strong> {{ userStore.mobileNumber }}</p>
+          <p><strong>Bank Account No:</strong> {{ userStore.bankAccountNumber }}</p>
+          <p><strong>Bank Name:</strong> {{ userStore.bankName }}</p>
+        </div>
+
+        <div class="mt-5">
             <router-link :to="{ name: 'EditProfile' }"
               ><button
                 class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
@@ -66,13 +80,6 @@ onMounted(() => {
               </button></router-link
             >
           </div>
-        </div>
-
-        <div v-if="isSeller">
-          <p>Mobile: {{ userStore.sellerMobileNumber }}</p>
-          <p>Bank Account No: {{ userStore.sellerBankAccountNumber }}</p>
-          <p>Bank Name: {{ userStore.sellerBankName }}</p>
-        </div>
       </div>
     </div>
   </div>
