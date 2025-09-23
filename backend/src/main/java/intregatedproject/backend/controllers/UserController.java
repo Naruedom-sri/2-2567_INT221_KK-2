@@ -107,7 +107,7 @@ public class UserController {
         }
 
         if ("seller".equalsIgnoreCase(user.getRole())) {
-            Seller seller = sellerRepository.findById(userService.getUserById(id).getId()).orElse(null);
+            Seller seller = sellerRepository.findByUserId(userService.getUserById(id).getId());
 
             ResponseSellerDto sellerDto = new ResponseSellerDto();
             modelMapper.map(user, sellerDto);     // map ข้อมูลจาก User
