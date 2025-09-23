@@ -119,6 +119,76 @@ const register = async (url, form) => {
   return res.json();
 };
 
+const getUserById = async (url, id, token) => {
+  const statusStore = useStatusStore();
+
+  const response = await fetch(`${url}/v2/users/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(`Can't get user (status: ${response.status}) - ${errorMessage}`);
+  }
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "get",
+    response.status,
+    "Get user successfully."
+  );
+  return response.json();
+};
+
+const editProfile = async (url, id, token, form) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/users/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: form,
+  });
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "edit",
+      response.status,
+      errorMessage
+    );
+    throw new Error(`Can't edit user (status: ${response.status}) - ${errorMessage}`);
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "edit",
+    response.status,
+    "Edit user successfully."
+  );
+  return response.json();
+};
+
 const refreshAccessToken = async (url) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/refresh`, {
@@ -180,10 +250,4 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-export {
-  loginUser,
-  register,
-  getAllSaleItemOfSeller,
-  refreshAccessToken,
-  logoutUser,
-};
+export { loginUser, register, getAllSaleItemOfSeller, refreshAccessToken, getUserById, logoutUser };

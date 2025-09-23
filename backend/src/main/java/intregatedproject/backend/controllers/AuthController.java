@@ -3,8 +3,8 @@ package intregatedproject.backend.controllers;
 import intregatedproject.backend.dtos.authentications.RequestLogin;
 import intregatedproject.backend.dtos.authentications.ResponseToken;
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
-import intregatedproject.backend.dtos.users.ResponseBuyerDto;
-import intregatedproject.backend.dtos.users.ResponseSellerDto;
+import intregatedproject.backend.dtos.users.ResponseBuyerRegisterDto;
+import intregatedproject.backend.dtos.users.ResponseSellerRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
@@ -44,15 +44,15 @@ public class AuthController {
         User user = emailService.verifyEmail(jwtToken);
 
         if ("SELLER".equalsIgnoreCase(user.getRole())) {
-            ResponseSellerDto response = modelMapper.map(user.getSeller(), ResponseSellerDto.class);
+            ResponseSellerRegisterDto response = modelMapper.map(user.getSeller(), ResponseSellerRegisterDto.class);
             response.setNickname(user.getNickname());
             response.setEmail(user.getEmail());
-            response.setFullname(user.getFullName());
+            response.setFullName(user.getFullName());
             response.setRole(user.getRole());
             response.setStatus(user.getStatus());
             return ResponseEntity.ok(response);
         } else {
-            ResponseBuyerDto response = modelMapper.map(user, ResponseBuyerDto.class);
+            ResponseBuyerRegisterDto response = modelMapper.map(user, ResponseBuyerRegisterDto.class);
             return ResponseEntity.ok(response);
         }
     }
@@ -66,10 +66,10 @@ public class AuthController {
         if ("seller".equalsIgnoreCase(userDto.getRole())) {
             userDto.setRole("seller");
             User newUser = userService.registerSeller(userDto, front, back);
-            ResponseSellerDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerDto.class);
+            ResponseSellerRegisterDto responseSellerDto = modelMapper.map(newUser.getSeller(), ResponseSellerRegisterDto.class);
             responseSellerDto.setNickname(newUser.getNickname());
             responseSellerDto.setEmail(newUser.getEmail());
-            responseSellerDto.setFullname(newUser.getFullName());
+            responseSellerDto.setFullName(newUser.getFullName());
             responseSellerDto.setRole(newUser.getRole());
             responseSellerDto.setStatus(newUser.getStatus());
 
@@ -79,7 +79,7 @@ public class AuthController {
         }
         if ("buyer".equalsIgnoreCase(userDto.getRole())) {
             User newUser = userService.registerBuyer(userDto);
-            ResponseBuyerDto responseUserDto = modelMapper.map(newUser, ResponseBuyerDto.class);
+            ResponseBuyerRegisterDto responseUserDto = modelMapper.map(newUser, ResponseBuyerRegisterDto.class);
             emailService.sendVerificationEmail(newUser.getEmail(), token);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDto);

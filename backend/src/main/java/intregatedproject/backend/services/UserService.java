@@ -1,7 +1,6 @@
 package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.users.RequestRegisterDto;
-import intregatedproject.backend.dtos.users.ResponseSellerDto;
 import intregatedproject.backend.entities.Buyer;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
@@ -32,9 +31,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Integer id) {
-        return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
-    }
+        public User getUserById(Integer id) {
+            return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
+        }
 
     private void convertToEntityBuyer(RequestRegisterDto userDto, User user, Buyer buyer) {
         user.setNickname(userDto.getNickname());

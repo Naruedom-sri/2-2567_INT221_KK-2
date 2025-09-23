@@ -12,6 +12,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Register from "@/views/Register.vue";
 import VerifyEmail from "@/views/VerifyEmail.vue";
 import Login from "@/views/Login.vue";
+import Profile from "@/views/Profile.vue";
+import EditProfile from "@/views/EditProfile.vue";
 import { useTokenStore } from "@/stores/tokenStore";
 const history = createWebHistory("/kk2/");
 
@@ -46,6 +48,16 @@ const routes = [
   //   name: "VerifyEmail",
   //   component: VerifyEmail,
   // },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+  },
+   {
+    path: "/profile/edit",
+    name: "EditProfile",
+    component: EditProfile,
+  },
   {
     path: "/sale-items/:itemId",
     name: "SaleItemsDetail",
@@ -119,7 +131,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const tokenStore = useTokenStore();
   const userRole = tokenStore.getDecode()?.role;
-  
+
   if (userRole === "BUYER") {
     if (
       to.name === "SaleItemsList" ||

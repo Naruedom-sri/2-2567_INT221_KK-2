@@ -1,13 +1,16 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.saleitems.*;
-import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.dtos.users.ResponseBuyerDto;
+import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
+import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
+import intregatedproject.backend.utils.Token.JwtUtils;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
@@ -71,4 +76,31 @@ public class UserController {
         dto.setTotalElements((int) pageResult.getTotalElements());
         return ResponseEntity.ok(dto);
     }
-}   
+
+    @GetMapping("/v2/users/{id}")
+    public ResponseEntity<Object> getUserById(@PathVariable int id,
+                                              Authentication authentication) {
+
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+
+        if (!user.getId().equals(userIdFromToken)) {
+            throw new ForbiddenException("Request user id not matched with id in access token.");
+        }
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+
+        if ("seller".equalsIgnoreCase(user.getRole())) {
+            ResponseSellerDto sellerDto = modelMapper.map(user, ResponseSellerDto.class);
+            return ResponseEntity.ok(sellerDto);
+        } else {
+            ResponseBuyerDto buyerDto = modelMapper.map(user, ResponseBuyerDto.class);
+            return ResponseEntity.ok(buyerDto);
+        }
+    }
+}

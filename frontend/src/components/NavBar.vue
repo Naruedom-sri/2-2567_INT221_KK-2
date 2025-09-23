@@ -1,10 +1,8 @@
 <script setup>
-import { logoutUser } from "@/libs/userApi";
 import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 const tokenStore = useTokenStore();
-const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
 const route = useRoute();
 const isSearch = ref(false);
@@ -27,6 +25,11 @@ const handleSearchClick = (isClear) => {
     router.push({ name: "SaleItemsGallery" });
   }
 };
+
+function goToProfile() {
+  router.push({ name: "Profile" });
+}
+
 const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, tokenStore.getAccessToken());
@@ -104,8 +107,11 @@ onMounted(() => {
             src="/src/assets/imgs/account-symbol.png"
             alt="account"
             class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+            @click="goToProfile"
           />
-          <p class="opacity-85 hover:opacity-100 hover:cursor-pointer">
+          <p 
+          class="opacity-85 hover:opacity-100 hover:cursor-pointer" 
+          @click="goToProfile">
             {{ tokenStore.getDecode()?.nickname }}
           </p>
         </div>
