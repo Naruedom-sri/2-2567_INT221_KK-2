@@ -148,13 +148,6 @@ const getUserById = async (url, id, token) => {
       `Can't get user (status: ${response.status}) - ${errorMessage}`
     );
   }
-
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
-    "get",
-    response.status,
-    "Get user successfully."
-  );
   return response.json();
 };
 
@@ -163,9 +156,10 @@ const editProfile = async (url, id, token, form) => {
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "PUT",
     headers: {
+       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: form,
+    body: JSON.stringify(form),
   });
   if (!response.ok) {
     let errorMessage = "";

@@ -23,6 +23,7 @@ services:
     environment:
       - DB_PASSWORD=rootpassword
       - DB_SERVER=db_container
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - my_network
     depends_on:

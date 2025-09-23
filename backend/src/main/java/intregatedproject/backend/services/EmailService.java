@@ -11,6 +11,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -36,6 +37,8 @@ public class EmailService {
     private JwtUtils jwtUtil;
     @Autowired
     private SpringTemplateEngine templateEngine;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -44,8 +47,7 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-         String verificationUrl = "http://localhost:5173/kk2/verify-email?token=" + encoded;
-//       String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token=" + token;
+         String verificationUrl = baseUrl + encoded;
         // เตรียม context สำหรับ Thymeleaf
         Context context = new Context();
         context.setVariable("verificationUrl", verificationUrl);

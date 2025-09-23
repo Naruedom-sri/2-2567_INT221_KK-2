@@ -1,16 +1,22 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.saleitems.*;
+import intregatedproject.backend.dtos.users.RequestEditUserDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
 import intregatedproject.backend.entities.SaleItem;
+import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
+import intregatedproject.backend.repositories.SellerRepository;
+import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.Token.JwtUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -37,6 +44,10 @@ public class UserController {
     private ModelMapper modelMapper;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private SellerRepository sellerRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
@@ -96,11 +107,43 @@ public class UserController {
         }
 
         if ("seller".equalsIgnoreCase(user.getRole())) {
-            ResponseSellerDto sellerDto = modelMapper.map(user, ResponseSellerDto.class);
+            Seller seller = sellerRepository.findByUserId(userService.getUserById(id).getId());
+
+            ResponseSellerDto sellerDto = new ResponseSellerDto();
+            modelMapper.map(user, sellerDto);     // map ข้อมูลจาก User
+            if (seller != null) {
+                modelMapper.map(seller, sellerDto); // map ข้อมูลจาก Seller
+            }
+
             return ResponseEntity.ok(sellerDto);
+
         } else {
             ResponseBuyerDto buyerDto = modelMapper.map(user, ResponseBuyerDto.class);
             return ResponseEntity.ok(buyerDto);
+        }
+    }
+
+    @PutMapping("/v2/users/{id}")
+    public ResponseEntity<?> updateUserProfile(
+            @PathVariable @Min(1) Integer id,
+            Authentication authentication,
+            @Valid @RequestBody RequestEditUserDto request) {
+
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+
+        // หา user จาก DB ก่อน
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // เช็ค role จาก DB ไม่ใช่จาก request
+        if ("buyer".equalsIgnoreCase(user.getRole())) {
+            return ResponseEntity.ok(userService.updateBuyerProfile(id, request));
+        } else if ("seller".equalsIgnoreCase(user.getRole())) {
+            return ResponseEntity.ok(userService.updateSellerProfile(id, request));
+        } else {
+            return ResponseEntity.badRequest().body("Unsupported role");
         }
     }
 }
