@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
@@ -41,7 +41,7 @@ const handleSubmit = async (payload) => {
       if (payload.files?.back) form.append("back", payload.files.back);
       const data = await register(BASE_API_DOMAIN, form);
     }
-    router.push({ name: "SaleItemsGallery" });
+    router.push({ name: "Login" });
   } catch (e) {
     console.log(e);
     isSubmitting.value = false;
@@ -52,6 +52,7 @@ const handleCancel = () => {
   statusStore.clearEntityAndMethodAndStatusAndMessage();
   router.back();
 };
+
 </script>
 
 <template>

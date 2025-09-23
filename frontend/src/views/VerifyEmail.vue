@@ -37,7 +37,7 @@ const verify = async (token) => {
       res.status,
       "The account has been successfully activated."
     );
-    router.push({ name: "SaleItemsGallery" });
+    router.push({ name: "Login" });
   } catch (err) {
     console.error(err);
   }

@@ -54,6 +54,7 @@ const logoutUser = async (url, accessToken) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/logout`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-type": "application/json; charset=UTF-8",
       Authorization: `Bearer ${accessToken}`,
