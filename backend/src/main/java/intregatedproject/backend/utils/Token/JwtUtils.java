@@ -48,6 +48,7 @@ public class JwtUtils {
         String issuer = request.getRequestURL().toString().replace(request.getRequestURI(), "");
         return Jwts.builder()
                 .setId(user.getId().toString())
+                .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .claim("nickname", user.getNickname())
                 .claim("role", user.getRole())

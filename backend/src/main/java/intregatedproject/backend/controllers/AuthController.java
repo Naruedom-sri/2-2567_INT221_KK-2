@@ -89,39 +89,39 @@ public class AuthController {
     }
 
 
-    @PostMapping("/v2/auth/login")
-    public ResponseEntity<ResponseToken> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
-        List<User> userList = userService.getAllUsers();
-        ResponseToken responseToken = new ResponseToken();
-        for (User user : userList) {
-            if (user.getEmail().equals(requestLogin.getEmail())
-                    && user.getPassword().equals(requestLogin.getPassword())) {
+        @PostMapping("/v2/auth/login")
+        public ResponseEntity<ResponseToken> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
+            List<User> userList = userService.getAllUsers();
+            ResponseToken responseToken = new ResponseToken();
+            for (User user : userList) {
+                if (user.getEmail().equals(requestLogin.getEmail())
+                        && user.getPassword().equals(requestLogin.getPassword())) {
 
-                if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                    String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
-                    String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
+                    if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
+                        String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
+                        String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
 
-                    responseToken.setAccess_token(access_token);
+                        responseToken.setAccess_token(access_token);
 
-                    // refresh token อยู่ใน HttpOnly cookie
-                    ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
-                            .httpOnly(true)       // JS อ่านไม่ได้
-                            .secure(false)         // เฉพาะ HTTPS (true)
-                            .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
-                            .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
-                            .sameSite("Lax")    // ป้องกัน CSRF
-                            .build();
+                        // refresh token อยู่ใน HttpOnly cookie
+                        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
+                                .httpOnly(true)       // JS อ่านไม่ได้
+                                .secure(false)         // เฉพาะ HTTPS (true)
+                                .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                                .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
+                                .sameSite("Strict")    // ป้องกัน CSRF
+                                .build();
 
-                    return ResponseEntity.ok()
-                            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                            .body(responseToken);
-                } else {
-                    throw new ForbiddenException("You need to activate your account before signing in.");
+                        return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(responseToken);
+                    } else {
+                        throw new ForbiddenException("You need to activate your account before signing in.");
+                    }
                 }
             }
+            throw new UnauthorizedException("Email or password is incorrect.");
         }
-        throw new UnauthorizedException("Email or password is incorrect.");
-    }
 
     @PostMapping("/v2/auth/logout")
     public ResponseEntity<ResponseToken> logoutUser(Authentication authentication, HttpServletResponse response) {
@@ -133,14 +133,23 @@ public class AuthController {
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
+        // ใช้การตั้งค่าเดียวกับตอน login
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(false)
-                .path("/")     // must match the original path
-                .maxAge(0)     // delete immediately
+                .secure(false)        // ต้องเหมือนกับตอน login
+                .path("/")           // ต้องเหมือนกับตอน login
+                .maxAge(0)           // delete immediately
+                .sameSite("Strict   ")     // ต้องเหมือนกับตอน login
                 .build();
-        response.addHeader("Set-Cookie", deleteCookie.toString());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+        System.out.println("=== Delete Cookie ===");
+        System.out.println("Cookie string: " + deleteCookie.toString());
+
+        // ใช้วิธีเดียวกับตอน login
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
+
     }
 
     @PostMapping("/v2/auth/refresh")
