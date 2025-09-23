@@ -3,14 +3,15 @@ import { reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import { useTokenStore } from "@/stores/tokenStore";
-import { editProfile } from "@/libs/userApi";
-// import { computed } from "vue";
+import { editProfile,refreshAccessToken } from "@/libs/userApi";
 import { jwtDecode } from "jwt-decode";
+import { useStatusStore } from "@/stores/statusStore";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
 const userData = useUserStore();
 const tokenStore = useTokenStore();
+const statusStore = useStatusStore();
 
 const form = reactive({
   nickname: userData.nickname || "",
@@ -50,6 +51,13 @@ async function saveProfile() {
     form.fullName = payload.fullName;
 
     router.push({ name: "Profile" });
+
+  //   statusStore.setEntityAndMethodAndStatusAndMessage(
+  //   "profile",
+  //   "edit",
+  //   response.status,
+  //   "Profile data is updated successfully."
+  // );
   } catch (error) {
     console.error("Failed to save profile:", error);
   }

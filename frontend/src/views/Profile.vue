@@ -11,11 +11,6 @@ const userStore = useUserStore();
 const tokenStore = useTokenStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
-// const isSeller = computed(() => userStore.role.toLowerCase() === "seller");
-// console.log(isSeller.value);
-
-// const isBuyer = computed(() => userStore.role.toLowerCase() === "buyer");
-
 const closePage = () => {
   router.push({ name: "SaleItemsGallery" });
 };
