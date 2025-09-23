@@ -16,6 +16,10 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
 // const isBuyer = computed(() => userStore.role.toLowerCase() === "buyer");
 
+const closePage = () => {
+  router.push({ name: "SaleItemsGallery" });
+};
+
 const fetchUserData = async () => {
   if (tokenStore.getAccessToken() === null) {
     try {
@@ -49,6 +53,16 @@ onMounted(() => {
 <template>
   <div class="min-h-screen grid place-items-center bg-gray-0">
     <div class="w-full max-w-xl rounded-2xl bg-white p-5 relative">
+      <button
+        @click="closePage"
+        aria-label="Close profile"
+        class="absolute top-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700"
+      >
+        <img 
+        src="/src/assets/imgs/close-symbol.png"
+        class="w-10">
+      </button>
+
       <label
         class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
       >
@@ -58,14 +72,14 @@ onMounted(() => {
         />
       </label>
       <div class="text-black flex flex-col justify-center items-center">
-        <div class="pt-7 text-center">
+        <div class="pt-7 text-center gap-1 flex flex-col">
           <p><strong>Nickname:</strong> {{ userStore.nickname }}</p>
           <p><strong>Email:</strong> {{ userStore.email }}</p>
           <p><strong>Fullname:</strong> {{ userStore.fullname }}</p>
           <p><strong>Type:</strong> {{ userStore.role }}</p>
         </div>
 
-        <div v-if="userStore.role === 'SELLER'" class="text-center">
+        <div v-if="userStore.role === 'SELLER'" class="text-center gap-1 flex flex-col mt-1">
           <p><strong>Mobile:</strong> {{ userStore.mobileNumber }}</p>
           <p><strong>Bank Account No:</strong> {{ userStore.bankAccountNumber }}</p>
           <p><strong>Bank Name:</strong> {{ userStore.bankName }}</p>

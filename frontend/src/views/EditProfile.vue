@@ -51,6 +51,11 @@ async function saveProfile() {
 function cancelEdit() {
   router.back();
 }
+
+const isUnchanged = computed(() => {
+  return (form.nickname === (userData.nickname || "")) &&
+         (form.fullName === (userData.fullname || ""));
+});
 </script>
 
 <template>
@@ -62,7 +67,7 @@ function cancelEdit() {
       <div class="p-5 text-black">
         <div class="form-row">
           <label><strong>Nickname:</strong></label>
-          <input v-model="form.nickname" type="text" />
+          <input v-model="form.nickname" type="text" class="border border-gray-800 rounded-md p-2"/>
         </div>
 
         <div class="form-row">
@@ -72,7 +77,7 @@ function cancelEdit() {
 
         <div class="form-row">
           <label><strong>Fullname:</strong></label>
-          <input v-model="form.fullName" type="text" />
+          <input v-model="form.fullName" type="text" class="border border-gray-800 rounded-md p-2"/>
         </div>
 
         <div class="form-row">
@@ -98,7 +103,8 @@ function cancelEdit() {
         <div class="mt-4 flex gap-4 justify-center">
           <button
             @click="saveProfile"
-            class="border-2 border-gray-500 rounded-md px-3 py-1 bg-gray-300 hover:bg-gra y-400"
+            :disabled="isUnchanged"
+            :class="['border-2 border-gray-500 rounded-md px-3 py-1', isUnchanged ? 'bg-gray-200 opacity-50 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400']"
           >
             Save
           </button>
