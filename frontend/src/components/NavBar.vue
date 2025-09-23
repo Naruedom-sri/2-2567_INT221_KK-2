@@ -107,8 +107,11 @@ onMounted(() => {
             src="/src/assets/imgs/account-symbol.png"
             alt="account"
             class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+            @click="goToProfile"
           />
-          <p class="opacity-85 hover:opacity-100 hover:cursor-pointer">
+          <p 
+          class="opacity-85 hover:opacity-100 hover:cursor-pointer" 
+          @click="goToProfile">
             {{ tokenStore.getDecode()?.nickname }}
           </p>
         </div>

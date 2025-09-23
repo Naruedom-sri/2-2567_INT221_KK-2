@@ -81,9 +81,6 @@ public class UserController {
     public ResponseEntity<Object> getUserById(@PathVariable int id,
                                               Authentication authentication) {
 
-//        if (id <= 0) {
-//            throw new BadRequestException("Missing or invalid request parameters.");
-//        }
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }

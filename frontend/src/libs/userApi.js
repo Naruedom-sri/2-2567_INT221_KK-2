@@ -119,14 +119,14 @@ const register = async (url, form) => {
   return res.json();
 };
 
-const getUserById = async (url, id, token = null) => {
+const getUserById = async (url, id, token) => {
   const statusStore = useStatusStore();
-  const headers = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "GET",
-    headers,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   if (!response.ok) {
@@ -151,6 +151,40 @@ const getUserById = async (url, id, token = null) => {
     "get",
     response.status,
     "Get user successfully."
+  );
+  return response.json();
+};
+
+const editProfile = async (url, id, token, form) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/users/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: form,
+  });
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "edit",
+      response.status,
+      errorMessage
+    );
+    throw new Error(`Can't edit user (status: ${response.status}) - ${errorMessage}`);
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "edit",
+    response.status,
+    "Edit user successfully."
   );
   return response.json();
 };

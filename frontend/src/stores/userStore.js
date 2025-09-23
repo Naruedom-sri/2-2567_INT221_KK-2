@@ -15,7 +15,7 @@ export const useUserStore = defineStore("user", () => {
     role.value = userData.role || "";
     email.value = userData.email || "";
     nickname.value = userData.nickname || "";
-    fullname.value = userData.fullname || "";
+    fullname.value = userData.fullName || "";
 
     if (role.value === "seller") {
       sellerMobileNumber.value = userData.sellerMobileNumber || "";

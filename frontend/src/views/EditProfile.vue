@@ -2,37 +2,42 @@
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
+import { useTokenStore } from "@/stores/tokenStore";
+import { editProfile } from "@/libs/userApi";
 
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
 const userData = useUserStore();
+const tokenStore = useTokenStore();
 
-// เตรียมข้อมูลท้องถิ่นสำหรับฟอร์ม (สำเนาจาก store)
 const form = reactive({
   nickname: userData.nickname || "",
   email: userData.email || "",
   fullname: userData.fullname || "",
   role: userData.role || "buyer",
-  // seller fields
   sellerMobileNumber: userData.sellerMobileNumber || "",
   sellerBankAccountNumber: userData.sellerBankAccountNumber || "",
   sellerBankName: userData.sellerBankName || "",
 });
 
 // บันทึกข้อมูลกลับไปที่ store
-function saveProfile() {
-  userData.nickname = form.nickname;
-  userData.email = form.email;
-  userData.fullname = form.fullname;
-  userData.role = form.role;
-  // seller-only fields
-  userData.sellerMobileNumber = form.sellerMobileNumber;
-  userData.sellerBankAccountNumber = form.sellerBankAccountNumber;
-  userData.sellerBankName = form.sellerBankName;
+async function saveProfile() {
+   try {
+    await editProfile(BASE_API_DOMAIN, form, tokenStore.getAccessToken());
 
-  // กลับไปหน้าโปรไฟล์
-  router.push({ name: "Profile" }).catch(() => {
-    /* ignore */
-  });
+    // ถ้า API สำเร็จ ค่อยอัปเดต store
+    userData.nickname = form.nickname;
+    userData.email = form.email;
+    userData.fullname = form.fullname;
+    userData.role = form.role;
+    userData.sellerMobileNumber = form.sellerMobileNumber;
+    userData.sellerBankAccountNumber = form.sellerBankAccountNumber;
+    userData.sellerBankName = form.sellerBankName;
+
+    router.push({ name: "Profile" });
+  } catch (error) {
+    console.error("Failed to save profile:", error);
+  }
 }
 
 function cancelEdit() {
