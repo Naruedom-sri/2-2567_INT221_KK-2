@@ -58,9 +58,6 @@ public class User {
     private Instant updatedOn;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
-    private Buyer buyer;
-
-    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Seller seller;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

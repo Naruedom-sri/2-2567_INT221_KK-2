@@ -50,7 +50,7 @@ public class Brand {
 
     public String getBrandName() {
         return this.name;
-    };
+    }
 
     public Integer getNoOfSaleItems() {
         return saleItems.size();

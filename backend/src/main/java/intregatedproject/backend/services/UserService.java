@@ -1,7 +1,7 @@
 package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.users.*;
-import intregatedproject.backend.entities.Buyer;
+import intregatedproject.backend.dtos.users.RequestRegisterDto;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
@@ -35,15 +35,13 @@ public class UserService {
             return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
         }
 
-    private void convertToEntityBuyer(RequestRegisterDto userDto, User user, Buyer buyer) {
+    private void convertToEntityBuyer(RequestRegisterDto userDto, User user) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
         user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
-        user.setBuyer(buyer);
-        buyer.setUser(user);
         userDto.setRole("buyer");
         userDto.setMobileNumber(null);
         userDto.setBankAccountNumber(null);
@@ -80,11 +78,9 @@ public class UserService {
             throw new InvalidRoleException("Role must be 'buyer'");
         }
         var newUser = new User();
-        var newBuyer = new Buyer();
-        convertToEntityBuyer(userDto, newUser, newBuyer);
-        User savedUser = userRepository.save(newUser);
-        newBuyer.setUser(savedUser);
-        return savedUser;
+        convertToEntityBuyer(userDto, newUser);
+
+        return userRepository.save(newUser);
     }
 
     public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
