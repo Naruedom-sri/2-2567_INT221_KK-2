@@ -26,37 +26,23 @@ const handleSearchClick = (isClear) => {
   }
 };
 
+function goToProfile() {
+  router.push({ name: "Profile" });
+}
+
+const logout = async () => {
+  try {
+    await logoutUser(`${BASE_API_DOMAIN}`, tokenStore.getAccessToken());
+    router.push({ name: "Login" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 onMounted(() => {
   const savedSearch = sessionStorage.getItem("searchContent");
   if (savedSearch) searchSaleItem.value = savedSearch;
 });
-
-// const isAuthenticated = ref(Boolean(sessionStorage.getItem("isAuthenticated")));
-// const userNickname = ref(sessionStorage.getItem("userNickname") || "Account");
-const isProfileOpen = ref(false);
-
-function goToProfile() {
-  router.push({ name: "Profile" });
-  isProfileOpen.value = false;
-}
-
-function logout() {
-  sessionStorage.removeItem("isAuthenticated");
-  sessionStorage.removeItem("userEmail");
-  sessionStorage.removeItem("userNickname");
-  sessionStorage.removeItem("userRole");
-  isAuthenticated.value = false;
-  isProfileOpen.value = false;
-  router.push({ name: "Login" });
-}
-
-// watch(
-//   () => route.fullPath,
-//   () => {
-//     isAuthenticated.value = Boolean(sessionStorage.getItem("isAuthenticated"));
-//     userNickname.value = sessionStorage.getItem("userNickname") || "Account";
-//   }
-// );
 </script>
 
 <template>
@@ -103,7 +89,7 @@ function logout() {
           About Us
         </RouterLink>
       </div>
-      <div class="symbol w-50 flex items-center gap-7">
+      <div class="symbol w-56 flex items-center gap-7">
         <img
           @click="isSearch = !isSearch"
           src="/src/assets/imgs/search-symbol.png"
@@ -116,17 +102,16 @@ function logout() {
           alt="cart"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
-        <!-- <div class="flex justify-center items-center gap-2"> -->
-          <!-- <img
+        <div class="flex justify-center items-center gap-2">
+          <img
             src="/src/assets/imgs/account-symbol.png"
             alt="account"
             class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
           />
           <p class="opacity-85 hover:opacity-100 hover:cursor-pointer">
             {{ tokenStore.getDecode()?.nickname }}
-          </p> -->
-          
-        <!-- </div> -->
+          </p>
+        </div>
       </div>
       <div
         v-if="tokenStore.getAccessToken() === null"
@@ -146,44 +131,12 @@ function logout() {
         </RouterLink>
       </div>
       <div v-else class="logout w-28 flex justify-center items-center gap-3">
-        <!-- <button class="opacity-85 hover:opacity-100 duration-200">
+        <button
+          @click="logout"
+          class="opacity-85 hover:opacity-100 duration-200"
+        >
           Logout
-        </button> -->
-        <div class="register-login w-28 flex justify-center items-center gap-3">
-            <div class="relative">
-              <div class="flex gap-2">
-                <img
-                  @click="isProfileOpen = !isProfileOpen"
-                  src="/src/assets/imgs/account-symbol4.png"
-                  alt="account"
-                  class="w-7 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
-                />
-                <p class="text-sm px-2 py-1">{{ tokenStore.getDecode()?.nickname }}</p>
-              </div>
-              <div
-                v-if="isProfileOpen"
-                class="absolute mt-2 bg-white text-black p-2 rounded shadow"
-                style="z-index: 9999; pointer-events: auto"
-              >
-                <!-- แก้ไข: เพิ่ม type="button" และ @click.stop เพื่อให้ปุ่มไม่เป็น submit และหยุดการแพร่ของ event -->
-                <button
-                  type="button"
-                  @click.stop="goToProfile"
-                  class="block w-full text-left px-2 py-1 hover:bg-gray-100"
-                >
-                  Profile
-                </button>
-                <!-- <button type="button" @click.stop="goToEdit" class="block w-full text-left px-2 py-1 hover:bg-gray-100">Edit Profile</button> -->
-                <button
-                  type="button"
-                  @click.stop="logout"
-                  class="block w-full text-left px-2 py-1 text-red-600 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-        </div>
+        </button>
       </div>
     </div>
   </div>

@@ -152,20 +152,18 @@ public class SaleItemController {
 
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(id);
-
-        if (!"SELLER".equalsIgnoreCase(user.getRole())) {
-            throw new ForbiddenException("User is not a seller.");
-        }
         if (!user.getId().equals(userIdFromToken)) {
             throw new ForbiddenException("Request seller id not matched with id in access token.");
         }
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
+        if (!"SELLER".equalsIgnoreCase(user.getRole())) {
+            throw new ForbiddenException("User is not a seller.");
+        }
+
         SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images, id);
-
         ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
