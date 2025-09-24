@@ -6,15 +6,13 @@ import NavBar from "@/components/NavBar.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import Notification from "@/components/Notification.vue";
 import { deleteSaleItemById } from "@/libs/saleItemApi";
-import { getAllSaleItemOfSeller, refreshAccessToken } from "@/libs/userApi";
+import { getAllSaleItemOfSeller } from "@/libs/userApi";
 import { getAllBrand } from "@/libs/brandApi";
-import { useTokenStore } from "@/stores/tokenStore";
-import { useRouter } from "vue-router";
-import { jwtDecode } from "jwt-decode";
+import { decodeToken } from "@/libs/jwtToken";
 const statusStore = useStatusStore();
-const tokenStore = useTokenStore();
-const router = useRouter();
 const params = new URLSearchParams();
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const items = ref([]);
 const brands = ref([]);
 const itemId = ref();
@@ -32,18 +30,6 @@ const tempIndexPage = ref(0);
 
 const getAllSaleItems = async () => {
   try {
-    if (tokenStore.getAccessToken() === null) {
-      try {
-        const data = await refreshAccessToken(`${BASE_API_DOMAIN}`);
-        const decoded = jwtDecode(data.access_token);
-        tokenStore.setAccessToken(data.access_token);
-        tokenStore.setDecode(decoded);
-      } catch (e) {
-        console.log(e);
-        router.push({ name: "Login" });
-      }
-    }
-
     params.delete("page");
     params.delete("size");
     params.delete("sortField");
@@ -61,8 +47,8 @@ const getAllSaleItems = async () => {
 
     const data = await getAllSaleItemOfSeller(
       `${BASE_API_DOMAIN}`,
-      tokenStore.getDecode().jti,
-      tokenStore.getAccessToken(),
+      decoded.jti,
+      accessToken,
       params
     );
 
@@ -72,7 +58,7 @@ const getAllSaleItems = async () => {
     sessionStorage.setItem("sortField", isSort.value.sortFiled);
     sessionStorage.setItem("sortDirection", isSort.value.sortDirection);
     sessionStorage.setItem("pageList", JSON.stringify(pageList.value));
-    
+
     items.value = data.content;
     totalSaleItems.value = data.totalElements;
     totalPage.value = data.totalPages;
@@ -95,7 +81,7 @@ const deleteSaleItem = async (itemId) => {
   statusStore.clearEntityAndMethodAndStatusAndMessage();
   showDialog.value = false;
   try {
-    const status = await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
+    await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
     items.value = items.value.filter((item) => item.id !== itemId);
   } catch (error) {
     console.log(error);

@@ -14,7 +14,7 @@ import VerifyEmail from "@/views/VerifyEmail.vue";
 import Login from "@/views/Login.vue";
 import Profile from "@/views/Profile.vue";
 import EditProfile from "@/views/EditProfile.vue";
-import { useTokenStore } from "@/stores/tokenStore";
+import { decodeToken, isAuth } from "@/libs/jwtToken";
 const history = createWebHistory("/kk2/");
 
 const routes = [
@@ -75,6 +75,11 @@ const routes = [
     props: { isEditing: true },
   },
   {
+    path: "/landing-page",
+    name: "LandingPage",
+    component: LandingPage,
+  },
+  {
     path: "/sale-items/list",
     name: "SaleItemsList",
     component: SaleItemsList,
@@ -128,9 +133,12 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const tokenStore = useTokenStore();
-  const userRole = tokenStore.getDecode()?.role;
-  if (userRole === "BUYER") {
+  if (!isAuth) {
+    return next({ name: "Login" });
+  }
+  const accessToken = localStorage.getItem("accessToken");
+  const decoded = decodeToken(accessToken);
+  if (decoded.role === "BUYER") {
     if (
       to.name === "SaleItemsList" ||
       to.name === "AddBrand" ||

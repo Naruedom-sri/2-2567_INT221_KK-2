@@ -1,47 +1,30 @@
 <script setup>
 import { onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
-import { getUserById, refreshAccessToken } from "@/libs/userApi";
-import { useTokenStore } from "@/stores/tokenStore";
+import { getUserById } from "@/libs/userApi";
 import { useRouter } from "vue-router";
-import { jwtDecode } from "jwt-decode";
+import { decodeToken } from "@/libs/jwtToken";
 
 const router = useRouter();
 const userStore = useUserStore();
-const tokenStore = useTokenStore();
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
-
-// const isSeller = computed(() => userStore.role.toLowerCase() === "seller");
-// console.log(isSeller.value);
-
-// const isBuyer = computed(() => userStore.role.toLowerCase() === "buyer");
 
 const closePage = () => {
   router.push({ name: "SaleItemsGallery" });
 };
 
 const fetchUserData = async () => {
-  if (tokenStore.getAccessToken() === null) {
-    try {
-      const data = await refreshAccessToken(`${BASE_API_DOMAIN}`);
-      const decoded = jwtDecode(data.access_token);
-      tokenStore.setAccessToken(data.access_token);
-      tokenStore.setDecode(decoded);
-    } catch (e) {
-      console.log(e);
-      router.push({ name: "Login" });
-    }
-  }
-
   try {
     const userData = await getUserById(
       BASE_API_DOMAIN,
-      tokenStore.getDecode().jti,
-      tokenStore.getAccessToken()
+      decoded.jti,
+      accessToken
     );
     userStore.setUser(userData);
   } catch (error) {
-    console.error("Failed to fetch user:", error);
+    console.error(error);
   }
 };
 
@@ -75,9 +58,7 @@ onMounted(() => {
         aria-label="Close profile"
         class="absolute top-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700"
       >
-        <img 
-        src="/src/assets/imgs/close-symbol.png"
-        class="w-10">
+        <img src="/src/assets/imgs/close-symbol.png" class="w-10" />
       </button>
 
       <label
@@ -96,21 +77,29 @@ onMounted(() => {
           <p><strong>Type:</strong> {{ userStore.role }}</p>
         </div>
 
-        <div v-if="userStore.role === 'SELLER'" class="text-center gap-1 flex flex-col mt-1">
-          <p><strong>Mobile:</strong> {{ maskMobile(userStore.mobileNumber) }}</p>
-          <p><strong>Bank Account No:</strong> {{ maskBankAccount(userStore.bankAccountNumber) }}</p>
+        <div
+          v-if="userStore.role === 'SELLER'"
+          class="text-center gap-1 flex flex-col mt-1"
+        >
+          <p>
+            <strong>Mobile:</strong> {{ maskMobile(userStore.mobileNumber) }}
+          </p>
+          <p>
+            <strong>Bank Account No:</strong>
+            {{ maskBankAccount(userStore.bankAccountNumber) }}
+          </p>
           <p><strong>Bank Name:</strong> {{ userStore.bankName }}</p>
         </div>
 
         <div class="mt-5">
-            <router-link :to="{ name: 'EditProfile' }"
-              ><button
-                class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
-              >
-                Edit Profile
-              </button></router-link
+          <router-link :to="{ name: 'EditProfile' }"
+            ><button
+              class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
             >
-          </div>
+              Edit Profile
+            </button></router-link
+          >
+        </div>
       </div>
     </div>
   </div>

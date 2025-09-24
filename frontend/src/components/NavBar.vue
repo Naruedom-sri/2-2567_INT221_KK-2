@@ -1,9 +1,10 @@
 <script setup>
-import { useTokenStore } from "@/stores/tokenStore";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { logoutUser } from "@/libs/userApi";
-const tokenStore = useTokenStore();
+import { decodeToken } from "@/libs/jwtToken";
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const router = useRouter();
 const route = useRoute();
 const isSearch = ref(false);
@@ -34,7 +35,7 @@ function goToProfile() {
 
 const logout = async () => {
   try {
-    await logoutUser(`${BASE_API_DOMAIN}`, tokenStore.getAccessToken());
+    await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     router.push({ name: "Login" });
   } catch (error) {
     console.log(error);
@@ -115,12 +116,12 @@ onMounted(() => {
             class="opacity-85 hover:opacity-100 hover:cursor-pointer"
             @click="goToProfile"
           >
-            {{ tokenStore.getDecode()?.nickname }}
+            {{ decoded.nickname }}
           </p>
         </div>
       </div>
       <div
-        v-if="tokenStore.getAccessToken() === null"
+        v-if="accessToken === null"
         class="register-login w-28 flex justify-center items-center gap-3"
       >
         <RouterLink

@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-  const role = ref(""); 
+  const role = ref("");
   const email = ref("");
   const nickname = ref("");
   const fullname = ref("");
@@ -33,9 +33,9 @@ export const useUserStore = defineStore("user", () => {
     email.value = "";
     nickname.value = "";
     fullname.value = "";
-    sellerMobileNumber.value = "";
+    mobileNumber.value = "";
     sellerBankName.value = "";
-    sellerBankAccountNumber.value = "";
+    bankAccountNumber.value = "";
   };
 
   return {

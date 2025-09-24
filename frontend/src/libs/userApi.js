@@ -122,7 +122,6 @@ const register = async (url, form) => {
 
 const getUserById = async (url, id, token) => {
   const statusStore = useStatusStore();
-
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "GET",
     headers: {
@@ -156,7 +155,7 @@ const editProfile = async (url, id, token, form) => {
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "PUT",
     headers: {
-       "Content-Type": "application/json",
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(form),

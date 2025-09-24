@@ -1,12 +1,10 @@
 <script setup>
-import { ref, watch } from "vue";
-import { loginUser } from "@/libs/userApi";
+import { onMounted, ref, watch } from "vue";
+import { loginUser} from "@/libs/userApi";
 import { useRouter } from "vue-router";
 import { useStatusStore } from "@/stores/statusStore";
-import { useTokenStore } from "@/stores/tokenStore";
-import { jwtDecode } from "jwt-decode";
+import { decodeToken } from "@/libs/jwtToken";
 const statusStore = useStatusStore();
-const tokenStore = useTokenStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const email = ref("");
 const password = ref("");
@@ -21,9 +19,8 @@ const login = async () => {
       email: email.value.trim(),
       password: password.value,
     });
-    const decoded = jwtDecode(data.access_token);
-    tokenStore.setAccessToken(data.access_token);
-    tokenStore.setDecode(decoded);
+    localStorage.setItem("accessToken", data.access_token);
+    const decoded = decodeToken(data.access_token);
     if (decoded.role === "SELLER") {
       router.push({ name: "SaleItemsList" });
     } else {
@@ -34,6 +31,17 @@ const login = async () => {
     isShowError.value = true;
   }
 };
+
+onMounted(async () => {
+  const accessToken = localStorage.getItem("accessToken");
+  const decoded = decodeToken(accessToken);
+  console.log(decoded.role);
+  if (decoded.role === "SELLER") {
+    router.push({ name: "SaleItemsList" });
+  } else {
+    router.push({ name: "SaleItemsGallery" });
+  }
+});
 
 watch(
   [email, password],

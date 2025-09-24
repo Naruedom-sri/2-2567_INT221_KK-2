@@ -11,9 +11,10 @@ import {
   getSaleItemById,
 } from "@/libs/saleItemApi";
 import { getAllBrand } from "@/libs/brandApi";
-import { useTokenStore } from "@/stores/tokenStore";
+import { decodeToken } from "@/libs/jwtToken";
 const statusStore = useStatusStore();
-const tokenStore = useTokenStore();
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const items = ref([]);
 const brands = ref([]);
 const prices = ref([
@@ -462,7 +463,10 @@ onUnmounted(() => {
         :class="countImg === 2 ? 'object-top' : ''"
       />
     </div>
-    <div v-if="tokenStore.getDecode()?.role !== 'BUYER'" class="flex justify-end mx-28 pt-7 pb-3">
+    <div
+      v-if="decoded.role === 'SELLER'"
+      class="flex justify-end mx-28 pt-7 pb-3"
+    >
       <RouterLink
         :to="{ name: 'SaleItemsList' }"
         class="py-3 px-5 rounded bg-white text-black"

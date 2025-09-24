@@ -12,15 +12,13 @@ import {
   getImageOfSaleItem,
   getSaleItemById,
 } from "@/libs/saleItemApi";
-import { useTokenStore } from "@/stores/tokenStore";
-
 const {
   params: { itemId },
 } = useRoute();
-
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const statusStore = useStatusStore();
-const tokenStore = useTokenStore();
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const item = ref({});
 const router = useRouter();
 const showDialog = ref(false);
@@ -50,10 +48,9 @@ const getSaleItem = async () => {
 const deleteSaleItem = async () => {
   showDialog.value = false;
   try {
-    const status = await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
+    await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
     sessionStorage.setItem("indexPage", String(0));
     sessionStorage.setItem("tempIndexPage", String(0));
-    console.log("Monkey");
     router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
@@ -267,7 +264,7 @@ onUnmounted(() => {
         </div>
         <div class="btn-add-buy mt-10">
           <div
-            v-if="tokenStore.getDecode()?.role !== 'BUYER'"
+            v-if="decoded.role === 'SELLER'"
             class="flex justify-between gap-4 space-y-5"
           >
             <button

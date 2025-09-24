@@ -13,17 +13,19 @@ import {
   updateSaleItem,
 } from "@/libs/saleItemApi";
 import { useStatusStore } from "@/stores/statusStore";
-import { useTokenStore } from "@/stores/tokenStore";
+import { decodeToken } from "@/libs/jwtToken";
 
-const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const props = defineProps({
   isEditing: Boolean,
 });
-const statusStore = useStatusStore();
-const tokenStore = useTokenStore();
 const {
   params: { itemId },
 } = useRoute();
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
+const statusStore = useStatusStore();
+
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
@@ -424,14 +426,14 @@ const addUpdateNewSaleItem = async () => {
     }
 
     if (!props.isEditing) {
-      const data = await createSaleItemSeller(
+      await createSaleItemSeller(
         `${BASE_API_DOMAIN}`,
-        tokenStore.getDecode().jti,
-        tokenStore.getAccessToken(),
+        decoded.jti,
+        accessToken,
         formData
       );
     } else {
-      const data = await updateSaleItem(`${BASE_API_DOMAIN}`, itemId, formData);
+      await updateSaleItem(`${BASE_API_DOMAIN}`, itemId, formData);
     }
     goBackToPreviousPage();
   } catch (error) {
