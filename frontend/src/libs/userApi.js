@@ -178,11 +178,12 @@ const editProfile = async (url, id, token, form) => {
       `Can't edit user (status: ${response.status}) - ${errorMessage}`
     );
   }
+
   statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
+    "profile",
     "edit",
     response.status,
-    "Edit user successfully."
+    "Profile data is updated successfully."
   );
   return response.json();
 };

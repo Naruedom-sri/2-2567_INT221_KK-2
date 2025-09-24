@@ -32,6 +32,13 @@ async function saveProfile() {
     form.nickname = payload.nickname;
     form.fullName = payload.fullName;
     router.push({ name: "Profile" });
+
+  //   statusStore.setEntityAndMethodAndStatusAndMessage(
+  //   "profile",
+  //   "edit",
+  //   response.status,
+  //   "Profile data is updated successfully."
+  // );
   } catch (error) {
     console.error( error);
   }
