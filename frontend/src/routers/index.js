@@ -133,25 +133,46 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (!isAuth) {
-    return next({ name: "Login" });
-  }
-  const accessToken = localStorage.getItem("accessToken");
-  const decoded = decodeToken(accessToken);
-  if (decoded.role === "BUYER") {
-    if (
-      to.name === "SaleItemsList" ||
-      to.name === "AddBrand" ||
-      to.name === "EditBrand" ||
-      to.name === "BrandList" ||
-      to.name === "EditSaleItems" ||
-      to.name === "AddSaleItems"
-    ) {
-      return next({ name: "SaleItemsGallery" });
-    }
-  }
-
-  next(); // อนุญาต navigation ตามปกติ
+  isAuth()
+    .then((haveAccessToken) => {
+      if (!haveAccessToken) {
+        if (
+          to.name === "Register" ||
+          to.name === "VerifyEmail" ||
+          to.name === "Home" ||
+          to.name === "SaleItemsGallery"
+        ) {
+          return next();
+        }
+        if (to.name !== "Login") {
+          return next({ name: "Login" });
+        } else {
+          return next(); // อยู่ Login แล้ว → ไม่ต้อง redirect
+        }
+      }
+      const accessToken = localStorage.getItem("accessToken");
+      const decoded = decodeToken(accessToken);
+      if (decoded?.role === "BUYER") {
+        if (
+          to.name === "SaleItemsList" ||
+          to.name === "AddBrand" ||
+          to.name === "EditBrand" ||
+          to.name === "BrandList" ||
+          to.name === "EditSaleItems" ||
+          to.name === "AddSaleItems"
+        ) {
+          return next({ name: "SaleItemsGallery" });
+        }
+      }
+      next(); // อนุญาต navigation ตามปกติ
+    })
+    .catch(() => {
+      if (to.name !== "Login") {
+        return next({ name: "Login" });
+      } else {
+        return next();
+      }
+    });
 });
 
 export default router;

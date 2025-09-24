@@ -3,10 +3,12 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { logoutUser } from "@/libs/userApi";
 import { decodeToken } from "@/libs/jwtToken";
+import { useStatusStore } from "@/stores/statusStore";
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const router = useRouter();
 const route = useRoute();
+const statusStore = useStatusStore();
 const isSearch = ref(false);
 const searchSaleItem = ref("");
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
@@ -30,12 +32,14 @@ const handleSearchClick = (isClear) => {
 };
 
 function goToProfile() {
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
   router.push({ name: "Profile" });
 }
 
 const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
+    localStorage.removeItem("accessToken");
     router.push({ name: "Login" });
   } catch (error) {
     console.log(error);
@@ -68,11 +72,15 @@ onMounted(() => {
           class="w-20 flex justify-center items-center opacity-85 hover:opacity-100 duration-200"
           >Home</RouterLink
         >
-        <RouterLink
-          :to="{ name: 'SaleItemsGallery' }"
-          class="w-20 flex justify-center items-center opacity-85 hover:opacity-100 duration-200"
-          >Store</RouterLink
+        <button
+          @click="
+            statusStore.clearEntityAndMethodAndStatusAndMessage(),
+              router.push({ name: 'SaleItemsGallery' })
+          "
+          class="w-20 flex justify-center items-center cursor-pointer opacity-85 hover:opacity-100 duration-200"
         >
+          Store
+        </button>
         <RouterLink
           :to="{ name: 'NotFoundPage' }"
           class="w-20 flex justify-center items-center opacity-85 hover:opacity-100 duration-200"
@@ -116,7 +124,7 @@ onMounted(() => {
             class="opacity-85 hover:opacity-100 hover:cursor-pointer"
             @click="goToProfile"
           >
-            {{ decoded.nickname }}
+            {{ decoded?.nickname }}
           </p>
         </div>
       </div>

@@ -1,4 +1,32 @@
 import { useStatusStore } from "@/stores/statusStore";
+const verifyEmail = async (url, token) => {
+  const statusStore = useStatusStore();
+  const res = await fetch(
+    `${url}/v2/users/verify-email?token=${encodeURIComponent(token)}`,
+    {
+      method: "POST",
+    }
+  );
+
+  if (!res.ok) {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "verify",
+      res.status,
+      "The account activate failed."
+    );
+    throw new Error(
+      `Request failed with status ${res.status} and with body`,
+      res.json
+    );
+  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "verify",
+    res.status,
+    "The account has been successfully activated."
+  );
+};
 const loginUser = async (url, newData) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/login`, {
@@ -202,12 +230,12 @@ const refreshAccessToken = async (url) => {
     } catch {
       errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
     }
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "user",
-      "refresh",
-      response.status,
-      errorMessage
-    );
+    // statusStore.setEntityAndMethodAndStatusAndMessage(
+    //   "user",
+    //   "refresh",
+    //   response.status,
+    //   errorMessage
+    // );
     throw new Error(
       `Can't create new access token (status: ${response.status}) - ${errorMessage}`
     );
@@ -257,4 +285,5 @@ export {
   getUserById,
   logoutUser,
   editProfile,
+  verifyEmail,
 };

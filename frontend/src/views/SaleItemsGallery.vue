@@ -464,7 +464,7 @@ onUnmounted(() => {
       />
     </div>
     <div
-      v-if="decoded.role === 'SELLER'"
+      v-if="decoded?.role === 'SELLER'"
       class="flex justify-end mx-28 pt-7 pb-3"
     >
       <RouterLink

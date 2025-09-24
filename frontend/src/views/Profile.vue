@@ -4,14 +4,18 @@ import { useUserStore } from "@/stores/userStore";
 import { getUserById } from "@/libs/userApi";
 import { useRouter } from "vue-router";
 import { decodeToken } from "@/libs/jwtToken";
+import Notification from "@/components/Notification.vue";
+import { useStatusStore } from "@/stores/statusStore";
 
 const router = useRouter();
 const userStore = useUserStore();
+const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
 const closePage = () => {
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
   router.push({ name: "SaleItemsGallery" });
 };
 
@@ -51,6 +55,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Notification v-if="statusStore.getStatus() !== null" />
   <div class="min-h-screen grid place-items-center bg-gray-0">
     <div class="w-full max-w-xl rounded-2xl bg-white p-5 relative">
       <button

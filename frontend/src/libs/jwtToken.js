@@ -17,6 +17,7 @@ const isAuth = async () => {
     try {
       const data = await refreshAccessToken(`${BASE_API_DOMAIN}`);
       localStorage.setItem("accessToken", data.access_token);
+      return true;
     } catch (error) {
       console.log(error);
       return false;
@@ -26,10 +27,12 @@ const isAuth = async () => {
 };
 
 const decodeToken = (token) => {
-  if (isAuth) {
+  try {
     return jwtDecode(token);
+  } catch (error) {
+    console.log(error);
+    return null;
   }
-  return null;
 };
 
 export { isAuth, decodeToken };

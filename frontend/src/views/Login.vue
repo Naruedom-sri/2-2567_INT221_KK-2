@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { loginUser} from "@/libs/userApi";
+import { loginUser } from "@/libs/userApi";
 import { useRouter } from "vue-router";
 import { useStatusStore } from "@/stores/statusStore";
 import { decodeToken } from "@/libs/jwtToken";
@@ -33,13 +33,15 @@ const login = async () => {
 };
 
 onMounted(async () => {
+  console.log(statusStore.getStatus(), statusStore.getMessage());
   const accessToken = localStorage.getItem("accessToken");
-  const decoded = decodeToken(accessToken);
-  console.log(decoded.role);
-  if (decoded.role === "SELLER") {
-    router.push({ name: "SaleItemsList" });
-  } else {
-    router.push({ name: "SaleItemsGallery" });
+  if (accessToken) {
+    const decoded = decodeToken(accessToken);
+    if (decoded.role === "SELLER") {
+      router.push({ name: "SaleItemsList" });
+    } else if (decoded.role === "BUYER") {
+      router.push({ name: "SaleItemsGallery" });
+    }
   }
 });
 
@@ -68,28 +70,33 @@ watch(
         class="flex-1 flex flex-col items-center justify-center gap-5"
       >
         <div
-          v-show="isShowError"
-          class="itbms-message flex justify-between w-72 py-1 px-3 bg-red-100 border border-red-500 text-red-500 text-xs text-center"
+          v-if="statusStore.getStatus() !== null"
+          class="itbms-message py-1 px-5 text-xs"
+          :class="
+            isShowError
+              ? 'bg-red-100 border border-red-500 text-red-500'
+              : 'bg-green-100 border border-green-500 text-green-500'
+          "
         >
-          <p>
+          <p v-if="isShowError">
             {{
               statusStore.getStatus() === 400
                 ? "Email or password is incorrect."
                 : statusStore.getMessage()
             }}
           </p>
-          <button
-            type="button"
-            @click="isShowError = false"
-            class="text-black hover:text-red-500"
-          >
-            x
-          </button>
+          <p v-else>
+            {{ statusStore.getMessage() }}
+          </p>
         </div>
         <h1 class="text-4xl font-bold text-center">Login</h1>
         <div class="login-input mx-auto w-72 flex flex-col gap-4">
           <div>
             <input
+              @focus="
+                (isShowError = false),
+                  statusStore.clearEntityAndMethodAndStatusAndMessage()
+              "
               type="text"
               v-model="email"
               maxlength="50"
@@ -100,6 +107,10 @@ watch(
 
           <div class="flex items-center border border-gray-300 rounded-2xl">
             <input
+              @focus="
+                (isShowError = false),
+                  statusStore.clearEntityAndMethodAndStatusAndMessage()
+              "
               :type="isShowPassword ? 'text' : 'password'"
               v-model="password"
               maxlength="14"
@@ -112,10 +123,16 @@ watch(
               class="px-4 text-xs"
             >
               <span v-if="isShowPassword">
-                <img src="/src/assets/imgs/eye-off.png" class="w-7 opacity-50" />
+                <img
+                  src="/src/assets/imgs/eye-off.png"
+                  class="w-7 opacity-50"
+                />
               </span>
               <span v-else>
-                <img src="/src/assets/imgs/eye-open.png" class="w-7 opacity-50" />
+                <img
+                  src="/src/assets/imgs/eye-open.png"
+                  class="w-7 opacity-50"
+                />
               </span>
             </button>
           </div>
