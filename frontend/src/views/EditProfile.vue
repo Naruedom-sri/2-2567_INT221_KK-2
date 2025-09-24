@@ -88,7 +88,7 @@ const maskBankAccount = (acct) => maskShowMiddleThreeBeforeLast(acct);
         <div class="form-row">
           <label><strong>Nickname:</strong></label>
           <input
-            v-model="form.nickname"
+            v-model.trim="form.nickname"
             type="text"
             class="border border-gray-800 rounded-md p-2"
           />
@@ -102,7 +102,7 @@ const maskBankAccount = (acct) => maskShowMiddleThreeBeforeLast(acct);
         <div class="form-row">
           <label><strong>Fullname:</strong></label>
           <input
-            v-model="form.fullName"
+            v-model.trim="form.fullName"
             type="text"
             class="border border-gray-800 rounded-md p-2"
           />
