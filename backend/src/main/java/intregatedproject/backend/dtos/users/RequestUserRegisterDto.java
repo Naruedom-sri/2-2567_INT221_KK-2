@@ -1,10 +1,9 @@
 package intregatedproject.backend.dtos.users;
 
-import intregatedproject.backend.utils.PasswordUtils;
 import lombok.Data;
 
 @Data
-public class RequestRegisterDto {
+public class RequestUserRegisterDto {
     private Integer id;
     private String nickname;
     private String password;

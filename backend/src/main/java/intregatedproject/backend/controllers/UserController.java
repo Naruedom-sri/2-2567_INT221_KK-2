@@ -1,7 +1,7 @@
 package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.saleitems.*;
-import intregatedproject.backend.dtos.users.RequestEditUserDto;
+import intregatedproject.backend.dtos.users.RequestUserEditDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -127,7 +126,7 @@ public class UserController {
     public ResponseEntity<?> updateUserProfile(
             @PathVariable @Min(1) Integer id,
             Authentication authentication,
-            @Valid @RequestBody RequestEditUserDto request) {
+            @Valid @RequestBody RequestUserEditDto request) {
 
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");

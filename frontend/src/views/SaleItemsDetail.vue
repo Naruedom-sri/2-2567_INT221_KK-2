@@ -11,7 +11,8 @@ import {
   deleteSaleItemById,
   getImageOfSaleItem,
   getSaleItemById,
-} from "@/libs/saleItemApi";
+} from "@/libs/saleItemApi";  
+import { decodeToken } from "@/libs/jwtToken";
 const {
   params: { itemId },
 } = useRoute();

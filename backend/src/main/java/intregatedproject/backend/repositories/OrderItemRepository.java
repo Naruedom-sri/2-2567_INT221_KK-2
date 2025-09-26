@@ -1,4 +1,7 @@
 package intregatedproject.backend.repositories;
 
-public interface OrderItemRepository {
+import intregatedproject.backend.entities.OrderItem;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface OrderItemRepository extends JpaRepository<OrderItem,Integer> {
 }

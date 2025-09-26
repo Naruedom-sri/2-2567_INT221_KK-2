@@ -14,7 +14,7 @@ CREATE TABLE brands (
 CREATE TABLE users (
     userId int AUTO_INCREMENT PRIMARY KEY,
     nickname VARCHAR(50) NOT NULL,
-    fullname VARCHAR(40) NOT NULL,
+    fullName VARCHAR(40) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('BUYER', 'SELLER') DEFAULT 'BUYER',
@@ -32,11 +32,11 @@ CREATE TABLE sellers (
     nationalIdNumber VARCHAR(13) NOT NULL UNIQUE,
     nationalIdPhotoFront VARCHAR(255) NOT NULL,
     nationalIdPhotoBack VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_seller_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+    CONSTRAINT fk_user_id FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
 CREATE TABLE sale_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    saleItemId INT AUTO_INCREMENT PRIMARY KEY,
     brandId INT NOT NULL,
     sellerId INT NOT NULL,
     model VARCHAR(60) CHARACTER SET utf8mb4 NOT NULL,
@@ -49,18 +49,42 @@ CREATE TABLE sale_items (
     color VARCHAR(40) CHARACTER SET utf8mb4,
     createdOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedOn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_brands FOREIGN KEY (brandId) REFERENCES brands(brandId),
-    CONSTRAINT fk_seller FOREIGN KEY (sellerId) REFERENCES users(userId) ON DELETE CASCADE
+    CONSTRAINT fk_brand_id FOREIGN KEY (brandId) REFERENCES brands(brandId),
+    CONSTRAINT fk_seller_id FOREIGN KEY (sellerId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS sale_item_images (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE sale_item_images (
+    saleItemImageId INT PRIMARY KEY AUTO_INCREMENT,
     fileName VARCHAR(70) NOT NULL UNIQUE CHECK (TRIM(fileName) <> ''),
     imageViewOrder INT ,
     ogFileName VARCHAR(50),
     saleItemId int not null,
-	FOREIGN KEY (saleItemId) REFERENCES sale_items(id)
+	FOREIGN KEY fk_sale_item_id (saleItemId) REFERENCES sale_items(saleItemId)
 );
+
+CREATE TABLE orders (
+    orderId INT PRIMARY KEY AUTO_INCREMENT,
+    buyerId INT NOT NULL,
+	sellerId INT NOT NULL,
+    saleItemId INT NOT NULL,
+	orderDate DATETIME NOT NULL,
+    shippingAddress VARCHAR(100) NOT NULL,
+    orderNote VARCHAR(100) NOT NULL,
+	orderStatus ENUM('COMPLETED','CANCELED') DEFAULT 'COMPLETED',
+	FOREIGN KEY fk_order_buyer_id (buyerId) REFERENCES users(userId),
+    FOREIGN KEY fk_order_seller_id (sellerId) REFERENCES users(userId)
+);
+
+CREATE TABLE order_items (
+    orderItemId INT AUTO_INCREMENT PRIMARY KEY,
+    orderId INT NOT NULL,
+    saleItemId INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY fk_order_item_order_id(orderId) REFERENCES orders(orderId) ON DELETE CASCADE,
+    FOREIGN KEY fk_order_item_sale_item_id(saleItemId) REFERENCES sale_items(saleItemId)
+);
+
 
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),
@@ -84,7 +108,7 @@ INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (19, 'Honor', 'China', 'https://www.hihonor.com', 1),	
 (20, 'Nothing', 'United Kingdom', 'https://nothing.tech', 1);
 
-INSERT INTO users (role, nickname, email, password, status, fullname) VALUES
+INSERT INTO users (role, nickname, email, password, status, fullName) VALUES
 ('BUYER', 'Somchai', 'itbkk.somchai@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somchai Jaidee'),
 ('BUYER', 'Somkiat', 'itbkk.somkiat@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somkiat Luckchart'),
 ('SELLER', 'Somsuan', 'itbkk.somsuan@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somsuan Hundee'),
@@ -96,7 +120,7 @@ INSERT INTO sellers (userId, mobileNumber, bankAccountNumber, bankName, national
 (4, '0845678901', '2371234567', 'Saim Commercial Bank', '1000111100333', '1000111100333_front.png', '1000111100333_back.png'),
 (5, '0856789012', '0373456789', 'Bangkok Bank', '1000111100444', '1000111100444_front.png', '1000111100444_back.png');
 
-INSERT INTO sale_items (id,sellerId,brandId,model,description,quantity,price,screenSizeInch,ramGb,storageGb,color) VALUES
+INSERT INTO sale_items (saleItemId,sellerId,brandId,model,description,quantity,price,screenSizeInch,ramGb,storageGb,color) VALUES
 (1,3,2,'iPhone 14 Pro Max','ไอโฟนเรือธงรุ่นล่าสุด มาพร้อม Dynamic Island จอใหญ่สุดในตระกูล กล้องระดับโปร',5,42900,'6.7','6','512','Space Black'),
 (2,4,2,'iPhone 14','ไอโฟนรุ่นใหม่ล่าสุด รองรับ 5G เร็วแรง ถ่ายภาพสวยทุกสภาพแสง',8,29700,'6.1','6','256','Midnight'),
 (3,3,2,'iPhone 13 Pro','ไอโฟนรุ่นโปร จอ ProMotion 120Hz กล้องระดับมืออาชีพ',3,33000,'6.1','6','256','Sierra Blue'),
