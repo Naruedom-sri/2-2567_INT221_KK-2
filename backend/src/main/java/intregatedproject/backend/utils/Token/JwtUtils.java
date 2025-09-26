@@ -7,7 +7,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.RequestUserRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import io.jsonwebtoken.Claims;
@@ -97,7 +97,7 @@ public class JwtUtils {
     }
 
 
-    public String generateToken(RequestRegisterDto user, long ageInMillis, TokenType tokenType) {
+    public String generateToken(RequestUserRegisterDto user, long ageInMillis, TokenType tokenType) {
         try {
             // 1) ใช้ private key สำหรับเซ็น token
             JWSSigner signer = new RSASSASigner(rsaPrivateJWK);

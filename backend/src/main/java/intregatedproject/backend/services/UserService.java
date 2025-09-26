@@ -1,7 +1,7 @@
 package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.users.*;
-import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.RequestUserRegisterDto;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
@@ -12,6 +12,7 @@ import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedExce
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,7 @@ public class UserService {
             return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
         }
 
-    private void convertToEntityBuyer(RequestRegisterDto userDto, User user) {
+    private void convertToEntityBuyer(RequestUserRegisterDto userDto, User user) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
@@ -49,7 +50,7 @@ public class UserService {
         userDto.setNationalIdNumber(null);
     }
 
-    private void convertToEntitySeller(RequestRegisterDto userDto, User user, Seller seller) {
+    private void convertToEntitySeller(RequestUserRegisterDto userDto, User user, Seller seller) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
@@ -64,7 +65,7 @@ public class UserService {
         seller.setNationalIdNumber(userDto.getNationalIdNumber());
     }
 
-    public User registerBuyer(RequestRegisterDto userDto) {
+    public User registerBuyer(RequestUserRegisterDto userDto) {
         List<User> users = getAllUsers();
         users.forEach(user -> {
             if (user.getEmail().equals(userDto.getEmail())) {
@@ -83,7 +84,7 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    public User registerSeller(RequestRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
+    public User registerSeller(RequestUserRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
         List<User> users = getAllUsers();
         users.forEach(user -> {
             if (user.getEmail().equals(userDto.getEmail())) {
@@ -117,9 +118,9 @@ public class UserService {
         return savedUser;
     }
 
-    public ResponseBuyerDto updateBuyerProfile(Integer id, RequestEditUserDto request) {
+    public ResponseBuyerDto updateBuyerProfile(Integer id, RequestUserEditDto request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setNickname(request.getNickname());
         user.setFullName(request.getFullName());
@@ -135,9 +136,9 @@ public class UserService {
         return dto;
     }
 
-    public ResponseSellerDto updateSellerProfile(Integer id, RequestEditUserDto request) {
+    public ResponseSellerDto updateSellerProfile(Integer id, RequestUserEditDto request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setNickname(request.getNickname());
         user.setFullName(request.getFullName());

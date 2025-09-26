@@ -2,7 +2,7 @@ package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.authentications.RequestLogin;
 import intregatedproject.backend.dtos.authentications.ResponseToken;
-import intregatedproject.backend.dtos.users.RequestRegisterDto;
+import intregatedproject.backend.dtos.users.RequestUserRegisterDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerRegisterDto;
 import intregatedproject.backend.dtos.users.ResponseSellerRegisterDto;
 import intregatedproject.backend.entities.User;
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/v2/auth/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> register(@ModelAttribute RequestRegisterDto userDto,
+    public ResponseEntity<?> register(@ModelAttribute RequestUserRegisterDto userDto,
                                       @RequestPart(value = "front", required = false) MultipartFile front,
                                       @RequestPart(value = "back", required = false) MultipartFile back) {
         String token = jwtUtil.generateToken(userDto, 48, TokenType.ACCESS_TOKEN);

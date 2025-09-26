@@ -21,7 +21,7 @@ import java.util.List;
 public class SaleItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "saleItemId", nullable = false)
     private Integer id;
 
     @NotNull

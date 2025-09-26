@@ -13,7 +13,7 @@ import lombok.Setter;
 public class SaleItemImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "saleItemImageId", nullable = false)
     private Integer id;
 
     @Size(max = 70)
