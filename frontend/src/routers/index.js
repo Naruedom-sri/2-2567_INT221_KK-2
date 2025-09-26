@@ -14,6 +14,7 @@ import VerifyEmail from "@/views/VerifyEmail.vue";
 import Login from "@/views/Login.vue";
 import Profile from "@/views/Profile.vue";
 import EditProfile from "@/views/EditProfile.vue";
+import Cart from "@/views/Cart.vue";
 import { decodeToken, isAuth } from "@/libs/jwtToken";
 const history = createWebHistory("/kk2/");
 
@@ -56,6 +57,11 @@ const routes = [
     path: "/profile/edit",
     name: "EditProfile",
     component: EditProfile,
+  },
+  {
+    path: "/cart",
+    name: "Cart",
+    component: Cart,
   },
   {
     path: "/sale-items/:itemId",
