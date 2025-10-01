@@ -1,12 +1,10 @@
 package intregatedproject.backend.dtos.saleitems;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 public class PageDto {
     private List<ResponseSaleItemDetailDto> content;
     private boolean last;

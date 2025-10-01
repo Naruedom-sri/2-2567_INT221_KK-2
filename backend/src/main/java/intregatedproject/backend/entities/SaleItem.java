@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "sale_items")
 public class SaleItem {
@@ -27,12 +29,14 @@ public class SaleItem {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "brandId", nullable = false)
+    @ToString.Exclude
     private Brand brand;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "sellerId")
-    private User user;
+    @ToString.Exclude
+    private User seller;
 
     @Size(max = 60)
     @NotNull
@@ -73,6 +77,7 @@ public class SaleItem {
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<SaleItemImage> saleItemImages = new ArrayList<>();
 
 }

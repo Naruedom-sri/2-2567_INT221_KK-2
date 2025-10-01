@@ -1,25 +1,20 @@
 package intregatedproject.backend.dtos.orders;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import intregatedproject.backend.dtos.saleitems.ResponseSaleItemDto;
 import intregatedproject.backend.dtos.users.SellerDto;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 
 import java.time.Instant;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 public class ResponseOrderDto {
     private Integer id;
     private Integer buyerId;
-    @JsonProperty("seller")
-    private SellerDto user;
+    private SellerDto seller;
     private Instant orderDate;
     private String shippingAddress;
     private String orderNote;
-    @JsonProperty("orderItems")
-    private List<ResponseSaleItemDto>  saleItems;
+    private List<OrderItemDto>  orderItems;
     private String orderStatus;
 }
