@@ -66,7 +66,6 @@ CREATE TABLE orders (
     orderId INT PRIMARY KEY AUTO_INCREMENT,
     buyerId INT NOT NULL,
 	sellerId INT NOT NULL,
-    saleItemId INT NOT NULL,
 	orderDate DATETIME NOT NULL,
     shippingAddress VARCHAR(100) NOT NULL,
     orderNote VARCHAR(100) NOT NULL,
@@ -78,6 +77,7 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
     orderItemId INT AUTO_INCREMENT PRIMARY KEY,
     orderId INT NOT NULL,
+    saleItemId INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     FOREIGN KEY fk_order_item_order_id(orderId) REFERENCES orders(orderId) ON DELETE CASCADE,
