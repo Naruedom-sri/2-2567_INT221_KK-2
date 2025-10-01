@@ -107,12 +107,16 @@ onMounted(() => {
           alt="search-symbol"
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
-
-        <img
-          src="/src/assets/imgs/cart-symbol.png"
-          alt="cart"
-          class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
-        />
+        
+        <RouterLink
+          :to="{ name: 'Cart' }"
+        >
+          <img
+            src="/src/assets/imgs/cart-symbol.png"
+            alt="cart"
+            class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+          />
+        </RouterLink>
         <div class="flex justify-center items-center gap-2">
           <img
             src="/src/assets/imgs/account-symbol.png"
