@@ -32,9 +32,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
-        public User getUserById(Integer id) {
-            return userRepository.findById(id).orElseThrow(() -> new UnauthorizedException("User with id " + id + " not found"));
-        }
+    public User getUserById(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
 
     private void convertToEntityBuyer(RequestUserRegisterDto userDto, User user) {
         user.setNickname(userDto.getNickname());

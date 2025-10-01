@@ -1,12 +1,10 @@
 package intregatedproject.backend.dtos.brands;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.Objects;
 
-@Getter
-@Setter
+@Data
 public class RequestBrandDto {
     private Integer id;
     private String name;

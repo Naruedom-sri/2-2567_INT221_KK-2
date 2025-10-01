@@ -135,37 +135,6 @@ public class SaleItemController {
     //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
     // }
 
-    @PostMapping(value = "/v2/sellers/{id}/sale-items",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItem(
-            Authentication authentication,
-            @PathVariable int id,
-            @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws BadRequestException {
-
-        if (id <= 0) {
-            throw new BadRequestException("Missing or invalid request parameters.");
-        }
-        if (authentication == null) {
-            throw new UnauthorizedException("invalid token.");
-        }
-
-        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
-        User user = userService.getUserById(id);
-        if (!user.getId().equals(userIdFromToken)) {
-            throw new ForbiddenException("Request seller id not matched with id in access token.");
-        }
-        if (Objects.equals(user.getStatus(), "INACTIVE")) {
-            throw new ForbiddenException("Account is not active.");
-        }
-        if (!"SELLER".equalsIgnoreCase(user.getRole())) {
-            throw new ForbiddenException("User is not a seller.");
-        }
-
-        SaleItem saleitem = service.createSaleItemImage(saleItemCreateDTO, images, id);
-        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
 
     @PutMapping(value = "/v2/sale-items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

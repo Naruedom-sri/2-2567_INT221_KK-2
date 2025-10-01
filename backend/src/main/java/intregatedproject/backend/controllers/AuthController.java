@@ -130,6 +130,9 @@ public class AuthController {
         }
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(userIdFromToken);
+        if (user == null) {
+            throw new UnauthorizedException("User with not found.");
+        }
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
@@ -141,9 +144,6 @@ public class AuthController {
                 .maxAge(0)           // delete immediately
                 .sameSite("Strict   ")     // ต้องเหมือนกับตอน login
                 .build();
-
-        System.out.println("=== Delete Cookie ===");
-        System.out.println("Cookie string: " + deleteCookie.toString());
 
         // ใช้วิธีเดียวกับตอน login
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -165,22 +165,22 @@ public class AuthController {
             }
         }
 
-        System.out.println("refreshToken: " + refreshToken);
         if (refreshToken == null) {
             throw new BadRequestException("No refresh token.");
         }
 
         Claims claims = jwtUtil.validateToken(refreshToken);
-        System.out.println("claims: " + claims);
         if (claims == null) {
             throw new BadRequestException("Invalid refresh token.");
         }
 
         User user = userService.getUserById(Integer.valueOf(claims.getSubject()));
+        if (user == null) {
+            throw new UnauthorizedException("User with not found.");
+        }
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("User  is not active.");
         }
-
         String newAccessToken = jwtUtil.generateAccessToken(user, request);
         responseToken.setAccess_token(newAccessToken);
         return ResponseEntity.ok(responseToken);

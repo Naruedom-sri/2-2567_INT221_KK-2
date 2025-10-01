@@ -22,10 +22,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,11 +45,8 @@ public class UserController {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
     private SellerRepository sellerRepository;
-    @Autowired
-    private UserRepository userRepository;
+
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
@@ -87,6 +87,42 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
+    @PostMapping(value = "/v2/sellers/{id}/sale-items",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseSaleItemImageDtoV2> createSaleItem(
+            Authentication authentication,
+            @PathVariable int id,
+            @ModelAttribute RequestSaleItemDto saleItemCreateDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws BadRequestException {
+
+        if (id <= 0) {
+            throw new BadRequestException("Missing or invalid request parameters.");
+        }
+        if (authentication == null) {
+            throw new UnauthorizedException("invalid token.");
+        }
+
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+        if (!user.getId().equals(userIdFromToken)) {
+            throw new ForbiddenException("Request seller id not matched with id in access token.");
+        }
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+        if (!"SELLER".equalsIgnoreCase(user.getRole())) {
+            throw new ForbiddenException("User is not a seller.");
+        }
+
+        SaleItem saleitem = saleItemService.createSaleItemImage(saleItemCreateDTO, images, id);
+        ResponseSaleItemImageDtoV2 response = modelMapper.map(saleitem, ResponseSaleItemImageDtoV2.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
     @GetMapping("/v2/users/{id}")
     public ResponseEntity<Object> getUserById(@PathVariable int id,
                                               Authentication authentication) {
@@ -97,7 +133,9 @@ public class UserController {
 
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(id);
-
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
         if (!user.getId().equals(userIdFromToken)) {
             throw new ForbiddenException("Request user id not matched with id in access token.");
         }
@@ -106,14 +144,10 @@ public class UserController {
         }
 
         if ("seller".equalsIgnoreCase(user.getRole())) {
-            Seller seller = sellerRepository.findByUserId(userService.getUserById(id).getId());
-
+            Seller seller = userService.getUserById(id).getSeller();
             ResponseSellerDto sellerDto = new ResponseSellerDto();
             modelMapper.map(user, sellerDto);     // map ข้อมูลจาก User
-            if (seller != null) {
-                modelMapper.map(seller, sellerDto); // map ข้อมูลจาก Seller
-            }
-
+            modelMapper.map(seller, sellerDto); // map ข้อมูลจาก Seller
             return ResponseEntity.ok(sellerDto);
 
         } else {
@@ -124,18 +158,19 @@ public class UserController {
 
     @PutMapping("/v2/users/{id}")
     public ResponseEntity<?> updateUserProfile(
-            @PathVariable @Min(1) Integer id,
+            @PathVariable Integer id,
             Authentication authentication,
-            @Valid @RequestBody RequestUserEditDto request) {
+            @RequestBody RequestUserEditDto request) {
 
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }
 
         // หา user จาก DB ก่อน
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
         // เช็ค role จาก DB ไม่ใช่จาก request
         if ("buyer".equalsIgnoreCase(user.getRole())) {
             return ResponseEntity.ok(userService.updateBuyerProfile(id, request));

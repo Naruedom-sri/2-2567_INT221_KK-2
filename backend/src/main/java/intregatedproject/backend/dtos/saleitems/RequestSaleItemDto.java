@@ -1,13 +1,11 @@
 package intregatedproject.backend.dtos.saleitems;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
 
-@Setter
-@Getter
+@Data
 public class RequestSaleItemDto {
     private Integer id;
     private String model;
