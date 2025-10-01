@@ -1,13 +1,11 @@
 package intregatedproject.backend.dtos.saleitems;
 
 import intregatedproject.backend.dtos.brands.ResponseBrandDto;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
 public class ResponseSaleItemDtoEdit {
     private Integer id;
     private String model;

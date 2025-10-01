@@ -83,7 +83,7 @@ public class SaleItemService {
         item.setQuantity(saleItemDto.getQuantity());
         Brand brand = brandService.getBrandById(saleItemDto.getBrandId());
         item.setBrand(brand);
-        item.setUser(userService.getUserById(id));
+        item.setSeller(userService.getUserById(id));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

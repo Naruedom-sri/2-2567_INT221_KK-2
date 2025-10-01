@@ -66,7 +66,6 @@ CREATE TABLE orders (
     orderId INT PRIMARY KEY AUTO_INCREMENT,
     buyerId INT NOT NULL,
 	sellerId INT NOT NULL,
-    saleItemId INT NOT NULL,
 	orderDate DATETIME NOT NULL,
     shippingAddress VARCHAR(100) NOT NULL,
     orderNote VARCHAR(100) NOT NULL,

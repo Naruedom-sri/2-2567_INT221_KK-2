@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "brands")
 public class Brand {
@@ -46,6 +48,7 @@ public class Brand {
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "brand")
+    @ToString.Exclude
     private Set<SaleItem> saleItems = new LinkedHashSet<>();
 
     public String getBrandName() {

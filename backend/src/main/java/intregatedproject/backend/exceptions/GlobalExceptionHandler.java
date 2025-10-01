@@ -2,6 +2,7 @@ package intregatedproject.backend.exceptions;
 
 import intregatedproject.backend.exceptions.brands.BrandAlreadyExistsException;
 import intregatedproject.backend.exceptions.brands.BrandHasSaleItemException;
+import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityException;
 import intregatedproject.backend.exceptions.users.*;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
@@ -96,6 +97,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
     }
+    @ExceptionHandler(InsufficientQuantityException.class)
+    public ResponseEntity<Object> handleInsufficientQuantity(InsufficientQuantityException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGenericException(Exception ex, HttpServletRequest request) {
@@ -104,72 +109,8 @@ public class GlobalExceptionHandler {
                 "Something went wrong: " + ex.getMessage(),
                 request);
     }
+
 }
 
 
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-//        return new ResponseEntity<>(
-//                Map.of(
-//                        "timestamp",
-//                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-//                        "status", 404,
-//                        "error", "Not Found",
-//                        "message", ex.getMessage(),
-//                        "path", request.getRequestURI()),
-//                HttpStatus.NOT_FOUND);
-//    }
-//
-//    @ExceptionHandler(BrandAlreadyExistsException.class)
-//    public ResponseEntity<Object> handleBrandAlreadyExists(BrandAlreadyExistsException ex, HttpServletRequest request) {
-//        return new ResponseEntity<>(
-//                Map.of("timestamp",
-//                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-//                        "status", 400,
-//                        "error", "Bad Request",
-//                        "message", ex.getMessage(),
-//                        "path", request.getRequestURI()),
-//                HttpStatus.BAD_REQUEST);
-//    }
-//
-//    @ExceptionHandler(BrandHasSaleItemException.class)
-//    public ResponseEntity<Object> handleBrandHasSaleItem(BrandHasSaleItemException ex, HttpServletRequest request) {
-//        return new ResponseEntity<>(
-//                Map.of("timestamp",
-//                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-//                        "status", 400,
-//                        "error", "Bad Request",
-//                        "message", ex.getMessage(),
-//                        "path", request.getRequestURI()),
-//                HttpStatus.BAD_REQUEST);
-//    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Object> handleGenericException(Exception ex, HttpServletRequest request) {
-//        return new ResponseEntity<>(
-//                Map.of("timestamp",
-//                        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-//                        "status", 500,
-//                        "error", "Internal Server Error",
-//                        "message", "Something went wrong: " + ex.getMessage(),
-//                        "path", request.getRequestURI()),
-//
-//                HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
-//
-//    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException ex,
-//                                                            HttpServletRequest request) {
-//        Map<String, String> fieldErrors = new HashMap<>();
-//        ex.getBindingResult().getFieldErrors().forEach(error ->
-//                fieldErrors.put(error.getField(), error.getDefaultMessage()));
-//
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("timestamp", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-//        body.put("status", HttpStatus.BAD_REQUEST.value());
-//        body.put("error", "Bad Request");
-//        body.put("message", fieldErrors);
-//        body.put("path", request.getRequestURI());
-//
-//        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-//    }
 

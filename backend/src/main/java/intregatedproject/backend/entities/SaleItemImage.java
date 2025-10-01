@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "sale_item_images")
 public class SaleItemImage {
@@ -31,6 +33,7 @@ public class SaleItemImage {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "saleItemId", nullable = false)
+    @ToString.Exclude
     private SaleItem saleItem;
 
 }
