@@ -4,26 +4,17 @@ import intregatedproject.backend.dtos.saleitems.SaleItemWithImageInfo;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.SaleItemImage;
-import intregatedproject.backend.entities.User;
-import intregatedproject.backend.exceptions.users.ForbiddenException;
-import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.FileService;
 import intregatedproject.backend.services.SaleItemService;
-import intregatedproject.backend.services.UserService;
-import intregatedproject.backend.utils.Token.JwtUtils;
-import io.jsonwebtoken.Claims;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -31,14 +22,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin(origins = {"http://localhost:5173", "http://ip24kk2.sit.kmutt.ac.th"})
 public class SaleItemController {
     @Autowired
     private SaleItemService service;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private JwtUtils jwtUtils;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired

@@ -11,12 +11,8 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.repositories.SellerRepository;
-import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
-import intregatedproject.backend.utils.Token.JwtUtils;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +32,6 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/itb-mshop")
-@CrossOrigin(origins = {"http://localhost:5173", "http://ip24kk2.sit.kmutt.ac.th"})
 public class UserController {
     @Autowired
     private SaleItemService saleItemService;
@@ -44,8 +39,6 @@ public class UserController {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private SellerRepository sellerRepository;
 
 
     @GetMapping("/v2/sellers/{id}/sale-items")
@@ -126,7 +119,6 @@ public class UserController {
     @GetMapping("/v2/users/{id}")
     public ResponseEntity<Object> getUserById(@PathVariable int id,
                                               Authentication authentication) {
-
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }

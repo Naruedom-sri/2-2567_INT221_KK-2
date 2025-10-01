@@ -131,7 +131,7 @@ public class AuthController {
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(userIdFromToken);
         if (user == null) {
-            throw new UnauthorizedException("User with not found.");
+            throw new UnauthorizedException("User not found.");
         }
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
@@ -142,7 +142,7 @@ public class AuthController {
                 .secure(false)        // ต้องเหมือนกับตอน login
                 .path("/")           // ต้องเหมือนกับตอน login
                 .maxAge(0)           // delete immediately
-                .sameSite("Strict   ")     // ต้องเหมือนกับตอน login
+                .sameSite("Strict")     // ต้องเหมือนกับตอน login
                 .build();
 
         // ใช้วิธีเดียวกับตอน login
@@ -176,10 +176,10 @@ public class AuthController {
 
         User user = userService.getUserById(Integer.valueOf(claims.getSubject()));
         if (user == null) {
-            throw new UnauthorizedException("User with not found.");
+            throw new UnauthorizedException("User not found.");
         }
         if (user.getStatus().equals("INACTIVE")) {
-            throw new ForbiddenException("User  is not active.");
+            throw new ForbiddenException("User is not active.");
         }
         String newAccessToken = jwtUtil.generateAccessToken(user, request);
         responseToken.setAccess_token(newAccessToken);
