@@ -4,14 +4,24 @@ import intregatedproject.backend.dtos.orders.OrderItemDto;
 import intregatedproject.backend.dtos.orders.RequestOrderDto;
 import intregatedproject.backend.entities.*;
 import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityException;
+import intregatedproject.backend.exceptions.saleitems.PriceIsNotPresentException;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.repositories.OrderItemRepository;
 import intregatedproject.backend.repositories.OrderRepository;
+import intregatedproject.backend.utils.OrderSpecification;
+import intregatedproject.backend.utils.SaleItemSpecification;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -71,4 +81,69 @@ public class OrderService {
         orderItem.setDescription(item.getDescription());
     }
 
+//    public List<Order> getAllOrders() {
+//        try {
+//            return orderRepository.findAll(Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id")));
+//        } catch (Exception e) {
+//            throw new RuntimeException  ("Failed to retrieve sale items from database.", e);
+//        }
+//    }
+
+//    public Page<Order> getAllOrdersFilter(Integer orderId,String searchContent, String sortField, String sortDirection, Integer page, Integer size) throws BadRequestException {
+//        searchContent = searchContent == null || searchContent.isEmpty() ? null : searchContent;
+//        size = size <= 0 ? 10 : size;
+//        if (page == null || page < 0) {
+//            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+//        }
+//
+//        Sort sort;
+//        if ("brand.name".equalsIgnoreCase(sortField) || "price".equalsIgnoreCase(sortField) || "model".equalsIgnoreCase(sortField) || "storageGb".equalsIgnoreCase(sortField) || "ramGb".equalsIgnoreCase(sortField) || "description".equalsIgnoreCase(sortField) || "screenSizeInch".equalsIgnoreCase(sortField) || "color".equalsIgnoreCase(sortField) || "quantity".equalsIgnoreCase(sortField)) {
+//            sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
+//        } else {
+//            sort = Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id"));
+//        }
+//
+//        Pageable pageable = PageRequest.of(page, size, sort);
+//        Specification<SaleItem> searchSpec = Specification.where(SaleItemSpecification.hasColor(searchContent)).or(SaleItemSpecification.hasDescription(searchContent)).or(SaleItemSpecification.hasModel(searchContent));
+//        Specification<SaleItem> filterSpec = Specification.where(SaleItemSpecification.hasSeller(orderId)).and(searchSpec);
+//        return  orderRepository.findAll(filterSpec, pageable);
+//
+//    }
+    public Page<Order> getAllOrdersFilter(
+            Integer orderId,
+            String searchContent,
+            String sortField,
+            String sortDirection,
+            Integer page,
+            Integer size
+    ) throws BadRequestException {
+
+        searchContent = (searchContent == null || searchContent.isEmpty()) ? null : searchContent;
+        size = size <= 0 ? 10 : size;
+
+        if (page == null || page < 0) {
+            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+        }
+
+        Sort sort;
+        if ("orderDate".equalsIgnoreCase(sortField) ||
+                "paymentDate".equalsIgnoreCase(sortField) ||
+                "orderStatus".equalsIgnoreCase(sortField) ||
+                "id".equalsIgnoreCase(sortField)) {
+
+            sort = (sortDirection.equalsIgnoreCase("asc"))
+                    ? Sort.by(Sort.Order.asc(sortField))
+                    : Sort.by(Sort.Order.desc(sortField));
+        } else {
+            sort = Sort.by(Sort.Order.asc("orderDate"), Sort.Order.asc("id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Order> filterSpec = Specification
+                .where(OrderSpecification.hasOrderId(orderId))
+                .and(OrderSpecification.hasKeyword(searchContent));
+
+        return orderRepository.findAll(filterSpec, pageable);
+    }
 }
