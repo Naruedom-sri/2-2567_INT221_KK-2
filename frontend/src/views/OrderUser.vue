@@ -1,34 +1,21 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { useStatusStore } from "@/stores/statusStore";
 import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
-import AlertMessage from "@/components/AlertMessage.vue";
-import Notification from "@/components/Notification.vue";
-import { deleteSaleItemById } from "@/libs/saleItemApi";
-import { getAllSaleItemOfSeller } from "@/libs/userApi";
-import { getAllBrand } from "@/libs/brandApi";
-import { decodeToken } from "@/libs/jwtToken";
-const statusStore = useStatusStore();
-const params = new URLSearchParams();
-const accessToken = localStorage.getItem("accessToken");
-const decoded = decodeToken(accessToken);
-const items = ref([]);
-const brands = ref([]);
-const itemId = ref();
+import { getAllOrder } from "@/libs/userApi";
+import { onMounted, ref } from "vue";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
-const showDialog = ref(false);
+const params = new URLSearchParams();
+const orders = ref([]);
+const indexPage = ref(0);
+const tempIndexPage = ref(0);
 const pageSize = ref(10);
 const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
 const totalPage = ref(0);
-const totalSaleItems = ref(0);
-const indexPage = ref(0);
-const tempIndexPage = ref(0);
 
-const getAllSaleItems = async () => {
+const getAllOrderUser = async () => {
   try {
     params.delete("page");
     params.delete("size");
@@ -44,56 +31,34 @@ const getAllSaleItems = async () => {
     params.append("size", pageSize.value);
     params.append("sortField", isSort.value.sortFiled);
     params.append("sortDirection", isSort.value.sortDirection);
-
-    const data = await getAllSaleItemOfSeller(
+    const data = await getAllOrder(
       `${BASE_API_DOMAIN}`,
       decoded.jti,
       accessToken,
       params
     );
-
-    sessionStorage.setItem("pageSize-list", String(pageSize.value));
-    sessionStorage.setItem("indexPage-list", String(indexPage.value));
-    sessionStorage.setItem("tempIndexPage-list", String(tempIndexPage.value));
-    sessionStorage.setItem("sortField-list", isSort.value.sortFiled);
-    sessionStorage.setItem("sortDirection-list", isSort.value.sortDirection);
-    sessionStorage.setItem("pageList-list", JSON.stringify(pageList.value));
+    sessionStorage.setItem("pageSize-order", String(pageSize.value));
+    sessionStorage.setItem("indexPage-order", String(indexPage.value));
+    sessionStorage.setItem("tempIndexPage-order", String(tempIndexPage.value));
+    sessionStorage.setItem("sortField-order", isSort.value.sortFiled);
+    sessionStorage.setItem("sortDirection-order", isSort.value.sortDirection);
+    sessionStorage.setItem("pageList-order", JSON.stringify(pageList.value));
 
     items.value = data.content;
     totalSaleItems.value = data.totalElements;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    console.log(e);
   }
 };
-
-const getAllBrands = async () => {
-  try {
-    brands.value = await getAllBrand(`${BASE_API_DOMAIN}`);
-  } catch (error) {
-    console.log(error);
-    brands.value = [];
-  }
-};
-const deleteSaleItem = async (itemId) => {
-  statusStore.clearEntityAndMethodAndStatusAndMessage();
-  showDialog.value = false;
-  try {
-    await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
-    items.value = items.value.filter((item) => item.id !== itemId);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const clearSort = () => {
   isSort.value.sortFiled = "createOn";
   isSort.value.sortDirection = "none";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const sortAsc = () => {
@@ -101,7 +66,7 @@ const sortAsc = () => {
   isSort.value.sortDirection = "asc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const sortDesc = () => {
@@ -109,7 +74,7 @@ const sortDesc = () => {
   isSort.value.sortDirection = "desc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const nextNavPage = () => {
@@ -120,6 +85,7 @@ const nextNavPage = () => {
     pageList.value.push(pageList.value[indexPage.value] + 1);
     pageList.value.shift();
   }
+  getAllOrderUser();
 };
 
 const previousNavPage = () => {
@@ -127,6 +93,7 @@ const previousNavPage = () => {
     pageList.value.unshift(pageList.value[indexPage.value] - 1);
     pageList.value.pop();
   }
+  getAllOrderUser();
 };
 
 const nextPage = () => {
@@ -142,7 +109,7 @@ const nextPage = () => {
       tempIndexPage.value = pageList.value[indexPage.value] - 1;
     }
   }
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const previousPage = () => {
@@ -158,20 +125,20 @@ const previousPage = () => {
       tempIndexPage.value = pageList.value[indexPage.value] - 1;
     }
   }
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const clickPageNumber = (numPage) => {
   indexPage.value = pageList.value.findIndex((page) => page === numPage);
   tempIndexPage.value = numPage - 1;
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const firstPage = () => {
   indexPage.value = 0;
   tempIndexPage.value = 0;
   pageList.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  getAllSaleItems();
+  getAllOrderUser();
 };
 
 const lastPage = () => {
@@ -187,16 +154,15 @@ const lastPage = () => {
       (page) => page === totalPage.value
     );
   }
-  getAllSaleItems();
+  getAllOrderUser();
 };
-
 onMounted(() => {
-  const savedSize = sessionStorage.getItem("pageSize-list");
-  const savedSortField = sessionStorage.getItem("sortField-list");
-  const savedSortDirection = sessionStorage.getItem("sortDirection-list");
-  const savedIndexPage = sessionStorage.getItem("indexPage-list");
-  const savedTempIndexPage = sessionStorage.getItem("tempIndexPage-list");
-  const savedPageList = sessionStorage.getItem("pageList-list");
+  const savedSize = sessionStorage.getItem("pageSize-order");
+  const savedSortField = sessionStorage.getItem("sortField-order");
+  const savedSortDirection = sessionStorage.getItem("sortDirection-order");
+  const savedIndexPage = sessionStorage.getItem("indexPage-order");
+  const savedTempIndexPage = sessionStorage.getItem("tempIndexPage-order");
+  const savedPageList = sessionStorage.getItem("pageList-order");
 
   if (savedPageList) pageList.value = JSON.parse(savedPageList);
   if (savedSize) pageSize.value = parseInt(savedSize);
@@ -204,53 +170,20 @@ onMounted(() => {
   if (savedSortDirection) isSort.value.sortDirection = savedSortDirection;
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
-  getAllSaleItems();
-  getAllBrands();
+  getAllOrderUser();
 });
 </script>
 
 <template>
   <NavBar />
-  <Notification v-if="statusStore.getStatus() !== null" />
-  <div class="list-container text-white text-sm">
-    <AlertMessage
-      v-if="showDialog"
-      title="Delete Confirmation"
-      message="Do you want to delete this sale item?"
-      @confirm="deleteSaleItem(itemId)"
-      @cancel="showDialog = false"
-    />
-    <div class="promote h-96 flex flex-col justify-center items-center gap-8">
-      <h1 class="text-6xl">It's your lifestyle</h1>
-      <p class="text-white">Portable, fast to use, new model</p>
-      <RouterLink
-        :to="{ name: 'AddSaleItems' }"
-        class="itbms-sale-item-add w-36 py-2 rounded-2xl bg-blue-500 text-center hover:bg-blue-500/90"
-        >Add Model</RouterLink
-      >
-    </div>
-    <div
-      class="option-for-sale-item flex justify-between items-center h-20 bg-[rgba(22,22,23,255)] text-white"
-    >
-      <button
-        class="filter w-36 h-full hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
-      >
-        Filter
-      </button>
-      <RouterLink
-        @click="statusStore.clearEntityAndMethodAndStatusAndMessage"
-        :to="{ name: 'BrandList' }"
-        class="itbms-manage-brand w-36 h-full flex justify-center items-center hover:inset-shadow-xs hover:inset-shadow-[rgba(22,22,23,255)] hover:bg-blue-500 hover:cursor-pointer duration-200"
-      >
-        Manage Brand
-      </RouterLink>
-    </div>
-    <div class="filter-container mx-28 py-7 flex justify-center border-b">
-      <div class="sort-page p-2 flex items-center gap-1 bg-gray-200 rounded">
+  <div class="order-container mx-35 my-10 text-black text-sm">
+    <h1 class="text-2xl text-white font-semibold">Your Orders</h1>
+    <div class="filter-container flex justify-between my-4 text-white">
+      <div class="sort-page flex items-center gap-1 p-2 bg-gray-200 rounded">
         <div class="page space-x-3 text-black">
           <label>show</label>
           <select
-            @change="(indexPage = 0), (tempIndexPage = 0), getAllSaleItems()"
+            @change="(indexPage = 0), (tempIndexPage = 0), getAllOrderUser()"
             v-model="pageSize"
             class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300"
           >
@@ -299,77 +232,8 @@ onMounted(() => {
           </button>
         </div>
       </div>
-    </div>
-    <div class="table w-full px-10 mt-10">
-      <div class="flex justify-center mb-10">
-        <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
-          <img
-            src="/src/assets/imgs/phone-symbol.png"
-            alt="phone"
-            class="w-36 object-cover"
-          />
-          <div class="self-center space-y-2">
-            <h1 class="text-2xl">Available Model</h1>
-            <p class="w-fit mx-auto p-1 rounded-full text-xl bg-blue-500">
-              {{ totalSaleItems }}
-            </p>
-          </div>
-        </div>
-      </div>
-      <h1 class="text-4xl mb-10">My Product</h1>
-      <table v-if="items.length !== 0" class="w-full">
-        <tr class="bg-[rgba(22,22,23,255)]">
-          <th>Id</th>
-          <th>Brand</th>
-          <th>Model</th>
-          <th>Ram</th>
-          <th>Storage</th>
-          <th>Color</th>
-          <th>Price</th>
-          <th>Action</th>
-        </tr>
-        <tr v-for="(item, index) in items" :key="index" class="itbms-row">
-          <td class="itbms-id">{{ item.id }}</td>
-          <td class="itbms-brand">{{ item.brandName }}</td>
-          <td class="itbms-model">{{ item.model }}</td>
-          <td class="itbms-ramGb">
-            {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-          </td>
-          <td class="itbms-storageGb">
-            {{
-              item.storageGb === null || item.storageGb === ""
-                ? "-"
-                : item.storageGb
-            }}
-          </td>
-          <td class="itbms-color">
-            {{ item.color === null || item.color === "" ? "-" : item.color }}
-          </td>
-          <td class="itbms-price">฿ {{ item.price.toLocaleString() }}</td>
-          <td class="flex justify-center gap-5">
-            <RouterLink
-              @click="statusStore.clearStatusAndMethod()"
-              :to="{ name: 'EditSaleItems', params: { itemId: item.id } }"
-              class="itbms-edit-button w-10 border rounded border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-200"
-              >E</RouterLink
-            >
-            <button
-              @click="(showDialog = true), (itemId = item.id)"
-              class="itbms-delete-button w-10 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer duration-200"
-            >
-              D
-            </button>
-          </td>
-        </tr>
-      </table>
-      <h1
-        v-else
-        class="itmbs-row py-10 text-white text-5xl text-center border-t"
-      >
-        no sale item
-      </h1>
       <div
-        v-show="items.length !== 0 && totalPage > 1"
+        v-show="orders.length !== 0 && totalPage > 1"
         class="nav-page my-5 gap-1 flex items-center justify-center col-span-5 text-white"
       >
         <button
@@ -438,22 +302,61 @@ onMounted(() => {
         </button>
       </div>
     </div>
+    <div v-if="true" class="itbms-row my-4 px-10 py-2 rounded bg-gray-300">
+      <div class="order-title flex justify-between">
+        <h1 class="w-32 font-medium text-center">Seller</h1>
+        <h1 class="w-32 font-medium text-center">Order No</h1>
+        <h1 class="w-32 font-medium text-center">Order Date</h1>
+        <h1 class="w-32 font-medium text-center">Payment Date</h1>
+        <h1 class="w-32 font-medium text-center">Total</h1>
+        <h1 class="w-32 font-medium text-center">Status</h1>
+      </div>
+      <div class="order-detail my-3 flex justify-between">
+        <p class="itbms-nickname w-32 text-center">Somchai</p>
+        <p class="itbms-order-id w-32 text-center">12345</p>
+        <p class="itbms-order-date w-32 text-center">25/09/2025</p>
+        <p class="itbms-payment-date w-32 text-center">25/09/2025</p>
+        <p class="itbms-total-order-price w-32 text-center">67,900</p>
+        <p class="itbms-order-status w-32 text-center">Completed</p>
+      </div>
+      <div class="ship-note-order">
+        <div class="ship-detail flex gap-1">
+          <h1 class="font-medium">Shipped To:</h1>
+          <p class="itbms-shipping-address">Monkey Ranger</p>
+        </div>
+        <div class="note-detail my-3 flex gap-1">
+          <h1 class="font-medium">Note:</h1>
+          <p class="Itbms-order-note">Monkey Ranger</p>
+        </div>
+      </div>
+      <div class="item-row-container text-white">
+        <div
+          class="itbms-item-row flex items-center gap-4 p-4 rounded bg-[rgba(22,22,23,255)]"
+        >
+          <div class="item-row-img w-32">
+            <img
+              src="../assets/imgs/no-image.png"
+              alt="img"
+              class="w-full object-cover"
+            />
+          </div>
+          <div class="item-row-detail w-full flex justify-between">
+            <p class="itbms-item-description">Monkey Ranger</p>
+            <p class="itbms-item-quantity">
+              Quantity: <span class="text-white/80">2</span>
+            </p>
+            <p class="itbms-item-total-price">
+              Price: <span class="text-white/80">49,700</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h1 v-else class="itmbs-row pt-10 text-white text-5xl text-center border-t">
+      no order
+    </h1>
   </div>
-
   <Footer />
 </template>
 
-<style scoped>
-th,
-td {
-  border: 1px solid gray;
-  text-align: center;
-  padding: 10px 0;
-}
-
-.promote {
-  background-image: url("/src/assets/imgs/bg-gif.gif");
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-</style>
+<style scoped></style>

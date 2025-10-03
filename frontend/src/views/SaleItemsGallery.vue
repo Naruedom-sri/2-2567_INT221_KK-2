@@ -660,6 +660,7 @@ onUnmounted(() => {
         >
           <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
           <p class="itbms-model text-base">{{ item.model }}</p>
+          <p class="itbms-color">{{ item.color }}</p>
           <div class="ram-storage flex items-center gap-4 text-xs">
             <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
               {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
@@ -692,7 +693,7 @@ onUnmounted(() => {
             }}</span>
           </p>
           <button
-            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
+            class="itbms-add-to-cart-button px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
           >
             Add to Cart

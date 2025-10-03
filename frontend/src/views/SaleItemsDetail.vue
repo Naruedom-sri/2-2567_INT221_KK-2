@@ -265,7 +265,7 @@ onUnmounted(() => {
         </div>
         <div class="btn-add-buy mt-10">
           <div
-            v-if="decoded.role === 'SELLER'"
+            v-if="decoded?.role === 'SELLER'"
             class="flex justify-between gap-4 space-y-5"
           >
             <button
