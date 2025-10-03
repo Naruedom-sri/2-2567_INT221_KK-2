@@ -37,6 +37,11 @@ public class Order {
     @Column(name = "orderDate", nullable = false)
     private Instant orderDate;
 
+    @NotNull
+    @Column(name = "paymentDate", nullable = false)
+    private Instant paymentDate;
+
+
     @Size(max = 100)
     @NotNull
     @Column(name = "shippingAddress", nullable = false, length = 100)

@@ -67,6 +67,7 @@ CREATE TABLE orders (
     buyerId INT NOT NULL,
 	sellerId INT NOT NULL,
 	orderDate DATETIME NOT NULL,
+    paymentDate DATETIME NOT NULL,
     shippingAddress VARCHAR(100) NOT NULL,
     orderNote VARCHAR(100) NOT NULL,
 	orderStatus ENUM('COMPLETED','CANCELED') DEFAULT 'COMPLETED',
