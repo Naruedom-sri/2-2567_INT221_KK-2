@@ -48,7 +48,7 @@ public class OrderService {
                 throw new InsufficientQuantityException("Insufficient quantity.");
             }
             covertOrderItemDtoToEntity(item, orderItem, order, saleItem);
-            orderItemRepository.save(orderItem);// but save 1
+            orderItemRepository.save(orderItem);
             order.getOrderItems().add(orderItem);
         });
         return order;
