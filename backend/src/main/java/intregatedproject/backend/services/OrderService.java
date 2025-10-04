@@ -89,26 +89,17 @@ public class OrderService {
 //        }
 //    }
 
-//    public Page<Order> getAllOrdersFilter(Integer orderId,String searchContent, String sortField, String sortDirection, Integer page, Integer size) throws BadRequestException {
-//        searchContent = searchContent == null || searchContent.isEmpty() ? null : searchContent;
-//        size = size <= 0 ? 10 : size;
-//        if (page == null || page < 0) {
-//            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
-//        }
-//
-//        Sort sort;
-//        if ("brand.name".equalsIgnoreCase(sortField) || "price".equalsIgnoreCase(sortField) || "model".equalsIgnoreCase(sortField) || "storageGb".equalsIgnoreCase(sortField) || "ramGb".equalsIgnoreCase(sortField) || "description".equalsIgnoreCase(sortField) || "screenSizeInch".equalsIgnoreCase(sortField) || "color".equalsIgnoreCase(sortField) || "quantity".equalsIgnoreCase(sortField)) {
-//            sort = (sortDirection.equalsIgnoreCase("asc")) ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
-//        } else {
-//            sort = Sort.by(Sort.Order.asc("createdOn"), Sort.Order.asc("id"));
-//        }
-//
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//        Specification<SaleItem> searchSpec = Specification.where(SaleItemSpecification.hasColor(searchContent)).or(SaleItemSpecification.hasDescription(searchContent)).or(SaleItemSpecification.hasModel(searchContent));
-//        Specification<SaleItem> filterSpec = Specification.where(SaleItemSpecification.hasSeller(orderId)).and(searchSpec);
-//        return  orderRepository.findAll(filterSpec, pageable);
-//
-//    }
+    public Order getOrderByOrderId(int id) {
+        try {
+            return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order with id " + id + " not found"));
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error occurred while fetching Order with id " + id, e);
+        }
+    }
+
+
     public Page<Order> getAllOrdersFilter(
             Integer orderId,
             String searchContent,
