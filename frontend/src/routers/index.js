@@ -120,7 +120,7 @@ const routes = [
   },
   {
     path: "/your-orders",
-    name: "YourOrders",
+    name: "OrderUser",
     component: OrderUser,
   },
   {
