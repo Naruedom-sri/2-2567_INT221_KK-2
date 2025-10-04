@@ -1,4 +1,4 @@
-package intregatedproject.backend.utils.Token;
+package intregatedproject.backend.utils.token;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;

@@ -1,4 +1,4 @@
-package intregatedproject.backend.utils;
+package intregatedproject.backend.utils.specifications;
 
 import intregatedproject.backend.entities.SaleItem;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,7 +31,7 @@ public class SaleItemSpecification {
             if ( userId == null ||  userId == 0) {
                 return criteriaBuilder.conjunction();
             }
-            return root.join("user").get("id").in(userId);
+            return root.join("seller").get("id").in(userId);
         };
     }
     public static Specification<SaleItem> hasDescription(String searchContent) {

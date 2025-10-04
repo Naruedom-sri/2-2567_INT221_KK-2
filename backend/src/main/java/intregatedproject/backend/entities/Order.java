@@ -37,8 +37,7 @@ public class Order {
     @Column(name = "orderDate", nullable = false)
     private Instant orderDate;
 
-    @NotNull
-    @Column(name = "paymentDate", nullable = false)
+    @Column(name = "paymentDate", nullable = false, insertable = false, updatable = false)
     private Instant paymentDate;
 
 
