@@ -11,8 +11,12 @@ import {
   deleteSaleItemById,
   getImageOfSaleItem,
   getSaleItemById,
+  getFirstImageOfSaleItem,
 } from "@/libs/saleItemApi";  
 import { decodeToken } from "@/libs/jwtToken";
+import { useCartStore } from "@/stores/cartStore";
+
+const cart = useCartStore();
 const {
   params: { itemId },
 } = useRoute();
@@ -61,6 +65,57 @@ onMounted(() => getSaleItem());
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
+
+// add quantity control for detail page
+const buyQty = ref(1);
+
+function increaseQty() {
+  if (buyQty.value < (item.value?.quantity ?? 9999)) buyQty.value++;
+}
+function decreaseQty() {
+  if (buyQty.value > 1) buyQty.value--;
+}
+
+const showAddSuccess = ref(false);
+const successMessage = ref("");
+
+async function addItemToCart() {
+  if (!item.value) return;
+  let imageUrl = null;
+  try {
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, item.value.id);
+  } catch (e) {
+    imageUrl = null;
+  }
+  if (!imageUrl && imageUrlList.value && imageUrlList.value.length) {
+    imageUrl = imageUrlList.value[0] ?? null;
+  }
+
+  const itemPayload = {
+    itemId: item.value.id,
+    name: item.value.model ?? item.value.brandName ?? "Item",
+    price: Number(item.value.price ?? 0),
+    availableStock: item.value.quantity ?? 0,
+    image: imageUrl ?? "",
+  };
+  const sellerPayload = {
+    sellerId:
+      item.value.sellerId ??
+      item.value.userId ??
+      item.value.shopId ??
+      item.value.ownerId ??
+      "unknown",
+    sellerNickname: item.value.sellerName ?? item.value.shopName ?? item.value.brandName ?? "Seller",
+  };
+  cart.addToCart(itemPayload, sellerPayload, Number(buyQty.value));
+
+  // show success alert
+  successMessage.value = "Added to cart successfully";
+  showAddSuccess.value = true;
+  setTimeout(() => {
+    showAddSuccess.value = false;
+  }, 2500);
+}
 </script>
 
 <template>
@@ -247,18 +302,22 @@ onUnmounted(() => {
           </h1>
           <button
             class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            type="button"
+            @click="decreaseQty"
           >
             -
           </button>
           <input
             type="number"
             min="1"
-            value="1"
+            v-model.number="buyQty"
             :max="item.quantity"
             class="mx-3 border rounded-md text-center"
           />
           <button
             class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            type="button"
+            @click="increaseQty"
           >
             +
           </button>
@@ -289,6 +348,7 @@ onUnmounted(() => {
           </div>
           <button
             class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
+            @click="addItemToCart"
           >
             Add to Cart
           </button>
@@ -297,6 +357,15 @@ onUnmounted(() => {
     </div>
   </div>
   <Footer />
+
+  <AlertMessage
+    v-if="showAddSuccess"
+    :visible="showAddSuccess"
+    overImage
+    title="Added to cart"
+    :message="successMessage"
+    @toggleUploadError="showAddSuccess = false"
+  />
 </template>
 
 <style scoped></style>

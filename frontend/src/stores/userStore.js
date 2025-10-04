@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
+  const id = ref("")
   const role = ref("");
   const email = ref("");
   const nickname = ref("");
@@ -12,6 +13,7 @@ export const useUserStore = defineStore("user", () => {
   const bankAccountNumber = ref("");
 
   const setUser = (userData) => {
+    id.value = userData.id || userData.userId || userData._id || "";
     role.value = userData.role || "";
     email.value = userData.email || "";
     nickname.value = userData.nickname || "";
@@ -29,6 +31,7 @@ export const useUserStore = defineStore("user", () => {
   };
 
   const clearUser = () => {
+    id.value = "";
     role.value = "";
     email.value = "";
     nickname.value = "";
@@ -39,6 +42,7 @@ export const useUserStore = defineStore("user", () => {
   };
 
   return {
+    id,
     role,
     email,
     nickname,

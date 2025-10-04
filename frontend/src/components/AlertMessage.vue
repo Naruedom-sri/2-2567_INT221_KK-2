@@ -23,7 +23,7 @@ const cancel = () => emit("cancel");
         class="w-12 mx-auto"
       />
       <h2 class="font-bold text-black mb-4 text-xl">{{ title }}</h2>
-      <p class="itbms-message mb-6 text-gray-600">{{ message }}</p>
+      <p class="itbms-message mb-6 text-gray-700 font-medium">{{ message }}</p>
       <div v-if="!overImage" class="flex flex-col gap-4">
         <button
           v-if="!haveSaleItem"

@@ -9,9 +9,13 @@ import {
   getAllSaleItemV2,
   getImageOfSaleItem,
   getSaleItemById,
+  getFirstImageOfSaleItem,
 } from "@/libs/saleItemApi";
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
+import { useCartStore } from "@/stores/cartStore";
+
+const cart = useCartStore();
 const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
@@ -400,6 +404,64 @@ onMounted(() => {
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
+
+async function addItemToCart(saleItem, qty = 1) {
+  try {
+    const imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
+    const itemPayload = {
+      itemId: saleItem.id,
+      name: saleItem.model ?? saleItem.brandName ?? "Item",
+      price: Number(saleItem.price ?? 0),
+      availableStock: saleItem.quantity ?? 0,
+      image: imageUrl ?? "", 
+    };
+    const sellerPayload = {
+      sellerId:
+        saleItem.sellerId ??
+        saleItem.userId ??
+        saleItem.shopId ??
+        saleItem.ownerId ??
+        "unknown",
+      sellerNickname:
+        saleItem.sellerName ?? saleItem.shopName ?? saleItem.brandName ?? "Seller",
+    };
+    cart.addToCart(itemPayload, sellerPayload, qty);
+
+   statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "login",
+    response.status,
+    "added to cart successfully"
+  );
+  } catch (err) {
+    console.error("Failed to fetch item image for cart:", err);
+    const itemPayload = {
+      itemId: saleItem.id,
+      name: saleItem.model ?? saleItem.brandName ?? "Item",
+      price: Number(saleItem.price ?? 0),
+      availableStock: saleItem.quantity ?? 0,
+      image: "",
+    };
+    const sellerPayload = {
+      sellerId:
+        saleItem.sellerId ??
+        saleItem.userId ??
+        saleItem.shopId ??
+        saleItem.ownerId ??
+        "unknown",
+      sellerNickname:
+        saleItem.sellerName ?? saleItem.shopName ?? saleItem.brandName ?? "Seller",
+    };
+    cart.addToCart(itemPayload, sellerPayload, qty);
+
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+    "user",
+    "login",
+    response.status,
+    "added to cart successfully."
+  );
+  }
+}
 </script>
 
 <template>
@@ -628,77 +690,80 @@ onUnmounted(() => {
       >
         no sale item
       </h1>
-      <RouterLink
-        @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
-        @mouseover="showButtonItem = index"
-        @mouseleave="showButtonItem = null"
+      <div
         v-for="(item, index) in items"
         v-show="items.length !== 0"
-        :to="{
-          name: 'SaleItemsDetail',
-          params: { itemId: item.id },
-        }"
         :key="index"
         class="itbms-row animation-slide-up w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:shadow-sm duration-300"
-        ><div
-          class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
+        @mouseover="showButtonItem = index"
+        @mouseleave="showButtonItem = null"
+      >
+        <RouterLink
+          @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
+          :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
+          class="block"
         >
-          <img
-            v-if="imageUrlList[index]"
-            :src="imageUrlList[index]"
-            class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
-          />
-          <img
-            v-else
-            src="../assets/imgs/no-image.png"
-            class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
-          />
-        </div>
-
-        <div
-          class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
-        >
-          <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
-          <p class="itbms-model text-base">{{ item.model }}</p>
-          <div class="ram-storage flex items-center gap-4 text-xs">
-            <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
-              {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-              <span
-                v-show="item.ramGb !== null && item.ramGb !== ''"
-                class="itbms-storageGb-unit"
-              >
-                GB</span
-              >
-            </p>
-
-            <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
-              {{
-                item.storageGb === null || item.storageGb === ""
-                  ? "-"
-                  : item.storageGb
-              }}
-              <span
-                v-show="item.storageGb !== null && item.storageGb !== ''"
-                class="itbms-storageGb-unit"
-              >
-                GB</span
-              >
-            </p>
+          <div class="h-56 bg-white rounded-t-2xl flex justify-center items-center">
+            <img
+              v-if="imageUrlList[index]"
+              :src="imageUrlList[index]"
+              class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
+            />
+            <img
+              v-else
+              src="../assets/imgs/no-image.png"
+              class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+            />
           </div>
 
-          <p class="itbms-price text-white/80">
-            From ฿<span class="itbms-price-unit mx-0.5">{{
-              item.price.toLocaleString()
-            }}</span>
-          </p>
+          <div class="item-detail flex flex-col items-center space-y-3 mt-5 text-white">
+            <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
+            <p class="itbms-model text-base">{{ item.model }}</p>
+            <div class="ram-storage flex items-center gap-4 text-xs">
+              <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
+                {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
+                <span
+                  v-show="item.ramGb !== null && item.ramGb !== ''"
+                  class="itbms-storageGb-unit"
+                >
+                  GB</span
+                >
+              </p>
+
+              <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
+                {{
+                  item.storageGb === null || item.storageGb === ""
+                    ? "-"
+                    : item.storageGb
+                }}
+                <span
+                  v-show="item.storageGb !== null && item.storageGb !== ''"
+                  class="itbms-storageGb-unit"
+                >
+                  GB</span
+                >
+              </p>
+            </div>
+
+            <p class="itbms-price text-white/80">
+              From ฿<span class="itbms-price-unit mx-0.5">{{
+                item.price.toLocaleString()
+              }}</span>
+            </p>
+          </div>
+        </RouterLink>
+
+        <div class="flex justify-center">
           <button
-            class="px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
+            class="px-10 py-2 my-3 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
+            type="button"
+            @click.stop="addItemToCart(item, 1)"
           >
             Add to Cart
           </button>
         </div>
-      </RouterLink>
+      </div>
       <div
         v-show="items.length !== 0 && totalPage > 1"
         class="nav-page mt-2 gap-1 flex items-center justify-center col-span-5 text-white"
@@ -772,6 +837,16 @@ onUnmounted(() => {
   </div>
   <Notification v-if="statusStore.getStatus() !== null" />
   <Footer />
+
+  <!-- success alert (reused AlertMessage) -->
+  <AlertMessage
+    v-if="showAddSuccess"
+    :visible="showAddSuccess"
+    overImage
+    title="Added to cart"
+    :message="successMessage"
+    @toggleUploadError="showAddSuccess = false"
+  />
 </template>
 
 <style scoped>
