@@ -9,7 +9,7 @@ import intregatedproject.backend.entities.SaleItemImage;
 import intregatedproject.backend.exceptions.saleitems.PriceIsNotPresentException;
 import intregatedproject.backend.repositories.SaleItemImageRepository;
 import intregatedproject.backend.repositories.SaleItemRepository;
-import intregatedproject.backend.utils.SaleItemSpecification;
+import intregatedproject.backend.utils.specifications.SaleItemSpecification;
 import jakarta.persistence.EntityManager;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;

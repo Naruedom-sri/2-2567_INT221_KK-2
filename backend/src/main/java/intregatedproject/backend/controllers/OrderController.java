@@ -31,9 +31,9 @@ public class OrderController {
 
     @PostMapping("/v2/orders")
     public ResponseEntity<List<ResponseOrderDto>> createOrder(Authentication authentication, @RequestBody List<RequestOrderDto> requestOrderDto) throws BadRequestException {
-        if (authentication == null) {
-            throw new UnauthorizedException("invalid token.");
-        }
+//        if (authentication == null) {
+//            throw new UnauthorizedException("invalid token.");
+//        }
         if (requestOrderDto == null || requestOrderDto.isEmpty()) {
             throw new BadRequestException("Missing request parameters or invalid request parameter.");
         }

@@ -1,16 +1,21 @@
 package intregatedproject.backend.controllers;
 
+import intregatedproject.backend.dtos.orders.PageBuyerOrder;
+import intregatedproject.backend.dtos.orders.ResponseOrderDto;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.dtos.users.RequestUserEditDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
+import intregatedproject.backend.entities.Order;
 import intregatedproject.backend.entities.SaleItem;
 import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
+import intregatedproject.backend.repositories.OrderRepository;
 import intregatedproject.backend.repositories.SellerRepository;
+import intregatedproject.backend.services.OrderService;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
 import org.apache.coyote.BadRequestException;
@@ -39,6 +44,10 @@ public class UserController {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private OrderService orderService;
+    @Autowired
+    private OrderRepository orderRepository;
 
 
     @GetMapping("/v2/sellers/{id}/sale-items")
@@ -171,5 +180,44 @@ public class UserController {
         } else {
             return ResponseEntity.badRequest().body("Unsupported role");
         }
+    }
+
+
+    @GetMapping("/v2/users/{id}/orders")
+    public ResponseEntity<PageBuyerOrder> getAllOrderByUserId(@PathVariable int id,
+                                                    Authentication authentication,
+                                                    @RequestParam(required = false) Integer page,
+                                                    @RequestParam(defaultValue = "10") Integer size,
+                                                    @RequestParam(defaultValue = "id") String sortField,
+                                                    @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
+//        if (authentication == null) {
+//            throw new UnauthorizedException("Invalid token.");
+//        }
+
+//        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+//        if (!user.getId().equals(userIdFromToken)) {
+//            throw new ForbiddenException("Request user id not matched with id in access token.");
+//        }
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size);
+        List<ResponseOrderDto> ordersDto = resultPage.getContent().stream()
+                .map(order -> modelMapper.map(order, ResponseOrderDto.class))
+                .collect(Collectors.toList());
+        PageBuyerOrder dto = new PageBuyerOrder();
+        dto.setContent(ordersDto);
+        dto.setPage(page);
+        dto.setSize(resultPage.getSize());
+        dto.setSort(sortField + ": " + sortDirection.toUpperCase());
+        dto.setFirst(resultPage.isFirst());
+        dto.setLast(resultPage.isLast());
+        dto.setTotalPages(resultPage.getTotalPages());
+        dto.setTotalElements((int) resultPage.getTotalElements());
+        return ResponseEntity.ok(dto);
     }
 }

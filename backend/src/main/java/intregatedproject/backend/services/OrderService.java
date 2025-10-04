@@ -7,7 +7,14 @@ import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityExcept
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.repositories.OrderItemRepository;
 import intregatedproject.backend.repositories.OrderRepository;
+import intregatedproject.backend.utils.specifications.OrderSpecification;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -71,4 +78,36 @@ public class OrderService {
         orderItem.setDescription(item.getDescription());
     }
 
+    public Page<Order> getAllOrdersFilter(
+            Integer userId,
+            String sortField,
+            String sortDirection,
+            Integer page,
+            Integer size
+    ) throws BadRequestException {
+        size = size <= 0 ? 10 : size;
+
+        if (page == null || page < 0) {
+            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+        }
+
+        Sort sort;
+        if ("orderDate".equalsIgnoreCase(sortField) ||
+                "paymentDate".equalsIgnoreCase(sortField) ||
+                "orderStatus".equalsIgnoreCase(sortField) ||
+                "id".equalsIgnoreCase(sortField)) {
+
+            sort = (sortDirection.equalsIgnoreCase("asc"))
+                    ? Sort.by(Sort.Order.asc(sortField))
+                    : Sort.by(Sort.Order.desc(sortField));
+        } else {
+            sort = Sort.by(Sort.Order.asc("orderDate"), Sort.Order.asc("id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId));
+
+        return orderRepository.findAll(filterSpec, pageable);
+    }
 }

@@ -67,7 +67,7 @@ CREATE TABLE orders (
     buyerId INT NOT NULL,
 	sellerId INT NOT NULL,
 	orderDate DATETIME NOT NULL,
-    paymentDate DATETIME NOT NULL,
+    paymentDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     shippingAddress VARCHAR(100) NOT NULL,
     orderNote VARCHAR(100) NOT NULL,
 	orderStatus ENUM('COMPLETED','CANCELED') DEFAULT 'COMPLETED',
@@ -76,10 +76,11 @@ CREATE TABLE orders (
 );
 
 CREATE TABLE order_items (
-    orderItemId INT AUTO_INCREMENT PRIMARY KEY,
+    orderNo INT AUTO_INCREMENT PRIMARY KEY,
     orderId INT NOT NULL,
     saleItemId INT NOT NULL,
     quantity INT NOT NULL,
+    description TEXT CHARACTER SET utf8mb4 NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     FOREIGN KEY fk_order_item_order_id(orderId) REFERENCES orders(orderId) ON DELETE CASCADE,
     FOREIGN KEY fk_order_item_sale_item_id(saleItemId) REFERENCES sale_items(saleItemId)
