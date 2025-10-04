@@ -7,7 +7,7 @@ public class OrderSpecification {
     public static Specification<Order> hasUser(Integer userId) {
         return (root, query, criteriaBuilder) -> {
             if (userId == null || userId <= 0) return criteriaBuilder.conjunction();
-            return criteriaBuilder.equal(root.join("user").get("id"), userId);
+            return criteriaBuilder.equal(root.join("buyer").get("id"), userId);
         };
     }
 

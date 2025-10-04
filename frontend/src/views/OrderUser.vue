@@ -3,17 +3,21 @@ import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
 import { getAllOrder } from "@/libs/userApi";
 import { onMounted, ref } from "vue";
+import { decodeToken } from "@/libs/jwtToken";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
+const accessToken = localStorage.getItem("accessToken");
+const decoded = decodeToken(accessToken);
 const orders = ref([]);
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const pageSize = ref(10);
-const isSort = ref({ sortFiled: "createOn", sortDirection: "none" });
+const isSort = ref({ sortFiled: "id", sortDirection: "none" });
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
 const totalPage = ref(0);
+const totalPriceList = ref([]);
 
 const getAllOrderUser = async () => {
   try {
@@ -44,17 +48,23 @@ const getAllOrderUser = async () => {
     sessionStorage.setItem("sortDirection-order", isSort.value.sortDirection);
     sessionStorage.setItem("pageList-order", JSON.stringify(pageList.value));
 
-    items.value = data.content;
-    totalSaleItems.value = data.totalElements;
+    orders.value = data.content;
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
+    for (const order of orders.value) {
+      let totalPrice = 0;
+      order.orderItems.forEach((item) => {
+        totalPrice += item.quantity * item.price;
+      });
+      totalPriceList.value.push(totalPrice);
+    }
   } catch (e) {
     console.log(e);
   }
 };
 const clearSort = () => {
-  isSort.value.sortFiled = "createOn";
+  isSort.value.sortFiled = "id";
   isSort.value.sortDirection = "none";
   indexPage.value = 0;
   tempIndexPage.value = 0;
@@ -62,7 +72,7 @@ const clearSort = () => {
 };
 
 const sortAsc = () => {
-  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortFiled = "id";
   isSort.value.sortDirection = "asc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
@@ -70,7 +80,7 @@ const sortAsc = () => {
 };
 
 const sortDesc = () => {
-  isSort.value.sortFiled = "brand.name";
+  isSort.value.sortFiled = "id";
   isSort.value.sortDirection = "desc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
@@ -302,7 +312,12 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <div v-if="true" class="itbms-row my-4 px-10 py-2 rounded bg-gray-300">
+    <div
+      v-for="(order, index) in orders"
+      :key="index"
+      v-if="orders.length !== 0"
+      class="itbms-row my-4 p-10 rounded bg-gray-300"
+    >
       <div class="order-title flex justify-between">
         <h1 class="w-32 font-medium text-center">Seller</h1>
         <h1 class="w-32 font-medium text-center">Order No</h1>
@@ -312,25 +327,37 @@ onMounted(() => {
         <h1 class="w-32 font-medium text-center">Status</h1>
       </div>
       <div class="order-detail my-3 flex justify-between">
-        <p class="itbms-nickname w-32 text-center">Somchai</p>
-        <p class="itbms-order-id w-32 text-center">12345</p>
-        <p class="itbms-order-date w-32 text-center">25/09/2025</p>
-        <p class="itbms-payment-date w-32 text-center">25/09/2025</p>
-        <p class="itbms-total-order-price w-32 text-center">67,900</p>
-        <p class="itbms-order-status w-32 text-center">Completed</p>
+        <p class="itbms-nickname w-32 text-center">
+          {{ order.seller.nickName }}
+        </p>
+        <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
+        <p class="itbms-order-date w-32 text-center">
+          {{ new Date(order.orderDate).toLocaleDateString() }}
+        </p>
+        <p class="itbms-payment-date w-32 text-center">
+          {{ new Date(order.paymentDate).toLocaleDateString() }}
+        </p>
+        <p class="itbms-total-order-price w-32 text-center">
+          {{ totalPriceList.at(index).toLocaleString()}}
+        </p>
+        <p class="itbms-order-status w-32 text-center">
+          {{ order.orderStatus }}
+        </p>
       </div>
       <div class="ship-note-order">
         <div class="ship-detail flex gap-1">
           <h1 class="font-medium">Shipped To:</h1>
-          <p class="itbms-shipping-address">Monkey Ranger</p>
+          <p class="itbms-shipping-address">{{ order.shippingAddress }}</p>
         </div>
         <div class="note-detail my-3 flex gap-1">
           <h1 class="font-medium">Note:</h1>
-          <p class="Itbms-order-note">Monkey Ranger</p>
+          <p class="Itbms-order-note">{{ order.orderNote }}</p>
         </div>
       </div>
-      <div class="item-row-container text-white">
+      <div class="item-row-container space-y-2 text-white">
         <div
+          v-for="(item, index) in order.orderItems"
+          :key="index"
           class="itbms-item-row flex items-center gap-4 p-4 rounded bg-[rgba(22,22,23,255)]"
         >
           <div class="item-row-img w-32">
@@ -341,12 +368,17 @@ onMounted(() => {
             />
           </div>
           <div class="item-row-detail w-full flex justify-between">
-            <p class="itbms-item-description">Monkey Ranger</p>
-            <p class="itbms-item-quantity">
-              Quantity: <span class="text-white/80">2</span>
+            <p class="itbms-item-description w-52 text-center">
+              {{ item.description }}
             </p>
-            <p class="itbms-item-total-price">
-              Price: <span class="text-white/80">49,700</span>
+            <p class="itbms-item-quantity w-52 text-center">
+              Quantity: <span class="text-white/80">{{ item.quantity }}</span>
+            </p>
+            <p class="itbms-item-total-price w-52 text-center">
+              Price:
+              <span class="text-white/80">{{
+                (item.quantity * item.price).toLocaleString()
+              }}</span>
             </p>
           </div>
         </div>
