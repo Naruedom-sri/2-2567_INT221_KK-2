@@ -16,6 +16,7 @@ import Profile from "@/views/Profile.vue";
 import EditProfile from "@/views/EditProfile.vue";
 import { decodeToken, isAuth } from "@/libs/jwtToken";
 import OrderUser from "@/views/OrderUser.vue";
+import OrderDetail from "@/views/OrderDetail.vue";
 const history = createWebHistory("/kk2/");
 
 const routes = [
@@ -122,6 +123,11 @@ const routes = [
     path: "/your-orders",
     name: "OrderUser",
     component: OrderUser,
+  },
+   {
+    path: "/your-orders/:orderId",
+    name: "OrderDetail",
+    component: OrderDetail,
   },
   {
     path: "/:pathMatch(.*)*",

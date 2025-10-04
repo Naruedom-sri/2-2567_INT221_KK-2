@@ -4,11 +4,17 @@ import NavBar from "@/components/NavBar.vue";
 import { getAllOrder } from "@/libs/userApi";
 import { onMounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
+import { useRouter } from "vue-router";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const orders = ref([]);
+const router = useRouter();
+const orderCompletedList = ref([]);
+const totalPriceCompletedList = ref([]);
+const orderCanceledList = ref([]);
+const totalPriceCanceledList = ref([]);
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const pageSize = ref(10);
@@ -16,8 +22,8 @@ const isSort = ref({ sortFiled: "id", sortDirection: "none" });
 const pageList = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const isLastPage = ref();
 const isFirstPage = ref();
+const haveStatus = ref("completed");
 const totalPage = ref(0);
-const totalPriceList = ref([]);
 
 const getAllOrderUser = async () => {
   try {
@@ -52,12 +58,20 @@ const getAllOrderUser = async () => {
     totalPage.value = data.totalPages;
     isLastPage.value = data.last;
     isFirstPage.value = data.first;
+
     for (const order of orders.value) {
       let totalPrice = 0;
       order.orderItems.forEach((item) => {
         totalPrice += item.quantity * item.price;
       });
-      totalPriceList.value.push(totalPrice);
+      if (order.orderStatus === "COMPLETED") {
+        orderCompletedList.value.push(order);
+        totalPriceCompletedList.value.push(totalPrice);
+      }
+      if (order.orderStatus === "CANCELED") {
+        orderCanceledList.value.push(order);
+        totalPriceCanceledList.value.push(totalPrice);
+      }
     }
   } catch (e) {
     console.log(e);
@@ -312,11 +326,40 @@ onMounted(() => {
         </button>
       </div>
     </div>
+    <div class="completed-cancel space-x-2 text-white">
+      <button
+        @click="haveStatus = 'completed'"
+        class="py-1 px-2"
+        :class="[
+          haveStatus === 'completed'
+            ? 'text-black bg-gray-200 rounded'
+            : 'hover:text-blue-500 cursor-pointer duration-200',
+        ]"
+      >
+        Completed
+      </button>
+      <button
+        @click="haveStatus = 'canceled'"
+        class="py-1 px-2"
+        :class="[
+          haveStatus === 'canceled'
+            ? 'text-black bg-gray-200 rounded'
+            : 'hover:text-blue-500 cursor-pointer duration-200',
+        ]"
+      >
+        Canceled
+      </button>
+    </div>
     <div
-      v-for="(order, index) in orders"
+      v-for="(order, index) in haveStatus === 'completed'
+        ? orderCompletedList
+        : orderCanceledList"
       :key="index"
       v-if="orders.length !== 0"
-      class="itbms-row my-4 p-10 rounded bg-gray-300"
+      class="itbms-row my-4 p-10 rounded bg-gray-200"
+      @click="
+        router.push({ name: 'OrderDetail', params: { orderId: order.id } })
+      "
     >
       <div class="order-title flex justify-between">
         <h1 class="w-32 font-medium text-center">Seller</h1>
@@ -338,7 +381,11 @@ onMounted(() => {
           {{ new Date(order.paymentDate).toLocaleDateString() }}
         </p>
         <p class="itbms-total-order-price w-32 text-center">
-          {{ totalPriceList.at(index).toLocaleString()}}
+          {{
+            haveStatus === "completed"
+              ? totalPriceCompletedList.at(index).toLocaleString()
+              : totalPriceCanceledList.at(index).toLocaleString()
+          }}
         </p>
         <p class="itbms-order-status w-32 text-center">
           {{ order.orderStatus }}
