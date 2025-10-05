@@ -4,7 +4,6 @@ import intregatedproject.backend.dtos.orders.OrderItemDto;
 import intregatedproject.backend.dtos.orders.RequestOrderDto;
 import intregatedproject.backend.entities.*;
 import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityException;
-import intregatedproject.backend.exceptions.saleitems.PriceIsNotPresentException;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.repositories.OrderItemRepository;
 import intregatedproject.backend.repositories.OrderRepository;
@@ -19,9 +18,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -83,6 +82,7 @@ public class OrderService {
     }
 
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Order createOrder(RequestOrderDto requestOrderDto) {
         User buyer = userService.getUserById(requestOrderDto.getBuyerId());
         User seller = userService.getUserById(requestOrderDto.getSellerId());
