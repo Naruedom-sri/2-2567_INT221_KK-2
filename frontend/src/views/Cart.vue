@@ -187,7 +187,7 @@ async function placeOrder() {
       };
     });
 
-    // console.log(requestPayload);
+    console.log(requestPayload);
 
     const { status, data } = await placeOrderApi(BASE_API_DOMAIN, requestPayload, accessToken);
     if (status === 201) {

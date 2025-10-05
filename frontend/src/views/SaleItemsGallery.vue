@@ -14,9 +14,7 @@ import {
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
-import { useUserStore } from "@/stores/userStore";
 
-const userStore = useUserStore();
 const cart = useCartStore();
 const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
@@ -410,7 +408,12 @@ onUnmounted(() => {
 async function addItemToCart(saleItem, qty = 1) {
   if (!saleItem) return;
 
-  const currentUserId = userStore.$id;
+  const token = localStorage.getItem("accessToken");
+  let currentUserId = null;
+  if (token) {
+    const decoded = decodeToken(token);
+    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+  }
 
   const sellerId =
     saleItem.seller?.id ??
@@ -421,15 +424,14 @@ async function addItemToCart(saleItem, qty = 1) {
     "unknown";
 
   if (sellerId === currentUserId) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      400,
-      "You cannot add your own product to the cart."
-    );
-    console.warn("Seller cannot add their own product.");
-    return;
-  }
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    400,
+    "You cannot add your own product to the cart."
+  );
+  return;
+}
 
   let imageUrl = null;
   try {
@@ -476,7 +478,6 @@ async function addItemToCart(saleItem, qty = 1) {
     "Add to cart successfully."
   );
 }
-
 </script>
 
 <template>

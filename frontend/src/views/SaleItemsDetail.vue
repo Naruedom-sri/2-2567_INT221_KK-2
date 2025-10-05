@@ -95,7 +95,7 @@ async function addItemToCart(saleItem, qty = 1) {
     saleItem.ownerId ??
     "unknown";
 
-  if (Number(sellerId) === Number(currentUserId)) {
+  if (sellerId === currentUserId) {
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",
     "add",
