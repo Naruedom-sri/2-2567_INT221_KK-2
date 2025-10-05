@@ -1,19 +1,27 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch, computed } from "vue";
 import { useStatusStore } from "@/stores/statusStore";
+
 const statusStore = useStatusStore();
-const status = statusStore.getStatus();
-const message = statusStore.getMessage();
-const showMessage = ref(true);
-const setIntervalShowMessage = () => {
-  setTimeout(() => {
-    showMessage.value = false;
-    statusStore.clearEntityAndMethodAndStatusAndMessage();
-  }, 5000);
-};
-onMounted(() => {
-  setIntervalShowMessage();
-});
+
+const status = computed(() => statusStore.getStatus());
+const message = computed(() => statusStore.getMessage());
+
+const showMessage = ref(false);
+
+watch(
+  status,
+  (newVal) => {
+    if (newVal !== null && newVal !== undefined) {
+      showMessage.value = true;
+      setTimeout(() => {
+        showMessage.value = false;
+        statusStore.clearEntityAndMethodAndStatusAndMessage();
+      }, 5000);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -32,10 +40,7 @@ onMounted(() => {
           {{ status >= 400 ? "Error!" : "Success!" }}
         </h1>
         <button
-          @click="
-            (showMessage = false),
-              statusStore.clearEntityAndMethodAndStatusAndMessage()
-          "
+          @click="(showMessage = false), statusStore.clearEntityAndMethodAndStatusAndMessage()"
           class="w-6 h-6 text-center text-black bg-gray-300 rounded-full hover:cursor-pointer"
         >
           x

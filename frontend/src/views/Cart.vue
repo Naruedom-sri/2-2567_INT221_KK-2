@@ -1,15 +1,18 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import { useCartStore } from "@/stores/cartStore";
-import { useUserStore } from "@/stores/userStore";
+import { useStatusStore } from "@/stores/statusStore";
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
-
+import { placeOrder as placeOrderApi } from "@/libs/orderApi";
+import { decodeToken } from "@/libs/jwtToken";
+``
 const cart = useCartStore();
-const user = useUserStore();
+const statusStore = useStatusStore();
 const loading = ref(false);
-
+const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const accessToken = localStorage.getItem("accessToken");
 const showConfirmModal = ref(false);
 const confirmTarget = ref(null);
 
@@ -39,30 +42,242 @@ function onCancel() {
   showConfirmModal.value = false;
 }
 
+const shippingAddress = ref("");
+const orderNote = ref("");
+
+
+const selectAll = ref(false);
+const selectedItems = ref(new Set()); 
+const selectedSellers = ref(new Set()); 
+
+const itemKey = (sellerId, itemId) => `${sellerId}::${itemId}`;
+
+function toggleSelectAll() {
+  if (selectAll.value) {
+    selectedItems.value = new Set();
+    selectedSellers.value = new Set();
+    for (const seller of cart.groupedBySeller) {
+      selectedSellers.value.add(String(seller.sellerId));
+      for (const it of seller.items) {
+        selectedItems.value.add(itemKey(seller.sellerId, it.itemId));
+      }
+    }
+  } else {
+    selectedItems.value.clear();
+    selectedSellers.value.clear();
+  }
+}
+
+function isSellerSelected(seller) {
+  return selectedSellers.value.has(String(seller.sellerId));
+}
+
+function isItemSelected(seller, it) {
+  return selectedItems.value.has(itemKey(seller.sellerId, it.itemId));
+}
+
+function toggleSeller(seller) {
+  const sId = String(seller.sellerId);
+  if (selectedSellers.value.has(sId)) {
+    selectedSellers.value.delete(sId);
+    for (const it of seller.items) {
+      selectedItems.value.delete(itemKey(seller.sellerId, it.itemId));
+    }
+  } else {
+    selectedSellers.value.add(sId);
+    for (const it of seller.items) {
+      selectedItems.value.add(itemKey(seller.sellerId, it.itemId));
+    }
+  }
+  syncSelectAllFlag();
+}
+
+function toggleItem(seller, it) {
+  const key = itemKey(seller.sellerId, it.itemId);
+  if (selectedItems.value.has(key)) {
+    selectedItems.value.delete(key);
+  } else {
+    selectedItems.value.add(key);
+  }
+  const allSelected = seller.items.every((x) =>
+    selectedItems.value.has(itemKey(seller.sellerId, x.itemId))
+  );
+  if (allSelected) selectedSellers.value.add(String(seller.sellerId));
+  else selectedSellers.value.delete(String(seller.sellerId));
+  syncSelectAllFlag();
+}
+
+function syncSelectAllFlag() {
+  const totalItems = cart.items.length;
+  selectAll.value = totalItems > 0 && selectedItems.value.size === totalItems;
+}
+
+const selectedCartItems = computed(() => {
+  const items = [];
+  for (const seller of cart.groupedBySeller) {
+    for (const it of seller.items) {
+      if (selectedItems.value.has(itemKey(seller.sellerId, it.itemId))) {
+        items.push(it);
+      }
+    }
+  }
+  return items;
+});
+
+
+const selectedTotalItems = computed(() =>
+  selectedCartItems.value.reduce((sum, i) => sum + i.quantity, 0)
+);
+
+const selectedTotalPrice = computed(() =>
+  selectedCartItems.value.reduce((sum, i) => sum + i.quantity * i.price, 0)
+);
+
+watch(
+  () => cart.items.length,
+  () => {
+    const existingKeys = new Set(cart.items.map((it) => itemKey(it.sellerId, it.itemId)));
+    for (const k of Array.from(selectedItems.value)) {
+      if (!existingKeys.has(k)) selectedItems.value.delete(k);
+    }
+    selectedSellers.value.clear();
+    for (const k of selectedItems.value) {
+      const [sId] = k.split("::");
+      selectedSellers.value.add(sId);
+    }
+    syncSelectAllFlag();
+  }
+);
+
+async function placeOrder() {
+  if (!cart.items.length) {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "orders",
+      "place",
+      400,
+      "Your cart is empty."
+    );
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const token = accessToken || localStorage.getItem("accessToken");
+    let buyerId = null;
+    if (token) {
+      const decoded = decodeToken(token);
+      buyerId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+    }
+    const requestPayload = cart.groupedBySeller.map((seller) => {
+      const sellerIdNum = Number(seller.sellerId);
+      return {
+        buyerId,
+        sellerId: Number.isFinite(sellerIdNum) ? sellerIdNum : null,
+        orderDate: new Date().toISOString(),
+        paymentDate: null,
+        shippingAddress: shippingAddress.value || "",
+        orderNote: orderNote.value || "",
+        orderItems: seller.items.map((it) => ({
+          saleItemId: it.itemId,
+          quantity: it.quantity,
+          description: it.description || it.name || "",
+          price: it.price,
+        })),
+        orderStatus: 'COMPLETED',
+      };
+    });
+
+    // console.log(requestPayload);
+
+    const { status, data } = await placeOrderApi(BASE_API_DOMAIN, requestPayload, accessToken);
+    if (status === 201) {
+      cart.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "orders",
+        "place",
+        status,
+        "Order placed successfully."
+      );
+      console.log("Orders created:", data);
+    } else {
+      const errMsg =
+        data?.message ||
+        `Failed to place order (status ${status})` ||
+        JSON.stringify(data);
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "orders",
+        "place",
+        status,
+        errMsg
+      );
+    }
+  } catch (err) {
+    console.error("Place order error:", err);
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "orders",
+      "place",
+      500,
+      "Network or unexpected error when placing order."
+    );
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <template>
   <div>
     <NavBar />
-    <div class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30">
+    <div
+      class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30"
+    >
       <div class="text-left space-y-4 col-span-2">
-        <p class="text-3xl font-semibold">Shopping Cart</p>
+        <div class="flex items-center gap-3">
+          <img src="../assets/imgs/cart-shopping-solid-full.svg" class="w-10 h-10" />
+          <p class="text-3xl font-semibold">Shopping Cart</p>
+        </div>
+        
 
         <div v-if="!cart.items.length" class="text-lg">Your cart is empty.</div>
+
+        <div class="itbms-select-all border rounded p-3 mb-3">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+            <span>Select All</span>
+            <span class="ml-2 text-sm text-gray-400">({{ cart.totalItems }} items)</span>
+          </label>
+        </div>
 
         <div
           v-for="seller in cart.groupedBySeller"
           :key="seller.sellerId"
           class="border p-3 rounded-md"
         >
-          <div class="font-semibold mb-2">Seller: {{ user.nickname }}</div>
+          <div class="font-semibold mb-2 flex items-center justify-between">
+            <label class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                :checked="isSellerSelected(seller)"
+                @change="toggleSeller(seller)"
+              />
+              <img src="../assets/imgs/store-solid-full.svg" class="w-7 inline" />
+              <span>{{ seller.sellerNickname }}</span>
+            </label>
+            <!-- <div class="text-sm">Seller total: {{ seller.sellerTotal?.toFixed ? seller.sellerTotal.toFixed(2) : seller.sellerTotal }}</div> -->
+          </div>
+
           <div class="space-y-2">
             <div
               v-for="it in seller.items"
               :key="it.itemId"
-              class="flex items-center justify-between bg-gray-800 p-2 rounded"
+              class="itbms-item-row flex items-center justify-between bg-gray-800 p-2 rounded"
             >
               <div class="flex items-center gap-3 flex-1">
+                <input
+                  type="checkbox"
+                  :checked="isItemSelected(seller, it)"
+                  @change="toggleItem(seller, it)"
+                />
                 <img
                   :src="it.image"
                   alt="item image"
@@ -91,7 +306,10 @@ function onCancel() {
                   +
                 </button>
                 <div class="w-32 text-right text-sm">
-                  <p>price: <span>{{ (it.price * it.quantity).toFixed(2) }}</span></p>
+                  <p>
+                    price:
+                    <span>{{ (it.price * it.quantity).toFixed(2) }}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -108,7 +326,7 @@ function onCancel() {
           <div class="flex flex-col">
             <label>Address</label>
             <textarea
-              type="text"
+              v-model="shippingAddress"
               class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
               placeholder="Address NO, Street, Subdistrict, District, Province, Postal Code"
             ></textarea>
@@ -116,7 +334,7 @@ function onCancel() {
           <div class="flex flex-col">
             <label>Note</label>
             <textarea
-              type="text"
+              v-model="orderNote"
               class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
               placeholder="Additional instruction or requests"
             ></textarea>
@@ -127,20 +345,20 @@ function onCancel() {
           <div>
             <p class="text-sm">
               Total Items:
-              <span>{{ cart.totalItems }}</span>
+              <span>{{ selectedTotalItems }}</span>
             </p>
           </div>
           <div>
             <p class="text-sm">
               Total Price:
-              <span>{{ cart.totalPrice.toFixed(2) }}</span>
+              <span>{{ selectedTotalPrice.toFixed(2) }}</span>
             </p>
-          </div>  
+          </div>
           <div>
             <button
               :disabled="!cart.items.length || loading"
-              @click="debugLog"
-              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5"
+              @click="placeOrder"
+              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 "
             >
               <span v-if="!loading">Place Order</span>
               <span v-else>Placing...</span>
@@ -163,4 +381,10 @@ function onCancel() {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbms-select-all input[type="checkbox"],
+.itbms-item-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+</style>

@@ -14,7 +14,9 @@ import {
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
+import { useUserStore } from "@/stores/userStore";
 
+const userStore = useUserStore();
 const cart = useCartStore();
 const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
@@ -406,62 +408,75 @@ onUnmounted(() => {
 });
 
 async function addItemToCart(saleItem, qty = 1) {
-  try {
-    const imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
-    const itemPayload = {
-      itemId: saleItem.id,
-      name: saleItem.model ?? saleItem.brandName ?? "Item",
-      price: Number(saleItem.price ?? 0),
-      availableStock: saleItem.quantity ?? 0,
-      image: imageUrl ?? "", 
-    };
-    const sellerPayload = {
-      sellerId:
-        saleItem.sellerId ??
-        saleItem.userId ??
-        saleItem.shopId ??
-        saleItem.ownerId ??
-        "unknown",
-      sellerNickname:
-        saleItem.sellerName ?? saleItem.shopName ?? saleItem.brandName ?? "Seller",
-    };
-    cart.addToCart(itemPayload, sellerPayload, qty);
+  if (!saleItem) return;
 
-   statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
-    "login",
-    response.status,
-    "added to cart successfully"
-  );
-  } catch (err) {
-    console.error("Failed to fetch item image for cart:", err);
-    const itemPayload = {
-      itemId: saleItem.id,
-      name: saleItem.model ?? saleItem.brandName ?? "Item",
-      price: Number(saleItem.price ?? 0),
-      availableStock: saleItem.quantity ?? 0,
-      image: "",
-    };
-    const sellerPayload = {
-      sellerId:
-        saleItem.sellerId ??
-        saleItem.userId ??
-        saleItem.shopId ??
-        saleItem.ownerId ??
-        "unknown",
-      sellerNickname:
-        saleItem.sellerName ?? saleItem.shopName ?? saleItem.brandName ?? "Seller",
-    };
-    cart.addToCart(itemPayload, sellerPayload, qty);
+  const currentUserId = userStore.$id;
 
+  const sellerId =
+    saleItem.seller?.id ??
+    saleItem.sellerId ??
+    saleItem.userId ??
+    saleItem.shopId ??
+    saleItem.ownerId ??
+    "unknown";
+
+  if (sellerId === currentUserId) {
     statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
-    "login",
-    response.status,
-    "added to cart successfully."
-  );
+      "cart",
+      "add",
+      400,
+      "You cannot add your own product to the cart."
+    );
+    console.warn("Seller cannot add their own product.");
+    return;
   }
+
+  let imageUrl = null;
+  try {
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
+  } catch (e) {
+    console.warn("Failed to fetch image:", e);
+  }
+
+  if (!imageUrl && saleItem.saleItemImages?.length) {
+    imageUrl = saleItem.saleItemImages[0].url ?? null;
+  }
+
+  const itemPayload = {
+    itemId: saleItem.id,
+    name: saleItem.model ?? saleItem.brandName ?? "Item",
+    price: Number(saleItem.price ?? 0),
+    availableStock: saleItem.quantity ?? 0,
+    image: imageUrl ?? "",
+  };
+
+  const sellerPayload = {
+    sellerId,
+    sellerNickname:
+      saleItem.seller?.nickName ??
+      saleItem.seller?.fullName ??
+      saleItem.sellerName ??
+      saleItem.shopName ??
+      saleItem.brandName ??
+      "Seller",
+  };
+
+  cart.addToCart(itemPayload, sellerPayload, Number(qty));
+
+  console.log("🛒 Added to cart:", {
+    itemPayload,
+    sellerPayload,
+    cartItems: cart.items,
+  });
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    200,
+    "Add to cart successfully."
+  );
 }
+
 </script>
 
 <template>
@@ -716,19 +731,22 @@ async function addItemToCart(saleItem, qty = 1) {
             />
           </div>
 
-          <div class="item-detail flex flex-col items-center space-y-3 mt-5 text-white">
-            <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
-            <p class="itbms-model text-base">{{ item.model }}</p>
-            <div class="ram-storage flex items-center gap-4 text-xs">
-              <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
-                {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-                <span
-                  v-show="item.ramGb !== null && item.ramGb !== ''"
-                  class="itbms-storageGb-unit"
-                >
-                  GB</span
-                >
-              </p>
+        <div
+          class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
+        >
+          <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
+          <p class="itbms-model text-base">{{ item.model }}</p>
+          <p class="itbms-color">{{ item.color }}</p>
+          <div class="ram-storage flex items-center gap-4 text-xs">
+            <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
+              {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
+              <span
+                v-show="item.ramGb !== null && item.ramGb !== ''"
+                class="itbms-storageGb-unit"
+              >
+                GB</span
+              >
+            </p>
 
               <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
                 {{
@@ -755,7 +773,7 @@ async function addItemToCart(saleItem, qty = 1) {
 
         <div class="flex justify-center">
           <button
-            class="px-10 py-2 my-3 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
+            class="itbms-add-to-cart-button px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
             type="button"
             @click.stop="addItemToCart(item, 1)"
@@ -837,16 +855,6 @@ async function addItemToCart(saleItem, qty = 1) {
   </div>
   <Notification v-if="statusStore.getStatus() !== null" />
   <Footer />
-
-  <!-- success alert (reused AlertMessage) -->
-  <AlertMessage
-    v-if="showAddSuccess"
-    :visible="showAddSuccess"
-    overImage
-    title="Added to cart"
-    :message="successMessage"
-    @toggleUploadError="showAddSuccess = false"
-  />
 </template>
 
 <style scoped>

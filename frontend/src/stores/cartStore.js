@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useUserStore } from "./userStore";
 
 export const useCartStore = defineStore("cart", {
 	state: () => ({
@@ -32,31 +33,33 @@ export const useCartStore = defineStore("cart", {
 		addToCart(item, seller, qty = 1) {
 			if (!item || !item.itemId) return;
 
-			// resolve sellerId with multiple fallbacks
+			const userStore = useUserStore();
+			const currentUser = userStore.getUser(); 
+
+			if(currentUser && currentUser.id === seller.sellerId){
+				return;
+			}
+
+			const resolvedSeller = seller || {
+				sellerId: userStore.id,
+				sellerNickname: userStore.nickname || userStore.fullname || "Seller",
+			};
+
 			const sellerId =
-				(seller && (seller.sellerId ?? seller.id ?? seller._id ?? seller.userId)) ??
+				resolvedSeller.sellerId ??
 				item.sellerId ??
 				(item.seller && (item.seller.id ?? item.seller._id ?? item.sellerId)) ??
 				"unknown";
 
-			// resolve seller nickname with preferred seller fields
-			// Avoid using brand/brandName as seller name unless absolutely nothing else
-			const sellerNicknameCandidates = [
-				// explicit seller arg preferred
-				seller && (seller.sellerNickname ?? seller.nickname ?? seller.name ?? seller.shopName ?? seller.displayName),
-				// item-level seller fields
-				item.sellerNickname ?? item.sellerName ?? item.shopName ?? (item.seller && (item.seller.nickname ?? item.seller.name ?? item.seller.shopName ?? item.seller.displayName)),
-				// last resort: plain string 'seller' or 'owner'
-				typeof item.seller === "string" ? item.seller : null,
-				// avoid brand name as seller; if you must, it will be used only if no other candidate
-				item.brandName ?? item.brand ?? null,
-			];
-			const sellerNickname = sellerNicknameCandidates.find((c) => c && String(c).trim()) ?? "Seller";
+			const sellerNickname =
+				resolvedSeller.sellerNickname ??
+				item.sellerNickname ??
+				item.sellerName ??
+				(item.seller && (item.seller.nickname ?? item.seller.name)) ??
+				"Seller";
 
-			// resolve image from many possible fields
 			const resolveImageFromArray = (arr) => {
 				if (!Array.isArray(arr) || !arr.length) return "";
-				// array may contain strings or objects
 				const first = arr.find(Boolean);
 				if (!first) return "";
 				if (typeof first === "string") return first;
@@ -74,11 +77,10 @@ export const useCartStore = defineStore("cart", {
 				resolveImageFromArray(item.images) ??
 				resolveImageFromArray(item.pictures) ??
 				(item.media && item.media[0] && (item.media[0].url ?? item.media[0].src)) ??
-				""; // keep empty if nothing
+				""; 
 
 			const avail = Number(item.availableStock ?? item.stock ?? item.qty ?? 9999);
 
-			// find existing by itemId + resolved sellerId
 			const existing = this.items.find(
 				(i) => i.itemId === item.itemId && i.sellerId === sellerId
 			);
@@ -86,11 +88,9 @@ export const useCartStore = defineStore("cart", {
 			if (existing) {
 				existing.quantity = Math.min(existing.quantity + qty, avail);
 				if (image) existing.image = image;
-				// update sellerNickname if previously generic
 				if (!existing.sellerNickname || existing.sellerNickname === "Seller") {
 					existing.sellerNickname = sellerNickname;
 				}
-				// ensure price/name are reasonably up-to-date
 				existing.price = Number(item.price ?? existing.price ?? 0);
 				existing.name = item.name ?? item.title ?? existing.name;
 				existing.availableStock = avail;

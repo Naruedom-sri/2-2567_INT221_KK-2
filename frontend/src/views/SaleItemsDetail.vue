@@ -12,11 +12,13 @@ import {
   getImageOfSaleItem,
   getSaleItemById,
   getFirstImageOfSaleItem,
-} from "@/libs/saleItemApi";  
+} from "@/libs/saleItemApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
+import { useUserStore } from "@/stores/userStore";
 
 const cart = useCartStore();
+const userStore = useUserStore();
 const {
   params: { itemId },
 } = useRoute();
@@ -66,7 +68,6 @@ onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
 
-// add quantity control for detail page
 const buyQty = ref(1);
 
 function increaseQty() {
@@ -76,45 +77,78 @@ function decreaseQty() {
   if (buyQty.value > 1) buyQty.value--;
 }
 
-const showAddSuccess = ref(false);
-const successMessage = ref("");
+async function addItemToCart(saleItem, qty = 1) {
+  if (!saleItem) return;
 
-async function addItemToCart() {
-  if (!item.value) return;
+  const token = localStorage.getItem("accessToken");
+  let currentUserId = null;
+  if (token) {
+    const decoded = decodeToken(token);
+    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+  }
+
+  const sellerId =
+    saleItem.seller?.id ??
+    saleItem.sellerId ??
+    saleItem.userId ??
+    saleItem.shopId ??
+    saleItem.ownerId ??
+    "unknown";
+
+  if (Number(sellerId) === Number(currentUserId)) {
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    400,
+    "You cannot add your own product to the cart."
+  );
+  return;
+}
+
   let imageUrl = null;
   try {
-    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, item.value.id);
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
   } catch (e) {
-    imageUrl = null;
+    console.warn("Failed to fetch image:", e);
   }
-  if (!imageUrl && imageUrlList.value && imageUrlList.value.length) {
-    imageUrl = imageUrlList.value[0] ?? null;
+
+  if (!imageUrl && saleItem.saleItemImages?.length) {
+    imageUrl = saleItem.saleItemImages[0].url ?? null;
   }
 
   const itemPayload = {
-    itemId: item.value.id,
-    name: item.value.model ?? item.value.brandName ?? "Item",
-    price: Number(item.value.price ?? 0),
-    availableStock: item.value.quantity ?? 0,
+    itemId: saleItem.id,
+    name: saleItem.model ?? saleItem.brandName ?? "Item",
+    price: Number(saleItem.price ?? 0),
+    availableStock: saleItem.quantity ?? 0,
     image: imageUrl ?? "",
   };
-  const sellerPayload = {
-    sellerId:
-      item.value.sellerId ??
-      item.value.userId ??
-      item.value.shopId ??
-      item.value.ownerId ??
-      "unknown",
-    sellerNickname: item.value.sellerName ?? item.value.shopName ?? item.value.brandName ?? "Seller",
-  };
-  cart.addToCart(itemPayload, sellerPayload, Number(buyQty.value));
 
-  // show success alert
-  successMessage.value = "Added to cart successfully";
-  showAddSuccess.value = true;
-  setTimeout(() => {
-    showAddSuccess.value = false;
-  }, 2500);
+  const sellerPayload = {
+    sellerId,
+    sellerNickname:
+      saleItem.seller?.nickName ??
+      saleItem.seller?.fullName ??
+      saleItem.sellerName ??
+      saleItem.shopName ??
+      saleItem.brandName ??
+      "Seller",
+  };
+
+  cart.addToCart(itemPayload, sellerPayload, Number(qty));
+
+  console.log("🛒 Added to cart:", {
+    itemPayload,
+    sellerPayload,
+    cartItems: cart.items,
+  });
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    200,
+    "Add to cart successfully."
+  );
 }
 </script>
 
@@ -324,7 +358,7 @@ async function addItemToCart() {
         </div>
         <div class="btn-add-buy mt-10">
           <div
-            v-if="decoded.role === 'SELLER'"
+            v-if="decoded?.role === 'SELLER'"
             class="flex justify-between gap-4 space-y-5"
           >
             <button
@@ -348,7 +382,7 @@ async function addItemToCart() {
           </div>
           <button
             class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
-            @click="addItemToCart"
+            @click.stop="addItemToCart(item, 1)"
           >
             Add to Cart
           </button>
@@ -357,15 +391,6 @@ async function addItemToCart() {
     </div>
   </div>
   <Footer />
-
-  <AlertMessage
-    v-if="showAddSuccess"
-    :visible="showAddSuccess"
-    overImage
-    title="Added to cart"
-    :message="successMessage"
-    @toggleUploadError="showAddSuccess = false"
-  />
 </template>
 
 <style scoped></style>

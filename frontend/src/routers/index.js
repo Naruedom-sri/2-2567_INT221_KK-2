@@ -16,6 +16,8 @@ import Profile from "@/views/Profile.vue";
 import EditProfile from "@/views/EditProfile.vue";
 import Cart from "@/views/Cart.vue";
 import { decodeToken, isAuth } from "@/libs/jwtToken";
+import OrderUser from "@/views/OrderUser.vue";
+import OrderDetail from "@/views/OrderDetail.vue";
 const history = createWebHistory("/kk2/");
 
 const routes = [
@@ -124,6 +126,16 @@ const routes = [
     component: NotFoundPage,
   },
   {
+    path: "/your-orders",
+    name: "OrderUser",
+    component: OrderUser,
+  },
+   {
+    path: "/your-orders/:orderId",
+    name: "OrderDetail",
+    component: OrderDetail,
+  },
+  {
     path: "/:pathMatch(.*)*",
     redirect: { name: "NotFoundPage" },
   },
@@ -142,11 +154,13 @@ router.beforeEach((to, from, next) => {
   isAuth()
     .then((haveAccessToken) => {
       if (!haveAccessToken) {
+        localStorage.removeItem("accessToken");
         if (
           to.name === "Register" ||
           to.name === "VerifyEmail" ||
           to.name === "Home" ||
-          to.name === "SaleItemsGallery"
+          to.name === "SaleItemsGallery" ||
+            to.name === "SaleItemsDetail"
         ) {
           return next();
         }

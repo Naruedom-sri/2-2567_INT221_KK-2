@@ -33,7 +33,6 @@ const login = async () => {
 };
 
 onMounted(async () => {
-  console.log(statusStore.getStatus(), statusStore.getMessage());
   const accessToken = localStorage.getItem("accessToken");
   if (accessToken) {
     const decoded = decodeToken(accessToken);

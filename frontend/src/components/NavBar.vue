@@ -76,6 +76,9 @@ watch(
 <template>
   <div class="container-header text-white text-xs">
     <div class="flex justify-center items-center gap-7 h-12">
+      <div class="your-or ders flex justify-center w-28 h-full">
+         <button @click="router.push({name:'OrderUser'})" class="opacity-85 hover:opacity-100 cursor-pointer">My Order</button>
+      </div>
       <div class="logo w-56 flex justify-end">
         <img
           @click="router.push({ name: 'LandingPage' })"

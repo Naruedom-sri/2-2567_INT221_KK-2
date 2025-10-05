@@ -1,6 +1,6 @@
 package intregatedproject.backend.filters;
 
-import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.token.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

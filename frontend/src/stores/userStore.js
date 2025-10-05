@@ -41,6 +41,19 @@ export const useUserStore = defineStore("user", () => {
     bankAccountNumber.value = "";
   };
 
+  const getUser = () => {
+    return {
+      id: id.value,
+      role: role.value,
+      email: email.value,
+      nickname: nickname.value,
+      fullname: fullname.value,
+      mobileNumber: mobileNumber.value,
+      bankName: bankName.value,
+      bankAccountNumber: bankAccountNumber.value,
+    };
+  };
+
   return {
     id,
     role,
@@ -52,5 +65,6 @@ export const useUserStore = defineStore("user", () => {
     bankAccountNumber,
     setUser,
     clearUser,
+    getUser,
   };
 });
