@@ -15,10 +15,8 @@ import {
 } from "@/libs/saleItemApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
-import { useUserStore } from "@/stores/userStore";
 
 const cart = useCartStore();
-const userStore = useUserStore();
 const {
   params: { itemId },
 } = useRoute();
@@ -136,12 +134,6 @@ async function addItemToCart(saleItem, qty = 1) {
   };
 
   cart.addToCart(itemPayload, sellerPayload, Number(qty));
-
-  console.log("🛒 Added to cart:", {
-    itemPayload,
-    sellerPayload,
-    cartItems: cart.items,
-  });
 
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",

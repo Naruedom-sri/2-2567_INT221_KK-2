@@ -7,7 +7,7 @@ import Footer from "@/components/Footer.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import { placeOrder as placeOrderApi } from "@/libs/orderApi";
 import { decodeToken } from "@/libs/jwtToken";
-``
+
 const cart = useCartStore();
 const statusStore = useStatusStore();
 const loading = ref(false);
@@ -45,10 +45,9 @@ function onCancel() {
 const shippingAddress = ref("");
 const orderNote = ref("");
 
-
 const selectAll = ref(false);
-const selectedItems = ref(new Set()); 
-const selectedSellers = ref(new Set()); 
+const selectedItems = ref(new Set());
+const selectedSellers = ref(new Set());
 
 const itemKey = (sellerId, itemId) => `${sellerId}::${itemId}`;
 
@@ -124,7 +123,6 @@ const selectedCartItems = computed(() => {
   return items;
 });
 
-
 const selectedTotalItems = computed(() =>
   selectedCartItems.value.reduce((sum, i) => sum + i.quantity, 0)
 );
@@ -136,7 +134,9 @@ const selectedTotalPrice = computed(() =>
 watch(
   () => cart.items.length,
   () => {
-    const existingKeys = new Set(cart.items.map((it) => itemKey(it.sellerId, it.itemId)));
+    const existingKeys = new Set(
+      cart.items.map((it) => itemKey(it.sellerId, it.itemId))
+    );
     for (const k of Array.from(selectedItems.value)) {
       if (!existingKeys.has(k)) selectedItems.value.delete(k);
     }
@@ -150,65 +150,85 @@ watch(
 );
 
 async function placeOrder() {
-  if (!cart.items.length) {
+  if (!selectedItems.value.size) {
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "orders",
       "place",
       400,
-      "Your cart is empty."
+      "Please select at least one item to place the order."
     );
     return;
   }
 
   loading.value = true;
   try {
-    const token = accessToken || localStorage.getItem("accessToken");
     let buyerId = null;
-    if (token) {
-      const decoded = decodeToken(token);
+    if (accessToken) {
+      const decoded = decodeToken(accessToken);
       buyerId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
     }
-    const requestPayload = cart.groupedBySeller.map((seller) => {
-      const sellerIdNum = Number(seller.sellerId);
-      return {
-        buyerId,
-        sellerId: Number.isFinite(sellerIdNum) ? sellerIdNum : null,
-        orderDate: new Date().toISOString(),
-        paymentDate: null,
-        shippingAddress: shippingAddress.value || "",
-        orderNote: orderNote.value || "",
-        orderItems: seller.items.map((it) => ({
-          saleItemId: it.itemId,
-          quantity: it.quantity,
-          description: it.description || it.name || "",
-          price: it.price,
-        })),
-        orderStatus: 'COMPLETED',
-      };
-    });
 
-    console.log(requestPayload);
+    const selectedGrouped = cart.groupedBySeller
+      .map((seller) => {
+        const items = seller.items.filter((it) =>
+          selectedItems.value.has(`${seller.sellerId}::${it.itemId}`)
+        );
+        if (!items.length) return null;
+        return {
+          buyerId,
+          sellerId: Number(seller.sellerId),
+          orderDate: new Date().toISOString(),
+          paymentDate: null,
+          shippingAddress: shippingAddress.value || "",
+          orderNote: orderNote.value || "",
+          orderItems: items.map((it) => ({
+            saleItemId: it.itemId,
+            quantity: it.quantity,
+            description: it.description || it.name || "",
+            price: it.price,
+          })),
+          orderStatus: "COMPLETED",
+        };
+      })
+      .filter(Boolean);
 
-    const { status, data } = await placeOrderApi(BASE_API_DOMAIN, requestPayload, accessToken);
-    if (status === 201) {
-      cart.clearCart();
+    if (!selectedGrouped.length) {
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "orders",
         "place",
-        status,
+        400,
+        "No selected items to place order."
+      );
+      return;
+    }
+
+    const { status, data } = await placeOrderApi(
+      BASE_API_DOMAIN,
+      selectedGrouped,
+      accessToken
+    );
+
+    if (status === 201) {
+      cart.items = cart.items.filter(
+        (it) => !selectedItems.value.has(`${it.sellerId}::${it.itemId}`)
+      );
+      cart._save();
+      selectedItems.value.clear();
+      selectedSellers.value.clear();
+      selectAll.value = false;
+
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "orders",
+        "place",
+        201,
         "Order placed successfully."
       );
-      console.log("Orders created:", data);
     } else {
-      const errMsg =
-        data?.message ||
-        `Failed to place order (status ${status})` ||
-        JSON.stringify(data);
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "orders",
         "place",
         status,
-        errMsg
+        data?.message || `Failed to place order (status ${status})`
       );
     }
   } catch (err) {
@@ -223,6 +243,7 @@ async function placeOrder() {
     loading.value = false;
   }
 }
+
 </script>
 
 <template>
@@ -233,18 +254,26 @@ async function placeOrder() {
     >
       <div class="text-left space-y-4 col-span-2">
         <div class="flex items-center gap-3">
-          <img src="../assets/imgs/cart-shopping-solid-full.svg" class="w-10 h-10" />
+          <img
+            src="../assets/imgs/cart-shopping-solid-full.svg"
+            class="w-10 h-10"
+          />
           <p class="text-3xl font-semibold">Shopping Cart</p>
         </div>
-        
 
         <div v-if="!cart.items.length" class="text-lg">Your cart is empty.</div>
 
         <div class="itbms-select-all border rounded p-3 mb-3">
           <label class="flex items-center gap-2">
-            <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+            <input
+              type="checkbox"
+              v-model="selectAll"
+              @change="toggleSelectAll"
+            />
             <span>Select All</span>
-            <span class="ml-2 text-sm text-gray-400">({{ cart.totalItems }} items)</span>
+            <span class="ml-2 text-sm text-gray-400"
+              >({{ cart.totalItems }} items)</span
+            >
           </label>
         </div>
 
@@ -260,7 +289,10 @@ async function placeOrder() {
                 :checked="isSellerSelected(seller)"
                 @change="toggleSeller(seller)"
               />
-              <img src="../assets/imgs/store-solid-full.svg" class="w-7 inline" />
+              <img
+                src="../assets/imgs/store-solid-full.svg"
+                class="w-7 inline"
+              />
               <span>{{ seller.sellerNickname }}</span>
             </label>
             <!-- <div class="text-sm">Seller total: {{ seller.sellerTotal?.toFixed ? seller.sellerTotal.toFixed(2) : seller.sellerTotal }}</div> -->
@@ -284,7 +316,7 @@ async function placeOrder() {
                   class="w-20 h-20 object-cover rounded"
                 />
                 <div>
-                  <div class="font-medium">{{ it.name }}</div>
+                  <div class="font-medium"> {{ it.name }}</div>
                   <!-- <div class="text-sm">
                     Unit: {{ it.price.toFixed(2) }} | Stock:
                     {{ it.availableStock }}
@@ -358,7 +390,7 @@ async function placeOrder() {
             <button
               :disabled="!cart.items.length || loading"
               @click="placeOrder"
-              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 "
+              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5"
             >
               <span v-if="!loading">Place Order</span>
               <span v-else>Placing...</span>
@@ -378,6 +410,8 @@ async function placeOrder() {
       @confirm="onConfirmRemove"
       @cancel="onCancel"
     />
+
+
   </div>
 </template>
 
