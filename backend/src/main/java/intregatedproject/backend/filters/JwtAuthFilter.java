@@ -18,37 +18,6 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-//    @Autowired
-//    private JwtUtils jwtUtils;
-//
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain filterChain)
-//            throws ServletException, IOException {
-//        String header = request.getHeader("Authorization");
-//
-//        if (header != null && header.startsWith("Bearer ")) {
-//            String token = header.substring(7);
-//
-//            try {
-//                Map<String, Object> claims = jwtUtils.getJWTClaimsSet(token);
-//
-//                if (!jwtUtils.isExpired(claims)) {
-//                    String username = (String) claims.get("sub");
-//
-//                    UsernamePasswordAuthenticationToken auth =
-//                            new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
-//
-//                    SecurityContextHolder.getContext().setAuthentication(auth);
-//                }
-//            } catch (Exception e) {
-//                System.out.println("Invalid JWT: " + e.getMessage());
-//            }
-//        }
-//        filterChain.doFilter(request, response);
-//    }
-
     @Autowired
     private JwtUtils jwtUtils;
 

@@ -27,8 +27,6 @@ import jakarta.mail.MessagingException;
 
 @Service
 public class EmailService {
-    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
