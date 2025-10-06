@@ -13,8 +13,6 @@ import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
-import intregatedproject.backend.repositories.OrderRepository;
-import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.services.OrderService;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
@@ -46,9 +44,6 @@ public class UserController {
     private ModelMapper modelMapper;
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private OrderRepository orderRepository;
-
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,

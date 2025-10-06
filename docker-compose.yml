@@ -1,11 +1,14 @@
 services:
   fe:
     container_name: frontend_container
+    volumes:
+    - ./frontend/ssl/:/etc/certificate/
     build:
       context: ./frontend
       dockerfile: dockerfile
     ports:
       - "80:80"
+      - "443:443"
     environment:
       - NODE_ENV=production
     networks:
