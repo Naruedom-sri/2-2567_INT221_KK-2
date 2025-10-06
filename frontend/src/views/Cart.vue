@@ -7,6 +7,9 @@ import Footer from "@/components/Footer.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import { placeOrder as placeOrderApi } from "@/libs/orderApi";
 import { decodeToken } from "@/libs/jwtToken";
+import Notification from "@/components/Notification.vue";
+import router from "@/routers";
+import noImage from "../assets/imgs/no-image.png";
 
 const cart = useCartStore();
 const statusStore = useStatusStore();
@@ -216,6 +219,7 @@ async function placeOrder() {
       selectedItems.value.clear();
       selectedSellers.value.clear();
       selectAll.value = false;
+      router.push({ name: "OrderUser" });
 
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "orders",
@@ -244,7 +248,6 @@ async function placeOrder() {
   }
 }
 
-
 function formatPrice(price) {
   return Number(price).toLocaleString('th-TH', {
     minimumFractionDigits: 2,
@@ -253,8 +256,9 @@ function formatPrice(price) {
 </script>
 
 <template>
+  <NavBar />
   <div>
-    <NavBar />
+    <Notification v-if="statusStore.getStatus() !== null"/>
     <div
       class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30"
     >
@@ -317,8 +321,7 @@ function formatPrice(price) {
                   @change="toggleItem(seller, it)"
                 />
                 <img
-                  :src="it.image"
-                  alt="item image"
+                  :src="it.image ? it.image : noImage"
                   class="w-20 h-20 object-cover rounded"
                 />
                 <div>

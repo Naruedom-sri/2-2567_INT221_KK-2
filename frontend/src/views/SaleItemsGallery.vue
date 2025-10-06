@@ -475,13 +475,11 @@ async function addItemToCart(saleItem, qty = 1) {
   };
 
   cart.addToCart(itemPayload, sellerPayload, Number(qty));
-
-  console.log("Added to cart:", {
+console.log("Added to cart:", {
     itemPayload,
     sellerPayload,
     cartItems: cart.items,
   });
-
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",
     "add",

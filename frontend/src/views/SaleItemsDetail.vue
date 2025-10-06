@@ -144,6 +144,7 @@ async function addItemToCart(saleItem, qty = 1) {
 
   cart.addToCart(itemPayload, sellerPayload, Number(qty));
 
+   
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",
     "add",
