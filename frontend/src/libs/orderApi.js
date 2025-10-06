@@ -1,4 +1,21 @@
 import { useStatusStore } from "@/stores/statusStore";
+
+async function placeOrder(url, requestPayload, accessToken) {
+  const res = await fetch(`${url}/v2/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(
+      Array.isArray(requestPayload) ? requestPayload : [requestPayload]
+    ),
+  });
+
+  const data = await res.json().catch(() => null);
+  return { status: res.status, data };
+}
+
 const getOrderById = async (url, id, accessToken) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/orders/${id}`, {
@@ -28,4 +45,4 @@ const getOrderById = async (url, id, accessToken) => {
   }
   return response.json();
 };
-export { getOrderById };
+export { getOrderById, placeOrder };

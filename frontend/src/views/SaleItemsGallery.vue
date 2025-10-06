@@ -9,9 +9,15 @@ import {
   getAllSaleItemV2,
   getImageOfSaleItem,
   getSaleItemById,
+  getFirstImageOfSaleItem,
 } from "@/libs/saleItemApi";
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
+import { useCartStore } from "@/stores/cartStore";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const cart = useCartStore();
 const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
@@ -400,6 +406,89 @@ onMounted(() => {
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
+
+async function addItemToCart(saleItem, qty = 1) {
+  if (!saleItem) return;
+
+  const token = localStorage.getItem("accessToken");
+  let currentUserId = null;
+
+  if(accessToken === null) {
+    router.push({ name: "Login" });
+    return;
+  }
+
+  if (token) {
+    const decoded = decodeToken(token);
+    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+  }
+
+  const sellerId =
+    saleItem.seller?.id ??
+    saleItem.sellerId ??
+    saleItem.userId ??
+    saleItem.shopId ??
+    saleItem.ownerId ??
+    "unknown";
+
+  if (sellerId === currentUserId) {
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    400,
+    "You cannot add your own product to the cart."
+  );
+  return;
+}
+
+  let imageUrl = null;
+  try {
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
+  } catch (e) {
+    console.warn("Failed to fetch image:", e);
+  }
+
+  if (!imageUrl && saleItem.saleItemImages?.length) {
+    imageUrl = saleItem.saleItemImages[0].url ?? null;
+  }
+
+  const itemPayload = {
+    itemId: saleItem.id,
+    brand: saleItem.brandName ?? "Brand",
+    color: saleItem.color ?? null,
+    storageGb: saleItem.storageGb ?? null,
+    name: saleItem.model ?? saleItem.brandName ?? "Item",
+    price: Number(saleItem.price ?? 0),
+    availableStock: saleItem.quantity ?? 0,
+    image: imageUrl ?? "",
+  };
+
+  const sellerPayload = {
+    sellerId,
+    sellerNickname:
+      saleItem.seller?.nickName ??
+      saleItem.seller?.fullName ??
+      saleItem.sellerName ??
+      saleItem.shopName ??
+      saleItem.brandName ??
+      "Seller",
+  };
+
+  cart.addToCart(itemPayload, sellerPayload, Number(qty));
+
+  console.log("Added to cart:", {
+    itemPayload,
+    sellerPayload,
+    cartItems: cart.items,
+  });
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    200,
+    "Add to cart successfully."
+  );
+}
 </script>
 
 <template>
@@ -628,32 +717,31 @@ onUnmounted(() => {
       >
         no sale item
       </h1>
-      <RouterLink
-        @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
-        @mouseover="showButtonItem = index"
-        @mouseleave="showButtonItem = null"
+      <div
         v-for="(item, index) in items"
         v-show="items.length !== 0"
-        :to="{
-          name: 'SaleItemsDetail',
-          params: { itemId: item.id },
-        }"
         :key="index"
         class="itbms-row animation-slide-up w-full rounded-2xl shadow-white bg-[rgba(22,22,23,255)] hover:shadow-sm duration-300"
-        ><div
-          class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
+        @mouseover="showButtonItem = index"
+        @mouseleave="showButtonItem = null"
+      >
+        <RouterLink
+          @click="statusStore.clearEntityAndMethodAndStatusAndMessage()"
+          :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
+          class="block"
         >
-          <img
-            v-if="imageUrlList[index]"
-            :src="imageUrlList[index]"
-            class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
-          />
-          <img
-            v-else
-            src="../assets/imgs/no-image.png"
-            class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
-          />
-        </div>
+          <div class="h-56 bg-white rounded-t-2xl flex justify-center items-center">
+            <img
+              v-if="imageUrlList[index]"
+              :src="imageUrlList[index]"
+              class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
+            />
+            <img
+              v-else
+              src="../assets/imgs/no-image.png"
+              class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+            />
+          </div>
 
         <div
           class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
@@ -672,34 +760,40 @@ onUnmounted(() => {
               >
             </p>
 
-            <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
-              {{
-                item.storageGb === null || item.storageGb === ""
-                  ? "-"
-                  : item.storageGb
-              }}
-              <span
-                v-show="item.storageGb !== null && item.storageGb !== ''"
-                class="itbms-storageGb-unit"
-              >
-                GB</span
-              >
+              <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
+                {{
+                  item.storageGb === null || item.storageGb === ""
+                    ? "-"
+                    : item.storageGb
+                }}
+                <span
+                  v-show="item.storageGb !== null && item.storageGb !== ''"
+                  class="itbms-storageGb-unit"
+                >
+                  GB</span
+                >
+              </p>
+            </div>
+
+            <p class="itbms-price text-white/80">
+              From ฿<span class="itbms-price-unit mx-0.5">{{
+                item.price.toLocaleString()
+              }}</span>
             </p>
           </div>
+        </RouterLink>
 
-          <p class="itbms-price text-white/80">
-            From ฿<span class="itbms-price-unit mx-0.5">{{
-              item.price.toLocaleString()
-            }}</span>
-          </p>
+        <div class="flex justify-center">
           <button
             class="itbms-add-to-cart-button px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
+            type="button"
+            @click.stop="addItemToCart(item, 1)"
           >
             Add to Cart
           </button>
         </div>
-      </RouterLink>
+      </div>
       <div
         v-show="items.length !== 0 && totalPage > 1"
         class="nav-page mt-2 gap-1 flex items-center justify-center col-span-5 text-white"

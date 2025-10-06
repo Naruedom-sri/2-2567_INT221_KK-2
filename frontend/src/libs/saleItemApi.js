@@ -62,6 +62,24 @@ const getImageOfSaleItem = async (url, itemId, imgViewOrder) => {
   return urlImg;
 };
 
+const getFirstImageOfSaleItem = async (url, itemId) => {
+  try {
+    const data = await getSaleItemById(url, itemId);
+    if (
+      data &&
+      Array.isArray(data.saleItemImages) &&
+      data.saleItemImages.length
+    ) {
+      const firstOrder = data.saleItemImages[0].imageViewOrder ?? 1;
+      const imgUrl = await getImageOfSaleItem(url, itemId, firstOrder);
+      return imgUrl;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 const deleteSaleItemById = async (url, id) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/sale-items/${id}`, {
@@ -188,4 +206,5 @@ export {
   createSaleItem,
   updateSaleItem,
   createSaleItemSeller,
+  getFirstImageOfSaleItem,
 };
