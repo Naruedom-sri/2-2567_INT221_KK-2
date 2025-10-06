@@ -1,4 +1,5 @@
 package intregatedproject.backend.configs;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,7 +13,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173","http://ip24kk2.sit.kmutt.ac.th")
+                        .allowedOrigins("http://localhost:5173,http://localhost:8080,https://intproj24.sit.kmutt.ac.th,https://ip24kk2.sit.kmutt.ac.th,http://ip24kk2.sit.kmutt.ac.th:8080,http://intproj24.sit.kmutt.ac.th:8080")
                         .allowedMethods("*")
                         .allowCredentials(true);
             }
