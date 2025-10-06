@@ -1,6 +1,8 @@
 services:
   fe:
     container_name: frontend_container
+    volumes:
+    - ./frontend/ssl/:/etc/certificate/
     build:
       context: ./frontend
       dockerfile: dockerfile
