@@ -94,12 +94,18 @@ export const useCartStore = defineStore("cart", {
         existing.price = Number(item.price ?? existing.price ?? 0);
         existing.name = item.name ?? item.title ?? existing.name;
         existing.availableStock = avail;
+        existing.brand = item.brand ?? existing.brand ?? "Brand";
+        existing.color = item.color ?? existing.color ?? null;
+        existing.storageGb = item.storageGb ?? existing.storageGb ?? null;
       } else {
         this.items.push({
           sellerId,
           sellerNickname,
           itemId: item.itemId,
           name: item.name ?? item.title ?? "",
+          brand: item.brand ?? "Brand",
+          color: item.color ?? null,
+          storageGb: item.storageGb ?? null,
           price: Number(item.price ?? 0),
           quantity: Math.min(qty, avail),
           availableStock: avail,

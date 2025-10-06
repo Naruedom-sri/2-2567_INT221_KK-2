@@ -184,7 +184,7 @@ async function placeOrder() {
           orderItems: items.map((it) => ({
             saleItemId: it.itemId,
             quantity: it.quantity,
-            description: it.description || it.name || "",
+            description: it.brandName || it.name || "",
             price: it.price,
           })),
           orderStatus: "COMPLETED",
@@ -244,6 +244,12 @@ async function placeOrder() {
   }
 }
 
+
+function formatPrice(price) {
+  return Number(price).toLocaleString('th-TH', {
+    minimumFractionDigits: 2,
+  });
+}
 </script>
 
 <template>
@@ -316,23 +322,24 @@ async function placeOrder() {
                   class="w-20 h-20 object-cover rounded"
                 />
                 <div>
-                  <div class="font-medium"> {{ it.name }}</div>
-                  <!-- <div class="text-sm">
-                    Unit: {{ it.price.toFixed(2) }} | Stock:
+                  <div class="font-light">
+                    <span class="font-semibold">{{ it.brand }}</span> {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
+                  </div>
+                  <div class="text-sm"> Stock:
                     {{ it.availableStock }}
-                  </div> -->
+                  </div>
                 </div>
               </div>
               <div class="flex items-center gap-2">
                 <button
-                  class="px-2 bg-red-600 rounded"
+                  class="px-2 bg-gray-600 rounded"
                   @click="onDecrement(it)"
                 >
                   -
                 </button>
                 <div class="px-3">{{ it.quantity }}</div>
                 <button
-                  class="px-2 bg-green-600 rounded"
+                  class="px-2 bg-gray-500 rounded"
                   @click="onIncrement(it)"
                 >
                   +
@@ -340,7 +347,7 @@ async function placeOrder() {
                 <div class="w-32 text-right text-sm">
                   <p>
                     price:
-                    <span>{{ (it.price * it.quantity).toFixed(2) }}</span>
+                    <span>{{ formatPrice(it.price * it.quantity) }}</span>
                   </p>
                 </div>
               </div>
@@ -374,23 +381,23 @@ async function placeOrder() {
         </div>
 
         <div class="mt-auto">
-          <div>
+          <div class="justify-between flex">
             <p class="text-sm">
               Total Items:
-              <span>{{ selectedTotalItems }}</span>
             </p>
+            <p><span>{{ selectedTotalItems }}</span></p>
           </div>
-          <div>
+          <div class="justify-between flex">
             <p class="text-sm">
               Total Price:
-              <span>{{ selectedTotalPrice.toFixed(2) }}</span>
             </p>
+            <p><span>Baht {{ formatPrice(selectedTotalPrice) }}</span></p>
           </div>
           <div>
             <button
-              :disabled="!cart.items.length || loading"
+              :disabled="!cart.items.length || !shippingAddress || loading"
               @click="placeOrder"
-              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5"
+              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 disabled:cursor-not-allowed"
             >
               <span v-if="!loading">Place Order</span>
               <span v-else>Placing...</span>

@@ -14,7 +14,9 @@ import {
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const cart = useCartStore();
 const statusStore = useStatusStore();
 const accessToken = localStorage.getItem("accessToken");
@@ -410,6 +412,12 @@ async function addItemToCart(saleItem, qty = 1) {
 
   const token = localStorage.getItem("accessToken");
   let currentUserId = null;
+
+  if(accessToken === null) {
+    router.push({ name: "Login" });
+    return;
+  }
+
   if (token) {
     const decoded = decodeToken(token);
     currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
@@ -446,6 +454,9 @@ async function addItemToCart(saleItem, qty = 1) {
 
   const itemPayload = {
     itemId: saleItem.id,
+    brand: saleItem.brandName ?? "Brand",
+    color: saleItem.color ?? null,
+    storageGb: saleItem.storageGb ?? null,
     name: saleItem.model ?? saleItem.brandName ?? "Item",
     price: Number(saleItem.price ?? 0),
     availableStock: saleItem.quantity ?? 0,
@@ -465,11 +476,11 @@ async function addItemToCart(saleItem, qty = 1) {
 
   cart.addToCart(itemPayload, sellerPayload, Number(qty));
 
-  // console.log("🛒 Added to cart:", {
-  //   itemPayload,
-  //   sellerPayload,
-  //   cartItems: cart.items,
-  // });
+  console.log("Added to cart:", {
+    itemPayload,
+    sellerPayload,
+    cartItems: cart.items,
+  });
 
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",

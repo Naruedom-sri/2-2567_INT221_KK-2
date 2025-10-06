@@ -80,6 +80,12 @@ async function addItemToCart(saleItem, qty = 1) {
 
   const token = localStorage.getItem("accessToken");
   let currentUserId = null;
+
+  if(accessToken === null) {
+    router.push({ name: "Login" });
+    return;
+  }
+
   if (token) {
     const decoded = decodeToken(token);
     currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
@@ -116,6 +122,9 @@ async function addItemToCart(saleItem, qty = 1) {
 
   const itemPayload = {
     itemId: saleItem.id,
+    brand: saleItem.brandName ?? "Brand",
+    color: saleItem.color ?? null,
+    storageGb: saleItem.storageGb ?? null,
     name: saleItem.model ?? saleItem.brandName ?? "Item",
     price: Number(saleItem.price ?? 0),
     availableStock: saleItem.quantity ?? 0,

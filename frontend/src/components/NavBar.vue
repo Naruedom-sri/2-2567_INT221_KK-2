@@ -136,7 +136,6 @@ watch(
               alt="cart"
               class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
             />
-            <!-- improved badge -->
             <span
               :class="[
                 'itbms-badge flex items-center justify-center text-xs text-white',
