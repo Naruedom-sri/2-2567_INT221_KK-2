@@ -397,7 +397,7 @@ onMounted(() => {
           </div>
           <div>
             <button
-              :disabled="!cart.items.length || !shippingAddress || loading"
+              :disabled="!cart.items.length || !shippingAddress || loading || selectedCartItems.length === 0"
               @click="placeOrder"
               class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 disabled:cursor-not-allowed"
             >
