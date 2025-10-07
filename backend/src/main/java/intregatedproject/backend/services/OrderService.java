@@ -2,6 +2,7 @@ package intregatedproject.backend.services;
 
 import intregatedproject.backend.dtos.orders.OrderItemDto;
 import intregatedproject.backend.dtos.orders.RequestOrderDto;
+import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.*;
 import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityException;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
@@ -98,16 +99,26 @@ public class OrderService {
         }
         Order order = new Order();
         covertOrderDtoToEntity(requestOrderDto, order, buyer, seller);
-        orderRepository.save(order);
         var savedOrder = orderRepository.save(order);
         requestOrderDto.getOrderItems().forEach(item -> {
             OrderItem orderItem = new OrderItem();
+            RequestSaleItemDto saleItemDto = new RequestSaleItemDto();
             SaleItem saleItem = saleItemService.getSaleItemById(Math.toIntExact(item.getSaleItemId()));
             if (saleItem.getQuantity() < item.getQuantity()) {
                 throw new InsufficientQuantityException("Insufficient quantity.");
             }
             covertOrderItemDtoToEntity(item, orderItem, order, saleItem);
-            orderItemRepository.save(orderItem);// but save 1
+            orderItemRepository.save(orderItem);
+            saleItemDto.setModel(saleItem.getModel());
+            saleItemDto.setBrandId(saleItem.getBrand().getId());
+            saleItemDto.setPrice(saleItem.getPrice());
+            saleItemDto.setColor(saleItem.getColor());
+            saleItemDto.setQuantity(saleItem.getQuantity() - item.getQuantity());
+            saleItemDto.setDescription(saleItem.getDescription());
+            saleItemDto.setScreenSizeInch(saleItem.getScreenSizeInch());
+            saleItemDto.setStorageGb(saleItem.getStorageGb());
+            saleItemDto.setRamGb(saleItem.getRamGb());
+            saleItemService.updateSaleItem(saleItem.getId(),saleItemDto);
             savedOrder.getOrderItems().add(orderItem);
         });
         entityManager.refresh(savedOrder);

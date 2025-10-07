@@ -30,7 +30,7 @@ const handleSearchClick = (isClear) => {
     sessionStorage.setItem("searchContent", searchSaleItem.value);
     sessionStorage.setItem("indexPage", String(0));
     sessionStorage.setItem("tempIndexPage", String(0));
-    router.push({ name: "SaleItemsGallery" });
+    router.push({ name: "SaleItemsGallery" }).then(() => router.go(0));
   }
 };
 
@@ -43,7 +43,9 @@ const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     localStorage.removeItem("accessToken");
-    router.push({ name: "SaleItemsGallery" });
+    localStorage.removeItem("cart_items_v1");
+    router.replace({ name: "SaleItemsGallery" });
+    router.go(0);
   } catch (error) {
     console.log(error);
   }
@@ -137,7 +139,10 @@ watch(
 
         <div class="flex items-center relative">
           <img
-            @click="!cart.items.length ? null : router.push({ name: 'Cart' })"
+            @click="
+              !cart.items.length ? null : router.push({ name: 'Cart' }),
+                statusStore.clearEntityAndMethodAndStatusAndMessage()
+            "
             src="/src/assets/imgs/cart-symbol.png"
             alt="cart"
             class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"

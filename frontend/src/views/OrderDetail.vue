@@ -29,7 +29,7 @@ onMounted(() => getOrder());
 <template>
   <NavBar />
   <div class="order-container mx-35 my-10 text-black text-sm">
-    <div class="flex gap-2 text-white text-2xl font-semibold">
+    <div class="flex gap-2 my-2 text-white text-2xl font-semibold">
       <button
         @click="router.push({ name: 'OrderUser' })"
         class="hover:text-blue-500 duration-200 cursor-pointer"
@@ -37,9 +37,15 @@ onMounted(() => getOrder());
         Your Orders
       </button>
       <p>-</p>
-      <button class="py-0.5 px-2 rounded-2xl bg-gray-200 text-black">
+      <button
+        v-if="order !== null"
+        class="py-0.5 px-2 rounded-2xl bg-gray-200 text-black"
+      >
         {{ order?.seller.nickName }},
         {{ new Date(order?.orderDate).toLocaleString() }}
+      </button>
+      <button v-else class="py-0.5 px-2 rounded-2xl bg-gray-200 text-black">
+        No Order
       </button>
     </div>
 
@@ -99,6 +105,9 @@ onMounted(() => getOrder());
             </p>
             <p class="itbms-item-quantity w-52 text-center">
               Quantity: <span class="text-white/80">{{ item.quantity }}</span>
+            </p>
+            <p>
+              Unit Price: <span class="text-white/80">{{ item.price }}</span>
             </p>
             <p class="itbms-item-total-price w-52 text-center">
               Price:

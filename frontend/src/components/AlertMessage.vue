@@ -2,14 +2,15 @@
 defineProps({
   haveSaleItem: { type: Boolean, default: false },
   overImage: { type: Boolean, default: false },
-  visible: { type: Boolean, default: false },
+  isSelectedItem: { type: Boolean, default: false },
   title: { type: String },
   message: { type: String },
 });
 
-const emit = defineEmits(["confirm", "cancel", "toggleUploadError"]);
+const emit = defineEmits(["confirm", "cancel", "toggleShowModal"]);
 const confirm = () => emit("confirm");
 const cancel = () => emit("cancel");
+const toggleShowModal = () => emit("toggleShowModal");
 </script>
 
 <template>
@@ -24,9 +25,11 @@ const cancel = () => emit("cancel");
       />
       <h2 class="font-bold text-black mb-4 text-xl">{{ title }}</h2>
       <p class="itbms-message mb-6 text-gray-700 font-medium">{{ message }}</p>
-      <div v-if="!overImage" class="flex flex-col gap-4">
+      <div
+        v-if="!overImage && isSelectedItem && !haveSaleItem"
+        class="flex flex-col gap-4"
+      >
         <button
-          v-if="!haveSaleItem"
           class="itbms-confirm-button bg-red-500 text-white px-4 py-2 rounded hover:cursor-pointer hover:bg-red-500/80"
           @click="confirm"
         >
@@ -41,8 +44,8 @@ const cancel = () => emit("cancel");
       </div>
       <div v-else>
         <button
-          @click="$emit('toggleUploadError')"
-          class="itbms-ok-button bg-blue-500 px-4 py-2 rounded hover:cursor-pointer hover:bg-[#0d47a1] duration-200"
+          @click="toggleShowModal"
+          class="itbms-ok-button bg-blue-500 text-white px-4 py-2 rounded hover:cursor-pointer hover:bg-blue-600 duration-200"
         >
           Ok
         </button>
