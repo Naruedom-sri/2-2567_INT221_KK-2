@@ -44,6 +44,7 @@ const logout = async () => {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("cart_items_v1");
+    localStorage.removeItem("shippingAddress")
     router.replace({ name: "SaleItemsGallery" });
     router.go(0);
   } catch (error) {

@@ -384,7 +384,7 @@ async function addItemToCart(saleItem, qty = 1) {
           </div>
           <button
             class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
-            @click.stop="addItemToCart(item, 1)"
+            @click.stop="addItemToCart(item, buyQty)"
           >
             Add to Cart
           </button>

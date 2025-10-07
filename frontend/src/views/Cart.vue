@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useCartStore } from "@/stores/cartStore";
 import { useStatusStore } from "@/stores/statusStore";
 import NavBar from "@/components/NavBar.vue";
@@ -213,6 +213,7 @@ async function placeOrder() {
       selectedItems.value.clear();
       selectedSellers.value.clear();
       selectAll.value = false;
+      localStorage.setItem("shippingAddress", shippingAddress.value);
       router.push({ name: "OrderUser" });
 
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -247,6 +248,10 @@ function formatPrice(price) {
     minimumFractionDigits: 2,
   });
 }
+onMounted(() => {
+  const savedAddress = localStorage.getItem("shippingAddress");
+  if (savedAddress) shippingAddress.value = savedAddress;
+});
 </script>
 
 <template>
