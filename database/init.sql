@@ -110,7 +110,6 @@ INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (20, 'Nothing', 'United Kingdom', 'https://nothing.tech', 1);
 
 INSERT INTO users (role, nickname, email, password, status, fullName) VALUES
-('SELLER','yorch','itmbkk2@gmail.com','yorch123','ACTIVE','Noppawut Phomchana'),
 ('BUYER', 'Somchai', 'itbkk.somchai@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somchai Jaidee'),
 ('BUYER', 'Somkiat', 'itbkk.somkiat@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somkiat Luckchart'),
 ('SELLER', 'Somsuan', 'itbkk.somsuan@ad.sit.kmutt.ac.th', 'itProj24*SOM','ACTIVE', 'Somsuan Hundee'),
