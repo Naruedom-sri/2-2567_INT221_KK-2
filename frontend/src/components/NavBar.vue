@@ -43,7 +43,7 @@ const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     localStorage.removeItem("accessToken");
-    router.push({ name: "Login" });
+    router.push({ name: "SaleItemsGallery" });
   } catch (error) {
     console.log(error);
   }
