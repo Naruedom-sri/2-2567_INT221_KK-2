@@ -2,9 +2,10 @@
 import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
 import { getAllOrder } from "@/libs/userApi";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
 import { useRouter } from "vue-router";
+import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
@@ -24,9 +25,18 @@ const isLastPage = ref();
 const isFirstPage = ref();
 const haveStatus = ref("completed");
 const totalPage = ref(0);
+const imageUrlCompletedList = ref([]);
+const imageUrlCanceledList = ref([]);
 
 const getAllOrderUser = async () => {
   try {
+    orderCompletedList.value = [];
+    orderCanceledList.value = [];
+    totalPriceCompletedList.value = [];
+    totalPriceCanceledList.value = [];
+    imageUrlCanceledList.value = [];
+    imageUrlCompletedList.value = [];
+
     params.delete("page");
     params.delete("size");
     params.delete("sortField");
@@ -72,11 +82,35 @@ const getAllOrderUser = async () => {
         orderCanceledList.value.push(order);
         totalPriceCanceledList.value.push(totalPrice);
       }
+      console.log("order :", order.orderItems);
+      console.log(imageUrlCompletedList.value)
+      await getImageOfAllItem(order.orderStatus, order.orderItems);
     }
   } catch (e) {
     console.log(e);
   }
 };
+
+const getImageOfAllItem = async (status, orderItems) => {
+  for (const item of orderItems) {
+    try {
+      const data = await getSaleItemById(`${BASE_API_DOMAIN}`, item.saleItemId);
+      if (data.saleItemImages.length !== 0) {
+        const imgUrl = await getImageOfSaleItem(
+          `${BASE_API_DOMAIN}`,
+          item.saleItemId,
+          1
+        );
+        if (status === "COMPLETED") imageUrlCompletedList.value.push(imgUrl);
+        else imageUrlCanceledList.value.push(imgUrl);
+      }
+    } catch (error) {
+      if (status === "COMPLETED") imageUrlCompletedList.value.push(null);
+      else imageUrlCanceledList.value.push(null);
+    }
+  }
+};
+
 const clearSort = () => {
   isSort.value.sortFiled = "id";
   isSort.value.sortDirection = "none";
@@ -195,6 +229,10 @@ onMounted(() => {
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
   getAllOrderUser();
+});
+onUnmounted(() => {
+  imageUrlCompletedList.value.forEach((url) => URL.revokeObjectURL(url));
+  imageUrlCanceledList.value.forEach((url) => URL.revokeObjectURL(url));
 });
 </script>
 
@@ -326,7 +364,7 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <div class="completed-cancel space-x-2 text-white">
+    <div class="completed-cancel space-x-2 my-4 text-white">
       <button
         @click="haveStatus = 'completed'"
         class="py-1 px-2"
@@ -361,76 +399,105 @@ onMounted(() => {
         router.push({ name: 'OrderDetail', params: { orderId: order.id } })
       "
     >
-      <div class="order-title flex justify-between">
-        <h1 class="w-32 font-medium text-center">Seller</h1>
-        <h1 class="w-32 font-medium text-center">Order No</h1>
-        <h1 class="w-32 font-medium text-center">Order Date</h1>
-        <h1 class="w-32 font-medium text-center">Payment Date</h1>
-        <h1 class="w-32 font-medium text-center">Total</h1>
-        <h1 class="w-32 font-medium text-center">Status</h1>
+      <div
+        v-if="
+          (haveStatus === 'completed' && orderCompletedList.length === 0) ||
+          (haveStatus === 'canceled' && orderCanceledList.length === 0)
+        "
+        class="itmbs-row pt-10 text-white text-5xl text-center border-t"
+      >
+        no order
       </div>
-      <div class="order-detail my-3 flex justify-between">
-        <p class="itbms-nickname w-32 text-center">
-          {{ order.seller.nickName }}
-        </p>
-        <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
-        <p class="itbms-order-date w-32 text-center">
-          {{ new Date(order.orderDate).toLocaleDateString() }}
-        </p>
-        <p class="itbms-payment-date w-32 text-center">
-          {{ new Date(order.paymentDate).toLocaleDateString() }}
-        </p>
-        <p class="itbms-total-order-price w-32 text-center">
-          {{
-            haveStatus === "completed"
-              ? totalPriceCompletedList.at(index).toLocaleString()
-              : totalPriceCanceledList.at(index).toLocaleString()
-          }}
-        </p>
-        <p class="itbms-order-status w-32 text-center">
-          {{ order.orderStatus }}
-        </p>
-      </div>
-      <div class="ship-note-order">
-        <div class="ship-detail flex gap-1">
-          <h1 class="font-medium">Shipped To:</h1>
-          <p class="itbms-shipping-address">{{ order.shippingAddress }}</p>
+      <div v-else>
+        <div class="order-title flex justify-between">
+          <h1 class="w-32 font-medium text-center">Seller</h1>
+          <h1 class="w-32 font-medium text-center">Order No</h1>
+          <h1 class="w-32 font-medium text-center">Order Date</h1>
+          <h1 class="w-32 font-medium text-center">Payment Date</h1>
+          <h1 class="w-32 font-medium text-center">Total</h1>
+          <h1 class="w-32 font-medium text-center">Status</h1>
         </div>
-        <div class="note-detail my-3 flex gap-1">
-          <h1 class="font-medium">Note:</h1>
-          <p class="Itbms-order-note">{{ order.orderNote }}</p>
+        <div class="order-detail my-3 flex justify-between">
+          <p class="itbms-nickname w-32 text-center">
+            {{ order.seller.nickName }}
+          </p>
+          <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
+          <p class="itbms-order-date w-32 text-center">
+            {{ new Date(order.orderDate).toLocaleDateString() }}
+          </p>
+          <p class="itbms-payment-date w-32 text-center">
+            {{ new Date(order.paymentDate).toLocaleDateString() }}
+          </p>
+          <p class="itbms-total-order-price w-32 text-center">
+            {{
+              haveStatus === "completed"
+                ? totalPriceCompletedList.at(index).toLocaleString()
+                : totalPriceCanceledList.at(index).toLocaleString()
+            }}
+          </p>
+          <p class="itbms-order-status w-32 text-center">
+            {{ order.orderStatus }}
+          </p>
         </div>
-      </div>
-      <div class="item-row-container space-y-2 text-white">
-        <div
-          v-for="(item, index) in order.orderItems"
-          :key="index"
-          class="itbms-item-row flex items-center gap-4 p-4 rounded bg-[rgba(22,22,23,255)]"
-        >
-          <div class="item-row-img w-32">
-            <img
-              src="../assets/imgs/no-image.png"
-              alt="img"
-              class="w-full object-cover"
-            />
+        <div class="ship-note-order">
+          <div class="ship-detail flex gap-1">
+            <h1 class="font-medium">Shipped To:</h1>
+            <p class="itbms-shipping-address">{{ order.shippingAddress }}</p>
           </div>
-          <div class="item-row-detail w-full flex justify-between">
-            <p class="itbms-item-description w-52 text-center">
-              {{ item.description }}
-            </p>
-            <p class="itbms-item-quantity w-52 text-center">
-              Quantity: <span class="text-white/80">{{ item.quantity }}</span>
-            </p>
-            <p class="itbms-item-total-price w-52 text-center">
-              Price:
-              <span class="text-white/80">{{
-                (item.quantity * item.price).toLocaleString()
-              }}</span>
-            </p>
+          <div class="note-detail my-3 flex gap-1">
+            <h1 class="font-medium">Note:</h1>
+            <p class="Itbms-order-note">{{ order.orderNote }}</p>
+          </div>
+        </div>
+        <div class="item-row-container space-y-2 text-white">
+          <div
+            v-for="(item, index) in order.orderItems"
+            :key="index"
+            class="itbms-item-row flex items-center gap-4 p-4 rounded bg-[rgba(22,22,23,255)]"
+          >
+            <div v-if="haveStatus === 'completed'" class="item-row-img w-32">
+              <img
+                v-if="imageUrlCompletedList[index]"
+                :src="imageUrlCompletedList[index]"
+                class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
+              />
+              <img
+                v-else
+                src="../assets/imgs/no-image.png"
+                class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+              />
+            </div>
+            <div v-else class="item-row-img w-32">
+              <img
+                v-if="imageUrlCanceledList[index]"
+                :src="imageUrlCanceledList[index]"
+                class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
+              />
+              <img
+                v-else
+                src="../assets/imgs/no-image.png"
+                class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
+              />
+            </div>
+            <div class="item-row-detail w-full flex justify-between">
+              <p class="itbms-item-description w-52 text-center">
+                {{ item.description }}
+              </p>
+              <p class="itbms-item-quantity w-52 text-center">
+                Quantity: <span class="text-white/80">{{ item.quantity }}</span>
+              </p>
+              <p class="itbms-item-total-price w-52 text-center">
+                Price:
+                <span class="text-white/80">{{
+                  (item.quantity * item.price).toLocaleString()
+                }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
     <h1 v-else class="itmbs-row pt-10 text-white text-5xl text-center border-t">
       no order
     </h1>

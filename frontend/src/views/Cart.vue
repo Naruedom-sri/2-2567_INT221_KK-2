@@ -7,7 +7,6 @@ import Footer from "@/components/Footer.vue";
 import AlertMessage from "@/components/AlertMessage.vue";
 import { placeOrder as placeOrderApi } from "@/libs/orderApi";
 import { decodeToken } from "@/libs/jwtToken";
-import Notification from "@/components/Notification.vue";
 import router from "@/routers";
 import noImage from "../assets/imgs/no-image.png";
 
@@ -17,6 +16,7 @@ const loading = ref(false);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const accessToken = localStorage.getItem("accessToken");
 const showConfirmModal = ref(false);
+const isSelectedItem = ref(true);
 const confirmTarget = ref(null);
 
 function onIncrement(item) {
@@ -154,13 +154,7 @@ watch(
 
 async function placeOrder() {
   if (!selectedItems.value.size) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "orders",
-      "place",
-      400,
-      "Please select at least one item to place the order."
-    );
-    return;
+    isSelectedItem.value = !isSelectedItem;
   }
 
   loading.value = true;
@@ -249,7 +243,7 @@ async function placeOrder() {
 }
 
 function formatPrice(price) {
-  return Number(price).toLocaleString('th-TH', {
+  return Number(price).toLocaleString("th-TH", {
     minimumFractionDigits: 2,
   });
 }
@@ -258,7 +252,6 @@ function formatPrice(price) {
 <template>
   <NavBar />
   <div>
-    <Notification v-if="statusStore.getStatus() !== null"/>
     <div
       class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30"
     >
@@ -305,7 +298,6 @@ function formatPrice(price) {
               />
               <span>{{ seller.sellerNickname }}</span>
             </label>
-            <!-- <div class="text-sm">Seller total: {{ seller.sellerTotal?.toFixed ? seller.sellerTotal.toFixed(2) : seller.sellerTotal }}</div> -->
           </div>
 
           <div class="space-y-2">
@@ -326,9 +318,11 @@ function formatPrice(price) {
                 />
                 <div>
                   <div class="font-light">
-                    <span class="font-semibold">{{ it.brand }}</span> {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
+                    <span class="font-semibold">{{ it.brand }}</span>
+                    {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
                   </div>
-                  <div class="text-sm"> Stock:
+                  <div class="text-sm">
+                    Stock:
                     {{ it.availableStock }}
                   </div>
                 </div>
@@ -368,7 +362,7 @@ function formatPrice(price) {
           <div class="flex flex-col">
             <label>Address</label>
             <textarea
-              v-model="shippingAddress"
+              v-model.trim="shippingAddress"
               class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
               placeholder="Address NO, Street, Subdistrict, District, Province, Postal Code"
             ></textarea>
@@ -376,7 +370,7 @@ function formatPrice(price) {
           <div class="flex flex-col">
             <label>Note</label>
             <textarea
-              v-model="orderNote"
+              v-model.trim="orderNote"
               class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
               placeholder="Additional instruction or requests"
             ></textarea>
@@ -385,16 +379,16 @@ function formatPrice(price) {
 
         <div class="mt-auto">
           <div class="justify-between flex">
-            <p class="text-sm">
-              Total Items:
+            <p class="text-sm">Total Items:</p>
+            <p>
+              <span>{{ selectedTotalItems }}</span>
             </p>
-            <p><span>{{ selectedTotalItems }}</span></p>
           </div>
           <div class="justify-between flex">
-            <p class="text-sm">
-              Total Price:
+            <p class="text-sm">Total Price:</p>
+            <p>
+              <span>Baht {{ formatPrice(selectedTotalPrice) }}</span>
             </p>
-            <p><span>Baht {{ formatPrice(selectedTotalPrice) }}</span></p>
           </div>
           <div>
             <button
@@ -409,20 +403,23 @@ function formatPrice(price) {
         </div>
       </div>
     </div>
-
-    <Footer />
-
+    <AlertMessage
+      v-if="!isSelectedItem && !showConfirmModal"
+      :is-selected-item="!isItemSelected"
+      title="Warning!"
+      message="Please select at least one item to place the order."
+      @toggleShowModal="isSelectedItem = true"
+    />
     <AlertMessage
       v-if="showConfirmModal"
-      :visible="showConfirmModal"
+      :is-selected-item="isItemSelected"
       title="Remove Item"
       message="Do you want to remove the sale item from the cart?"
       @confirm="onConfirmRemove"
       @cancel="onCancel"
     />
-
-
   </div>
+  <Footer />
 </template>
 
 <style scoped>
