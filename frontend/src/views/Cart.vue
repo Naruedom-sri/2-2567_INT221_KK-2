@@ -8,6 +8,7 @@ import AlertMessage from "@/components/AlertMessage.vue";
 import { placeOrder as placeOrderApi } from "@/libs/orderApi";
 import { decodeToken } from "@/libs/jwtToken";
 import router from "@/routers";
+import Notification from "@/components/Notification.vue";
 import noImage from "../assets/imgs/no-image.png";
 
 const cart = useCartStore();
@@ -152,10 +153,6 @@ watch(
 );
 
 async function placeOrder() {
-  if (!selectedItems.value.size) {
-    isSelectedItem.value = !isSelectedItem;
-  }
-
   loading.value = true;
   try {
     let buyerId = null;
@@ -219,7 +216,7 @@ async function placeOrder() {
         "orders",
         "place",
         201,
-        "Order placed successfully."
+        "Your order has been successfully processed."
       );
     } else {
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -255,172 +252,160 @@ onMounted(() => {
 
 <template>
   <NavBar />
-  <div>
-    <div
-      class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30"
-    >
-      <div class="text-left space-y-4 col-span-2">
-        <div class="flex items-center gap-3">
-          <img
-            src="../assets/imgs/cart-shopping-solid-full.svg"
-            class="w-10 h-10"
+  <Notification v-if="statusStore.getStatus() !== null" />
+  <div class="w-fullscreen grid grid-cols-3 gap-20 text-white p-4 ml-30 mr-30">
+    <div class="text-left space-y-4 col-span-2">
+      <div class="flex items-center gap-3">
+        <img
+          src="../assets/imgs/cart-shopping-solid-full.svg"
+          class="w-10 h-10"
+        />
+        <p class="text-3xl font-semibold">Shopping Cart</p>
+      </div>
+
+      <div v-if="!cart.items.length" class="text-lg">Your cart is empty.</div>
+
+      <div class="itbms-select-all border rounded p-3 mb-3">
+        <label class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            v-model="selectAll"
+            @change="toggleSelectAll"
           />
-          <p class="text-3xl font-semibold">Shopping Cart</p>
-        </div>
+          <span>Select All</span>
+          <span class="ml-2 text-sm text-gray-400"
+            >({{ cart.totalItems }} items)</span
+          >
+        </label>
+      </div>
 
-        <div v-if="!cart.items.length" class="text-lg">Your cart is empty.</div>
-
-        <div class="itbms-select-all border rounded p-3 mb-3">
+      <div
+        v-for="seller in cart.groupedBySeller"
+        :key="seller.sellerId"
+        class="border p-3 rounded-md"
+      >
+        <div class="font-semibold mb-2 flex items-center justify-between">
           <label class="flex items-center gap-2">
             <input
               type="checkbox"
-              v-model="selectAll"
-              @change="toggleSelectAll"
+              :checked="isSellerSelected(seller)"
+              @change="toggleSeller(seller)"
             />
-            <span>Select All</span>
-            <span class="ml-2 text-sm text-gray-400"
-              >({{ cart.totalItems }} items)</span
-            >
+            <img src="../assets/imgs/store-solid-full.svg" class="w-7 inline" />
+            <span>{{ seller.sellerNickname }}</span>
           </label>
         </div>
 
-        <div
-          v-for="seller in cart.groupedBySeller"
-          :key="seller.sellerId"
-          class="border p-3 rounded-md"
-        >
-          <div class="font-semibold mb-2 flex items-center justify-between">
-            <label class="flex items-center gap-2">
+        <div class="space-y-2">
+          <div
+            v-for="it in seller.items"
+            :key="it.itemId"
+            class="itbms-item-row flex items-center justify-between bg-gray-800 p-2 rounded"
+          >
+            <div class="flex items-center gap-3 flex-1">
               <input
                 type="checkbox"
-                :checked="isSellerSelected(seller)"
-                @change="toggleSeller(seller)"
+                :checked="isItemSelected(seller, it)"
+                @change="toggleItem(seller, it)"
               />
               <img
-                src="../assets/imgs/store-solid-full.svg"
-                class="w-7 inline"
+                :src="it.image ? it.image : noImage"
+                class="w-20 h-20 object-cover rounded"
               />
-              <span>{{ seller.sellerNickname }}</span>
-            </label>
-          </div>
-
-          <div class="space-y-2">
-            <div
-              v-for="it in seller.items"
-              :key="it.itemId"
-              class="itbms-item-row flex items-center justify-between bg-gray-800 p-2 rounded"
-            >
-              <div class="flex items-center gap-3 flex-1">
-                <input
-                  type="checkbox"
-                  :checked="isItemSelected(seller, it)"
-                  @change="toggleItem(seller, it)"
-                />
-                <img
-                  :src="it.image ? it.image : noImage"
-                  class="w-20 h-20 object-cover rounded"
-                />
-                <div>
-                  <div class="font-light">
-                    <span class="font-semibold">{{ it.brand }}</span>
-                    {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
-                  </div>
-                  <div class="text-sm">
-                    Stock:
-                    {{ it.availableStock }}
-                  </div>
+              <div>
+                <div class="font-light">
+                  <span class="font-semibold">{{ it.brand }}</span>
+                  {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
+                </div>
+                <div class="text-sm">
+                  Stock:
+                  {{ it.availableStock }}
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <button
-                  class="px-2 bg-gray-600 rounded"
-                  @click="onDecrement(it)"
-                >
-                  -
-                </button>
-                <div class="px-3">{{ it.quantity }}</div>
-                <button
-                  class="px-2 bg-gray-500 rounded"
-                  @click="onIncrement(it)"
-                >
-                  +
-                </button>
-                <div class="w-32 text-right text-sm">
-                  <p>
-                    price:
-                    <span>{{ formatPrice(it.price * it.quantity) }}</span>
-                  </p>
-                </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="px-2 bg-gray-600 rounded" @click="onDecrement(it)">
+                -
+              </button>
+              <div class="px-3">{{ it.quantity }}</div>
+              <button class="px-2 bg-gray-500 rounded" @click="onIncrement(it)">
+                +
+              </button>
+              <div class="w-32 text-right text-sm">
+                <p>
+                  price:
+                  <span>{{ formatPrice(it.price * it.quantity) }}</span>
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div
-        class="flex flex-col border border-white text-left p-4 rounded-md h-120 w-auto font-semibold"
-      >
-        <p class="text-3xl mb-4">Cart Summary</p>
-        <div>
-          <p class="text-xl">Ship To</p>
-          <div class="flex flex-col">
-            <label>Address</label>
-            <textarea
-              v-model.trim="shippingAddress"
-              class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
-              placeholder="Address NO, Street, Subdistrict, District, Province, Postal Code"
-            ></textarea>
-          </div>
-          <div class="flex flex-col">
-            <label>Note</label>
-            <textarea
-              v-model.trim="orderNote"
-              class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
-              placeholder="Additional instruction or requests"
-            ></textarea>
-          </div>
+    <div
+      class="flex flex-col border border-white text-left p-4 rounded-md h-120 w-auto font-semibold"
+    >
+      <p class="text-3xl mb-4">Cart Summary</p>
+      <div>
+        <p class="text-xl">Ship To</p>
+        <div class="flex flex-col">
+          <label>Address</label>
+          <textarea
+            v-model.trim="shippingAddress"
+            class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
+            placeholder="Address NO, Street, Subdistrict, District, Province, Postal Code"
+          ></textarea>
         </div>
+        <div class="flex flex-col">
+          <label>Note</label>
+          <textarea
+            v-model.trim="orderNote"
+            class="border border-white rounded-md h-20 w-auto p-1 font-light text-sm"
+            placeholder="Additional instruction or requests"
+          ></textarea>
+        </div>
+      </div>
 
-        <div class="mt-auto">
-          <div class="justify-between flex">
-            <p class="text-sm">Total Items:</p>
-            <p>
-              <span>{{ selectedTotalItems }}</span>
-            </p>
-          </div>
-          <div class="justify-between flex">
-            <p class="text-sm">Total Price:</p>
-            <p>
-              <span>Baht {{ formatPrice(selectedTotalPrice) }}</span>
-            </p>
-          </div>
-          <div>
-            <button
-              :disabled="
-                !cart.items.length ||
-                !shippingAddress ||
-                loading ||
-                selectedCartItems.length === 0
-              "
-              @click="placeOrder"
-              class="border-none mt-5 bg-blue-500 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 disabled:bg-[rgba(22,22,23,255)] disabled:cursor-not-allowed"
-            >
-              <span v-if="!loading">Place Order</span>
-              <span v-else>Placing...</span>
-            </button>
-          </div>
+      <div class="mt-auto">
+        <div class="justify-between flex">
+          <p class="text-sm">Total Items:</p>
+          <p>
+            <span>{{ selectedTotalItems }}</span>
+          </p>
+        </div>
+        <div class="justify-between flex">
+          <p class="text-sm">Total Price:</p>
+          <p>
+            <span>Baht {{ formatPrice(selectedTotalPrice) }}</span>
+          </p>
+        </div>
+        <div>
+          <button
+            :disabled="
+              !cart.items.length ||
+              !shippingAddress ||
+              loading ||
+              selectedCartItems.length === 0
+            "
+            @click="placeOrder"
+            class="border-none mt-5 bg-blue-500 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 disabled:bg-[rgba(22,22,23,255)] disabled:cursor-not-allowed"
+          >
+            <span v-if="!loading">Place Order</span>
+            <span v-else>Placing...</span>
+          </button>
         </div>
       </div>
     </div>
-    <AlertMessage
-      v-if="showConfirmModal"
-      :is-selected-item="isItemSelected"
-      title="Remove Item"
-      message="Do you want to remove the sale item from the cart?"
-      @confirm="onConfirmRemove"
-      @cancel="onCancel"
-    />
   </div>
+  <AlertMessage
+    v-if="showConfirmModal"
+    :is-selected-item="isItemSelected"
+    title="Remove Item"
+    message="Do you want to remove the sale item from the cart?"
+    @confirm="onConfirmRemove"
+    @cancel="onCancel"
+  />
   <Footer />
 </template>
 

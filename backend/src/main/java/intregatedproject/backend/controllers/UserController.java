@@ -185,18 +185,18 @@ public class UserController {
                                                     @RequestParam(defaultValue = "10") Integer size,
                                                     @RequestParam(defaultValue = "id") String sortField,
                                                     @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
-        //        if (authentication == null) {
-        //            throw new UnauthorizedException("Invalid token.");
-        //        }
+                if (authentication == null) {
+                    throw new UnauthorizedException("Invalid token.");
+                }
 
-        //        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+                Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(id);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
         }
-//        if (!user.getId().equals(userIdFromToken)) {
-//            throw new ForbiddenException("Request user id not matched with id in access token.");
-//        }
+        if (!user.getId().equals(userIdFromToken)) {
+            throw new ForbiddenException("Request user id not matched with id in access token.");
+        }
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
