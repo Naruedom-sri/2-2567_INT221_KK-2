@@ -360,84 +360,81 @@ const getImageOfAllItem = async () => {
 async function addItemToCart(saleItem, qty = 1) {
   if (!saleItem) return;
 
-  const token = localStorage.getItem("accessToken");
-  let currentUserId = null;
-
   if (accessToken === null) {
     router.push({ name: "Login" });
-  }
-
-  if (token) {
-    const decoded = decodeToken(token);
-    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
-  }
-
-  const sellerId =
-    saleItem.seller?.id ??
-    saleItem.sellerId ??
-    saleItem.userId ??
-    saleItem.shopId ??
-    saleItem.ownerId ??
-    "unknown";
-
-  if (sellerId === currentUserId) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      400,
-      "You cannot add your own product to the cart."
-    );
-    return;
-  }
-
-  let imageUrl = null;
-  try {
-    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
-  } catch (e) {
-    console.warn("Failed to fetch image:", e);
-  }
-
-  if (!imageUrl && saleItem.saleItemImages?.length) {
-    imageUrl = saleItem.saleItemImages[0].url ?? null;
-  }
-
-  if (saleItem.quantity === 0) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      400,
-      "sale item out of stock."
-    );
   } else {
-    const itemPayload = {
-      itemId: saleItem.id,
-      brand: saleItem.brandName ?? "Brand",
-      color: saleItem.color ?? null,
-      storageGb: saleItem.storageGb ?? null,
-      name: saleItem.model ?? saleItem.brandName ?? "Item",
-      price: Number(saleItem.price ?? 0),
-      availableStock: saleItem.quantity ?? 0,
-      image: imageUrl ?? "",
-    };
+    const currentUserId =
+      decoded?.buyerId || decoded?.id || decoded?.sub || null;
+    const sellerId =
+      saleItem.seller?.id ??
+      saleItem.sellerId ??
+      saleItem.userId ??
+      saleItem.shopId ??
+      saleItem.ownerId ??
+      "unknown";
 
-    const sellerPayload = {
-      sellerId,
-      sellerNickname:
-        saleItem.seller?.nickName ??
-        saleItem.seller?.fullName ??
-        saleItem.sellerName ??
-        saleItem.shopName ??
-        saleItem.brandName ??
-        "Seller",
-    };
+    if (sellerId === currentUserId) {
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "cart",
+        "add",
+        400,
+        "You cannot add your own product to the cart."
+      );
+      return;
+    }
 
-    cart.addToCart(itemPayload, sellerPayload, Number(qty));
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      200,
-      "Add to cart successfully."
-    );
+    let imageUrl = null;
+    try {
+      imageUrl = await getFirstImageOfSaleItem(
+        `${BASE_API_DOMAIN}`,
+        saleItem.id
+      );
+    } catch (e) {
+      console.warn("Failed to fetch image:", e);
+    }
+
+    if (!imageUrl && saleItem.saleItemImages?.length) {
+      imageUrl = saleItem.saleItemImages[0].url ?? null;
+    }
+
+    if (saleItem.quantity === 0) {
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "cart",
+        "add",
+        400,
+        "sale item out of stock."
+      );
+    } else {
+      const itemPayload = {
+        itemId: saleItem.id,
+        brand: saleItem.brandName ?? "Brand",
+        color: saleItem.color ?? null,
+        storageGb: saleItem.storageGb ?? null,
+        name: saleItem.model ?? saleItem.brandName ?? "Item",
+        price: Number(saleItem.price ?? 0),
+        availableStock: saleItem.quantity ?? 0,
+        image: imageUrl ?? "",
+      };
+
+      const sellerPayload = {
+        sellerId,
+        sellerNickname:
+          saleItem.seller?.nickName ??
+          saleItem.seller?.fullName ??
+          saleItem.sellerName ??
+          saleItem.shopName ??
+          saleItem.brandName ??
+          "Seller",
+      };
+
+      cart.addToCart(itemPayload, sellerPayload, Number(qty));
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "cart",
+        "add",
+        200,
+        "Add to cart successfully."
+      );
+    }
   }
 }
 
@@ -497,6 +494,7 @@ onUnmounted(() => {
 
 <template>
   <NavBar @search-sale-item="getAllSaleItemBySortAndFilter" />
+  <Notification v-if="statusStore.getStatus() !== null" />
   <div class="gallery-container text-white text-sm">
     <div class="promote">
       <div
@@ -875,7 +873,6 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <Notification v-if="statusStore.getStatus() !== null" />
   <Footer />
 </template>
 

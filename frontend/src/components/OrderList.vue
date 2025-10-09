@@ -42,7 +42,7 @@ const router = useRouter();
         {{ new Date(order.paymentDate).toLocaleDateString() }}
       </p>
       <p class="itbms-total-order-price w-32 text-center">
-        {{ totalPriceList.at(index).toLocaleString() }}
+        {{ totalPriceList.at(indexOrder).toLocaleString() }}
       </p>
       <p class="itbms-order-status w-32 text-center">
         {{ order.orderStatus }}

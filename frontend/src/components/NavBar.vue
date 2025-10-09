@@ -44,8 +44,12 @@ const logout = async () => {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     localStorage.clear();
     sessionStorage.clear();
-    router.replace({ name: "SaleItemsGallery" });
-    router.go(0);
+    if (router.currentRoute.value.name !== "SaleItemsGallery") {
+      router.push({ name: "SaleItemsGallery" });
+    } else {
+      router.replace({ name: "SaleItemsGallery" });
+      router.go(0);
+    }
   } catch (error) {
     console.log(error);
   }
@@ -81,7 +85,10 @@ watch(
     <div class="flex justify-center items-center gap-7 h-12">
       <div class="your-or ders flex justify-center w-28 h-full">
         <button
-          @click="router.push({ name: 'OrderUser' })"
+          @click="
+            router.push({ name: 'OrderUser' }),
+              statusStore.clearEntityAndMethodAndStatusAndMessage()
+          "
           class="opacity-85 hover:opacity-100 cursor-pointer"
         >
           My Order
@@ -153,6 +160,7 @@ watch(
             }"
           />
           <span
+            v-show="cart.totalItems !== 0"
             :class="[
               'itbms-badge flex items-center justify-center text-xs text-white',
               { 'itbms-badge-animate': badgeAnimate },

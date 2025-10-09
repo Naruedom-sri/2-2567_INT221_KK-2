@@ -6,10 +6,13 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
 import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
 import OrderList from "@/components/OrderList.vue";
+import Notification from "@/components/Notification.vue";
+import { useStatusStore } from "@/stores/statusStore";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
+const statusStore = useStatusStore();
 const orders = ref([]);
 const orderCompletedList = ref([]);
 const totalPriceCompletedList = ref([]);
@@ -109,7 +112,6 @@ const getImageOfAllItem = async (status, orderItems) => {
   }
   if (status === "COMPLETED") {
     imageUrlCompletedList.value.push({ imgOrder });
-    console.log(imageUrlCompletedList.value);
   } else {
     imageUrlCanceledList.value.push(imgUrl);
   }
@@ -242,6 +244,7 @@ onUnmounted(() => {
 
 <template>
   <NavBar />
+  <Notification v-if="statusStore.getStatus() !== null" />
   <div class="order-container mx-35 my-10 text-black text-sm">
     <h1 class="text-2xl text-white font-semibold">Your Orders</h1>
     <div class="filter-container flex justify-between my-4 text-white">
