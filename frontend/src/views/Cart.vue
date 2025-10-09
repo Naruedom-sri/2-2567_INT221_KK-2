@@ -16,7 +16,6 @@ const loading = ref(false);
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const accessToken = localStorage.getItem("accessToken");
 const showConfirmModal = ref(false);
-const isSelectedItem = ref(true);
 const confirmTarget = ref(null);
 
 function onIncrement(item) {
@@ -397,9 +396,14 @@ onMounted(() => {
           </div>
           <div>
             <button
-              :disabled="!cart.items.length || !shippingAddress || loading || selectedCartItems.length === 0"
+              :disabled="
+                !cart.items.length ||
+                !shippingAddress ||
+                loading ||
+                selectedCartItems.length === 0
+              "
               @click="placeOrder"
-              class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 disabled:cursor-not-allowed"
+              class="border-none mt-5 bg-blue-500 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 disabled:bg-[rgba(22,22,23,255)] disabled:cursor-not-allowed"
             >
               <span v-if="!loading">Place Order</span>
               <span v-else>Placing...</span>
@@ -408,13 +412,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <AlertMessage
-      v-if="!isSelectedItem && !showConfirmModal"
-      :is-selected-item="!isItemSelected"
-      title="Warning!"
-      message="Please select at least one item to place the order."
-      @toggleShowModal="isSelectedItem = true"
-    />
     <AlertMessage
       v-if="showConfirmModal"
       :is-selected-item="isItemSelected"

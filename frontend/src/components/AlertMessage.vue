@@ -2,7 +2,6 @@
 defineProps({
   haveSaleItem: { type: Boolean, default: false },
   overImage: { type: Boolean, default: false },
-  isSelectedItem: { type: Boolean, default: false },
   title: { type: String },
   message: { type: String },
 });
@@ -26,7 +25,7 @@ const toggleShowModal = () => emit("toggleShowModal");
       <h2 class="font-bold text-black mb-4 text-xl">{{ title }}</h2>
       <p class="itbms-message mb-6 text-gray-700 font-medium">{{ message }}</p>
       <div
-        v-if="!overImage && isSelectedItem && !haveSaleItem"
+        v-if="!overImage && !haveSaleItem"
         class="flex flex-col gap-4"
       >
         <button
