@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useCartStore } from "@/stores/cartStore";
 import { useStatusStore } from "@/stores/statusStore";
 import NavBar from "@/components/NavBar.vue";
@@ -213,6 +213,7 @@ async function placeOrder() {
       selectedItems.value.clear();
       selectedSellers.value.clear();
       selectAll.value = false;
+      localStorage.setItem("shippingAddress", shippingAddress.value);
       router.push({ name: "OrderUser" });
 
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -247,6 +248,10 @@ function formatPrice(price) {
     minimumFractionDigits: 2,
   });
 }
+onMounted(() => {
+  const savedAddress = localStorage.getItem("shippingAddress");
+  if (savedAddress) shippingAddress.value = savedAddress;
+});
 </script>
 
 <template>
@@ -392,7 +397,7 @@ function formatPrice(price) {
           </div>
           <div>
             <button
-              :disabled="!cart.items.length || !shippingAddress || loading"
+              :disabled="!cart.items.length || !shippingAddress || loading || selectedCartItems.length === 0"
               @click="placeOrder"
               class="border-none bg-blue-700 rounded-md p-2 w-full hover:bg-blue-800 disabled:opacity-50 mt-5 disabled:cursor-not-allowed"
             >
