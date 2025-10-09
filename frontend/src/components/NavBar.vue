@@ -42,9 +42,8 @@ function goToProfile() {
 const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("cart_items_v1");
-    localStorage.removeItem("shippingAddress")
+    localStorage.clear();
+    sessionStorage.clear();
     router.replace({ name: "SaleItemsGallery" });
     router.go(0);
   } catch (error) {

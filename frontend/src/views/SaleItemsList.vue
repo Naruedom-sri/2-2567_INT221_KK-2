@@ -78,11 +78,15 @@ const getAllBrands = async () => {
   }
 };
 const deleteSaleItem = async (itemId) => {
-  statusStore.clearEntityAndMethodAndStatusAndMessage();
-  showDialog.value = false;
   try {
+    statusStore.clearEntityAndMethodAndStatusAndMessage();
+    showDialog.value = false;
     await deleteSaleItemById(`${BASE_API_DOMAIN}`, itemId);
-    items.value = items.value.filter((item) => item.id !== itemId);
+    indexPage.value = 0;
+    tempIndexPage.value = 0;
+    getAllSaleItems();
+    sessionStorage.setItem("indexPage", 0);
+    sessionStorage.setItem("tempIndexPage", 0);
   } catch (error) {
     console.log(error);
   }
@@ -316,8 +320,8 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <h1 class="text-4xl mb-10">My Product</h1>
-      <table v-if="items.length !== 0" class="w-full">
+      <h1 class="text-4xl">My Product</h1>
+      <table v-if="items.length !== 0" class="w-full my-5">
         <tr class="bg-[rgba(22,22,23,255)]">
           <th>Id</th>
           <th>Brand</th>

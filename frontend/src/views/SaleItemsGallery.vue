@@ -346,13 +346,100 @@ const getImageOfAllItem = async () => {
           item.id,
           1
         );
+
         imageUrlList.value.push(imgUrl);
+      } else {
+        imageUrlList.value.push(null);
       }
     } catch (error) {
       imageUrlList.value.push(null);
     }
   }
 };
+
+async function addItemToCart(saleItem, qty = 1) {
+  if (!saleItem) return;
+
+  const token = localStorage.getItem("accessToken");
+  let currentUserId = null;
+
+  if (accessToken === null) {
+    router.push({ name: "Login" });
+  }
+
+  if (token) {
+    const decoded = decodeToken(token);
+    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+  }
+
+  const sellerId =
+    saleItem.seller?.id ??
+    saleItem.sellerId ??
+    saleItem.userId ??
+    saleItem.shopId ??
+    saleItem.ownerId ??
+    "unknown";
+
+  if (sellerId === currentUserId) {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "cart",
+      "add",
+      400,
+      "You cannot add your own product to the cart."
+    );
+    return;
+  }
+
+  let imageUrl = null;
+  try {
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
+  } catch (e) {
+    console.warn("Failed to fetch image:", e);
+  }
+
+  if (!imageUrl && saleItem.saleItemImages?.length) {
+    imageUrl = saleItem.saleItemImages[0].url ?? null;
+  }
+
+  if (saleItem.quantity === 0) {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "cart",
+      "add",
+      400,
+      "sale item out of stock."
+    );
+  } else {
+    const itemPayload = {
+      itemId: saleItem.id,
+      brand: saleItem.brandName ?? "Brand",
+      color: saleItem.color ?? null,
+      storageGb: saleItem.storageGb ?? null,
+      name: saleItem.model ?? saleItem.brandName ?? "Item",
+      price: Number(saleItem.price ?? 0),
+      availableStock: saleItem.quantity ?? 0,
+      image: imageUrl ?? "",
+    };
+
+    const sellerPayload = {
+      sellerId,
+      sellerNickname:
+        saleItem.seller?.nickName ??
+        saleItem.seller?.fullName ??
+        saleItem.sellerName ??
+        saleItem.shopName ??
+        saleItem.brandName ??
+        "Seller",
+    };
+
+    cart.addToCart(itemPayload, sellerPayload, Number(qty));
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "cart",
+      "add",
+      200,
+      "Add to cart successfully."
+    );
+  }
+}
 
 onMounted(() => {
   const savedBrands = sessionStorage.getItem("filterBrands");
@@ -406,87 +493,6 @@ onMounted(() => {
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
-
-async function addItemToCart(saleItem, qty = 1) {
-  if (!saleItem) return;
-
-  const token = localStorage.getItem("accessToken");
-  let currentUserId = null;
-
-  if(accessToken === null) {
-    router.push({ name: "Login" });
-    return;
-  }
-
-  if (token) {
-    const decoded = decodeToken(token);
-    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
-  }
-
-  const sellerId =
-    saleItem.seller?.id ??
-    saleItem.sellerId ??
-    saleItem.userId ??
-    saleItem.shopId ??
-    saleItem.ownerId ??
-    "unknown";
-
-  if (sellerId === currentUserId) {
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "cart",
-    "add",
-    400,
-    "You cannot add your own product to the cart."
-  );
-  return;
-}
-
-  let imageUrl = null;
-  try {
-    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
-  } catch (e) {
-    console.warn("Failed to fetch image:", e);
-  }
-
-  if (!imageUrl && saleItem.saleItemImages?.length) {
-    imageUrl = saleItem.saleItemImages[0].url ?? null;
-  }
-
-  const itemPayload = {
-    itemId: saleItem.id,
-    brand: saleItem.brandName ?? "Brand",
-    color: saleItem.color ?? null,
-    storageGb: saleItem.storageGb ?? null,
-    name: saleItem.model ?? saleItem.brandName ?? "Item",
-    price: Number(saleItem.price ?? 0),
-    availableStock: saleItem.quantity ?? 0,
-    image: imageUrl ?? "",
-  };
-
-  const sellerPayload = {
-    sellerId,
-    sellerNickname:
-      saleItem.seller?.nickName ??
-      saleItem.seller?.fullName ??
-      saleItem.sellerName ??
-      saleItem.shopName ??
-      saleItem.brandName ??
-      "Seller",
-  };
-
-  cart.addToCart(itemPayload, sellerPayload, Number(qty));
-console.log("Added to cart:", {
-    itemPayload,
-    sellerPayload,
-    cartItems: cart.items,
-  });
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "cart",
-    "add",
-    200,
-    "Add to cart successfully."
-  );
-}
 </script>
 
 <template>
@@ -728,7 +734,9 @@ console.log("Added to cart:", {
           :to="{ name: 'SaleItemsDetail', params: { itemId: item.id } }"
           class="block"
         >
-          <div class="h-56 bg-white rounded-t-2xl flex justify-center items-center">
+          <div
+            class="h-56 bg-white rounded-t-2xl flex justify-center items-center"
+          >
             <img
               v-if="imageUrlList[index]"
               :src="imageUrlList[index]"
@@ -741,24 +749,28 @@ console.log("Added to cart:", {
             />
           </div>
 
-        <div
-          class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
-        >
-          <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
-          <p class="itbms-model text-base">{{ item.model }}</p>
-          <p class="itbms-color">{{ item.color }}</p>
-          <div class="ram-storage flex items-center gap-4 text-xs">
-            <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
-              {{ item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb }}
-              <span
-                v-show="item.ramGb !== null && item.ramGb !== ''"
-                class="itbms-storageGb-unit"
-              >
-                GB</span
-              >
-            </p>
+          <div
+            class="item-detail flex flex-col items-center space-y-3 mt-5 text-white"
+          >
+            <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
+            <p class="itbms-model text-base">{{ item.model }}</p>
+            <p class="itbms-color">{{ item.color }}</p>
+            <div class="ram-storage flex items-center gap-4 text-xs">
+              <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
+                {{
+                  item.ramGb === null || item.ramGb === "" ? "-" : item.ramGb
+                }}
+                <span
+                  v-show="item.ramGb !== null && item.ramGb !== ''"
+                  class="itbms-storageGb-unit"
+                >
+                  GB</span
+                >
+              </p>
 
-              <p class="itbms-storageGb py-1 w-16 border rounded-xl text-center">
+              <p
+                class="itbms-storageGb py-1 w-16 border rounded-xl text-center"
+              >
                 {{
                   item.storageGb === null || item.storageGb === ""
                     ? "-"
@@ -783,7 +795,7 @@ console.log("Added to cart:", {
 
         <div class="flex justify-center">
           <button
-            class="itbms-add-to-cart-button px-10 py-2 mb-5 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
+            class="itbms-add-to-cart-button px-10 py-2 my-4 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
             type="button"
             @click.stop="addItemToCart(item, 1)"

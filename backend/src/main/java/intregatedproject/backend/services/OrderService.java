@@ -58,11 +58,11 @@ public class OrderService {
                 "orderNote".equalsIgnoreCase(sortField) ||
                 "id".equalsIgnoreCase(sortField)) {
 
-            sort = (sortDirection.equalsIgnoreCase("desc"))
-                    ? Sort.by(Sort.Order.desc(sortField))
-                    : Sort.by(Sort.Order.asc(sortField));
+            sort = (sortDirection.equalsIgnoreCase("asc"))
+                    ? Sort.by(Sort.Order.asc(sortField))
+                    : Sort.by(Sort.Order.desc(sortField));
         } else {
-            sort = Sort.by(Sort.Order.asc("id"));
+            sort = Sort.by(Sort.Order.desc("id"));
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);

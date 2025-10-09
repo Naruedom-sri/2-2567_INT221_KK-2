@@ -130,7 +130,7 @@ const routes = [
     name: "OrderUser",
     component: OrderUser,
   },
-   {
+  {
     path: "/your-orders/:orderId",
     name: "OrderDetail",
     component: OrderDetail,
@@ -160,7 +160,7 @@ router.beforeEach((to, from, next) => {
           to.name === "VerifyEmail" ||
           to.name === "Home" ||
           to.name === "SaleItemsGallery" ||
-            to.name === "SaleItemsDetail"
+          to.name === "SaleItemsDetail"
         ) {
           return next();
         }

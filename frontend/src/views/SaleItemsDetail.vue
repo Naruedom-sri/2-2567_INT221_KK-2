@@ -358,30 +358,7 @@ async function addItemToCart(saleItem, qty = 1) {
             +
           </button>
         </div>
-        <div class="btn-add-buy mt-10">
-          <div
-            v-if="decoded?.role === 'SELLER'"
-            class="flex justify-between gap-4 space-y-5"
-          >
-            <button
-              @click="showDialog = true"
-              class="itbms-delete-button w-full flex-1 py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
-            >
-              Delete
-            </button>
-            <RouterLink
-              :to="{
-                name: 'EditSaleItems',
-                params: { itemId: item.id },
-              }"
-              class="itbms-edit-button flex-1"
-              ><button
-                class="w-full py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
-              >
-                Edit
-              </button></RouterLink
-            >
-          </div>
+        <div class="btn-add-to-cart mt-10">
           <button
             class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
             @click.stop="addItemToCart(item, buyQty)"

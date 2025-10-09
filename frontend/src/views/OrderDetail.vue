@@ -2,11 +2,13 @@
 import { getOrderById } from "@/libs/orderApi";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { getSaleItemById, getImageOfSaleItem } from "@/libs/saleItemApi";
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
-import router from "@/routers";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const accessToken = localStorage.getItem("accessToken");
+const router = useRouter();
+const imageUrlList = ref([]);
 const {
   params: { orderId },
 } = useRoute();
@@ -19,8 +21,28 @@ const getOrder = async () => {
     order.value.orderItems.forEach((item) => {
       totalPrice += item.quantity * item.price;
     });
+    getImageOfAllItem();
   } catch (error) {
     console.log(error);
+  }
+};
+const getImageOfAllItem = async () => {
+  for (const item of order.value.orderItems) {
+    try {
+      const data = await getSaleItemById(`${BASE_API_DOMAIN}`, item.saleItemId);
+      if (data.saleItemImages.length !== 0) {
+        const imgUrl = await getImageOfSaleItem(
+          `${BASE_API_DOMAIN}`,
+          item.saleItemId,
+          1
+        );
+        imageUrlList.value.push(imgUrl);
+      } else {
+        imageUrlList.value.push(null);
+      }
+    } catch (error) {
+      imageUrlList.value.push(null);
+    }
   }
 };
 onMounted(() => getOrder());
@@ -94,9 +116,14 @@ onMounted(() => getOrder());
         >
           <div class="item-row-img w-32">
             <img
+              v-if="imageUrlList[index]"
+              :src="imageUrlList[index]"
+              class="max-w-32 max-h-32 object-cover rounded"
+            />
+            <img
+              v-else
               src="../assets/imgs/no-image.png"
-              alt="img"
-              class="w-full object-cover"
+              class="max-w-32 object-cover rounded"
             />
           </div>
           <div class="item-row-detail w-full flex justify-between">

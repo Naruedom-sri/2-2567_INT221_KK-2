@@ -4,14 +4,13 @@ import NavBar from "@/components/NavBar.vue";
 import { getAllOrder } from "@/libs/userApi";
 import { onMounted, onUnmounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
-import { useRouter } from "vue-router";
 import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
+import OrderList from "@/components/OrderList.vue";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const orders = ref([]);
-const router = useRouter();
 const orderCompletedList = ref([]);
 const totalPriceCompletedList = ref([]);
 const orderCanceledList = ref([]);
@@ -82,8 +81,6 @@ const getAllOrderUser = async () => {
         orderCanceledList.value.push(order);
         totalPriceCanceledList.value.push(totalPrice);
       }
-      console.log("order :", order.orderItems);
-      console.log(imageUrlCompletedList.value)
       await getImageOfAllItem(order.orderStatus, order.orderItems);
     }
   } catch (e) {
@@ -92,6 +89,7 @@ const getAllOrderUser = async () => {
 };
 
 const getImageOfAllItem = async (status, orderItems) => {
+  const imgOrder = [];
   for (const item of orderItems) {
     try {
       const data = await getSaleItemById(`${BASE_API_DOMAIN}`, item.saleItemId);
@@ -101,13 +99,19 @@ const getImageOfAllItem = async (status, orderItems) => {
           item.saleItemId,
           1
         );
-        if (status === "COMPLETED") imageUrlCompletedList.value.push(imgUrl);
-        else imageUrlCanceledList.value.push(imgUrl);
+        imgOrder.push(imgUrl);
+      } else {
+        imgOrder.push(null);
       }
     } catch (error) {
-      if (status === "COMPLETED") imageUrlCompletedList.value.push(null);
-      else imageUrlCanceledList.value.push(null);
+      imgOrder.push(null);
     }
+  }
+  if (status === "COMPLETED") {
+    imageUrlCompletedList.value.push({ imgOrder });
+    console.log(imageUrlCompletedList.value);
+  } else {
+    imageUrlCanceledList.value.push(imgUrl);
   }
 };
 
@@ -388,119 +392,18 @@ onUnmounted(() => {
         Canceled
       </button>
     </div>
-    <div
-      v-for="(order, index) in haveStatus === 'completed'
-        ? orderCompletedList
-        : orderCanceledList"
-      :key="index"
-      v-if="orders.length !== 0"
-      class="itbms-row my-4 p-10 rounded bg-gray-200"
-      @click="
-        router.push({ name: 'OrderDetail', params: { orderId: order.id } })
-      "
-    >
-      <div
-        v-if="
-          (haveStatus === 'completed' && orderCompletedList.length === 0) ||
-          (haveStatus === 'canceled' && orderCanceledList.length === 0)
-        "
-        class="itmbs-row pt-10 text-white text-5xl text-center border-t"
-      >
-        no order
-      </div>
-      <div v-else>
-        <div class="order-title flex justify-between">
-          <h1 class="w-32 font-medium text-center">Seller</h1>
-          <h1 class="w-32 font-medium text-center">Order No</h1>
-          <h1 class="w-32 font-medium text-center">Order Date</h1>
-          <h1 class="w-32 font-medium text-center">Payment Date</h1>
-          <h1 class="w-32 font-medium text-center">Total</h1>
-          <h1 class="w-32 font-medium text-center">Status</h1>
-        </div>
-        <div class="order-detail my-3 flex justify-between">
-          <p class="itbms-nickname w-32 text-center">
-            {{ order.seller.nickName }}
-          </p>
-          <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
-          <p class="itbms-order-date w-32 text-center">
-            {{ new Date(order.orderDate).toLocaleDateString() }}
-          </p>
-          <p class="itbms-payment-date w-32 text-center">
-            {{ new Date(order.paymentDate).toLocaleDateString() }}
-          </p>
-          <p class="itbms-total-order-price w-32 text-center">
-            {{
-              haveStatus === "completed"
-                ? totalPriceCompletedList.at(index).toLocaleString()
-                : totalPriceCanceledList.at(index).toLocaleString()
-            }}
-          </p>
-          <p class="itbms-order-status w-32 text-center">
-            {{ order.orderStatus }}
-          </p>
-        </div>
-        <div class="ship-note-order">
-          <div class="ship-detail flex gap-1">
-            <h1 class="font-medium">Shipped To:</h1>
-            <p class="itbms-shipping-address">{{ order.shippingAddress }}</p>
-          </div>
-          <div class="note-detail my-3 flex gap-1">
-            <h1 class="font-medium">Note:</h1>
-            <p class="Itbms-order-note">{{ order.orderNote }}</p>
-          </div>
-        </div>
-        <div class="item-row-container space-y-2 text-white">
-          <div
-            v-for="(item, index) in order.orderItems"
-            :key="index"
-            class="itbms-item-row flex items-center gap-4 p-4 rounded bg-[rgba(22,22,23,255)]"
-          >
-            <div v-if="haveStatus === 'completed'" class="item-row-img w-32">
-              <img
-                v-if="imageUrlCompletedList[index]"
-                :src="imageUrlCompletedList[index]"
-                class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
-              />
-              <img
-                v-else
-                src="../assets/imgs/no-image.png"
-                class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
-              />
-            </div>
-            <div v-else class="item-row-img w-32">
-              <img
-                v-if="imageUrlCanceledList[index]"
-                :src="imageUrlCanceledList[index]"
-                class="max-w-44 max-h-44 object-cover rounded-xl hover:scale-105 duration-500"
-              />
-              <img
-                v-else
-                src="../assets/imgs/no-image.png"
-                class="max-w-44 object-cover rounded-xl hover:scale-105 duration-500"
-              />
-            </div>
-            <div class="item-row-detail w-full flex justify-between">
-              <p class="itbms-item-description w-52 text-center">
-                {{ item.description }}
-              </p>
-              <p class="itbms-item-quantity w-52 text-center">
-                Quantity: <span class="text-white/80">{{ item.quantity }}</span>
-              </p>
-              <p class="itbms-item-total-price w-52 text-center">
-                Price:
-                <span class="text-white/80">{{
-                  (item.quantity * item.price).toLocaleString()
-                }}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h1 v-else class="itmbs-row pt-10 text-white text-5xl text-center border-t">
-      no order
-    </h1>
+    <OrderList
+      v-if="haveStatus === 'completed'"
+      :order-list="orderCompletedList"
+      :total-price-list="totalPriceCompletedList"
+      :image-url-list="imageUrlCompletedList"
+    />
+    <OrderList
+      v-else-if="haveStatus === 'canceled'"
+      :order-list="orderCanceledList"
+      :total-price-list="totalPriceCanceledList"
+      :image-url-list="imageUrlCanceledList"
+    />
   </div>
   <Footer />
 </template>
