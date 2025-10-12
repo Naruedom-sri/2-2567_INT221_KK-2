@@ -137,4 +137,19 @@ public class OrderService {
 
         return orderRepository.findAll(filterSpec, pageable);
     }
+
+//    public Page<Order> getAllSellerOrdersFilter(
+//            Integer sellerId,
+//            String searchContent,
+//            String sortField,
+//            String sortDirection,
+//            Integer page,
+//            Integer size) throws BadRequestException {
+//        searchContent = (searchContent == null || searchContent.isEmpty()) ? null : searchContent;
+//        size = size <= 0 ? 10 : size;
+//
+//        if (page == null || page < 0) {
+//            throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+//        }
+//    }
 }
