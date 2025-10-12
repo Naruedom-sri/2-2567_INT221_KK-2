@@ -17,9 +17,8 @@ const totalPrice = ref(0);
 const getOrder = async () => {
   try {
     order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken);
-    let totalPrice = 0;
     order.value.orderItems.forEach((item) => {
-      totalPrice += item.quantity * item.price;
+      totalPrice.value += item.quantity * item.price;
     });
     getImageOfAllItem();
   } catch (error) {
@@ -134,7 +133,7 @@ onMounted(() => getOrder());
               Quantity: <span class="text-white/80">{{ item.quantity }}</span>
             </p>
             <p>
-              Unit Price: <span class="text-white/80">{{ item.price }}</span>
+              Unit Price: <span class="text-white/80">{{ item.price.toLocaleString() }}</span>
             </p>
             <p class="itbms-item-total-price w-52 text-center">
               Price:
