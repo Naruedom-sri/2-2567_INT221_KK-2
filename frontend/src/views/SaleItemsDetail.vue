@@ -81,13 +81,12 @@ async function addItemToCart(saleItem, qty = 1) {
   const token = localStorage.getItem("accessToken");
   let currentUserId = null;
 
-  if(accessToken === null) {
+  if (accessToken === null) {
     router.push({ name: "Login" });
     return;
   }
 
   if (token) {
-    const decoded = decodeToken(token);
     currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
   }
 
@@ -100,14 +99,14 @@ async function addItemToCart(saleItem, qty = 1) {
     "unknown";
 
   if (sellerId === currentUserId) {
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "cart",
-    "add",
-    400,
-    "You cannot add your own product to the cart."
-  );
-  return;
-}
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "cart",
+      "add",
+      400,
+      "You cannot add your own product to the cart."
+    );
+    return;
+  }
 
   let imageUrl = null;
   try {
@@ -144,7 +143,6 @@ async function addItemToCart(saleItem, qty = 1) {
 
   cart.addToCart(itemPayload, sellerPayload, Number(qty));
 
-   
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "cart",
     "add",
@@ -201,6 +199,10 @@ async function addItemToCart(saleItem, qty = 1) {
       </div>
       <div class="truck-bag flex justify-end gap-6 h-7 mx-20">
         <div class="flex gap-2">
+          <p class="self-center">{{ item.seller.nickName }}</p>
+        </div>
+        <p class="self-center">|</p>
+        <div class="flex gap-2">
           <img
             src="/src/assets/imgs/truck-symbol.png"
             alt="truck"
@@ -208,7 +210,7 @@ async function addItemToCart(saleItem, qty = 1) {
           />
           <p class="self-center">Free shipping</p>
         </div>
-        <p>|</p>
+        <p class="self-center">|</p>
         <div class="flex gap-2">
           <img
             src="/src/assets/imgs/bag-symbol.png"
