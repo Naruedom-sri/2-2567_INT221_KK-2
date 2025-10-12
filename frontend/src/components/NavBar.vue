@@ -11,6 +11,7 @@ const decoded = decodeToken(accessToken);
 const router = useRouter();
 const route = useRoute();
 const statusStore = useStatusStore();
+const cartStore = useCartStore();
 const cart = useCartStore();
 const isSearch = ref(false);
 const searchSaleItem = ref("");
@@ -44,6 +45,7 @@ const logout = async () => {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
     localStorage.clear();
     sessionStorage.clear();
+    cartStore.clearCart();
     if (router.currentRoute.value.name !== "SaleItemsGallery") {
       router.push({ name: "SaleItemsGallery" });
     } else {
