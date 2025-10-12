@@ -6,7 +6,7 @@ import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import intregatedproject.backend.repositories.UserRepository;
-import intregatedproject.backend.utils.Token.JwtUtils;
+import intregatedproject.backend.utils.token.JwtUtils;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +27,6 @@ import jakarta.mail.MessagingException;
 
 @Service
 public class EmailService {
-    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-
     @Autowired
     private UserRepository userRepository;
     @Autowired

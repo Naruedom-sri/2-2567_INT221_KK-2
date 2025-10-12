@@ -72,34 +72,6 @@ public class FileService {
         files.forEach(file   -> fileNames.add(store(file)));
         return fileNames;
     }
-//    public List<String> multiStore(List<MultipartFile> files) {
-//        List<String> fileNames = new ArrayList<>(files.size());
-//
-//        for (MultipartFile file : files) {
-//            if (!isSupportedContentType(file)) {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-//                        "Does not support content type: " + file.getContentType());
-//            }
-//
-//            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-//
-//            try {
-//                if (fileName.contains("..")) {
-//                    throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
-//                }
-//
-//                Path targetLocation = this.fileStorageLocation.resolve(fileName);
-//                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-//
-//                fileNames.add(fileName);
-//
-//            } catch (IOException ex) {
-//                throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
-//            }
-//        }
-//
-//        return fileNames;
-//    }
 
     public List<String> multiStore(List<MultipartFile> files) {
         List<String> fileNames = new ArrayList<>(files.size());

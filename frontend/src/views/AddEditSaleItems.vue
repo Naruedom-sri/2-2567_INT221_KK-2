@@ -569,7 +569,7 @@ watch(
       title="Warning"
       :message="uploadError"
       :over-image="uploadError ? true : false"
-      @toggleUploadError="uploadError = ''"
+      @toggleShowModal="uploadError = ''"
     />
     <div class="flex py-7 mx-20 border-b border-white">
       <RouterLink

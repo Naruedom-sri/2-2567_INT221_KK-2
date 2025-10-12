@@ -1,14 +1,17 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { logoutUser } from "@/libs/userApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useStatusStore } from "@/stores/statusStore";
+import { useCartStore } from "@/stores/cartStore";
+
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const router = useRouter();
 const route = useRoute();
 const statusStore = useStatusStore();
+const cart = useCartStore();
 const isSearch = ref(false);
 const searchSaleItem = ref("");
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
@@ -27,7 +30,7 @@ const handleSearchClick = (isClear) => {
     sessionStorage.setItem("searchContent", searchSaleItem.value);
     sessionStorage.setItem("indexPage", String(0));
     sessionStorage.setItem("tempIndexPage", String(0));
-    router.push({ name: "SaleItemsGallery" });
+    router.push({ name: "SaleItemsGallery" }).then(() => router.go(0));
   }
 };
 
@@ -39,8 +42,14 @@ function goToProfile() {
 const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
-    localStorage.removeItem("accessToken");
-    router.push({ name: "Login" });
+    localStorage.clear();
+    sessionStorage.clear();
+    if (router.currentRoute.value.name !== "SaleItemsGallery") {
+      router.push({ name: "SaleItemsGallery" });
+    } else {
+      router.replace({ name: "SaleItemsGallery" });
+      router.go(0);
+    }
   } catch (error) {
     console.log(error);
   }
@@ -50,13 +59,40 @@ onMounted(() => {
   const savedSearch = sessionStorage.getItem("searchContent");
   if (savedSearch) searchSaleItem.value = savedSearch;
 });
+
+// new: badge animation control
+const badgeAnimate = ref(false);
+let prevTotal = cart.totalItems || 0;
+watch(
+  () => cart.totalItems,
+  (newVal) => {
+    // animate only when increasing (add to cart)
+    if (typeof newVal === "number" && newVal > prevTotal) {
+      badgeAnimate.value = false; // reset to retrigger
+      // nextTick not necessary here; short timeout to ensure class application
+      setTimeout(() => {
+        badgeAnimate.value = true;
+        setTimeout(() => (badgeAnimate.value = false), 600); // duration matches CSS
+      }, 20);
+    }
+    prevTotal = newVal;
+  }
+);
 </script>
 
 <template>
   <div class="container-header text-white text-xs">
     <div class="flex justify-center items-center gap-7 h-12">
-      <div class="empty-element w-28 h-full">
-        <!-- Empty element for spacing -->
+      <div class="your-or ders flex justify-center w-28 h-full">
+        <button
+          @click="
+            router.push({ name: 'OrderUser' }),
+              statusStore.clearEntityAndMethodAndStatusAndMessage()
+          "
+          class="opacity-85 hover:opacity-100 cursor-pointer"
+        >
+          My Order
+        </button>
       </div>
       <div class="logo w-56 flex justify-end">
         <img
@@ -108,11 +144,33 @@ onMounted(() => {
           class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
         />
 
-        <img
-          src="/src/assets/imgs/cart-symbol.png"
-          alt="cart"
-          class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
-        />
+        <div class="flex items-center relative">
+          <img
+            @click="
+              !cart.items.length ? null : router.push({ name: 'Cart' }),
+                statusStore.clearEntityAndMethodAndStatusAndMessage()
+            "
+            src="/src/assets/imgs/cart-symbol.png"
+            alt="cart"
+            class="w-5 object-cover opacity-85 hover:opacity-100 hover:cursor-pointer"
+            :class="{
+              'opacity-40 cursor-not-allowed pointer-events-none':
+                !cart.items.length,
+              'hover:cursor-pointer': cart.items.length,
+            }"
+          />
+          <span
+            v-show="cart.totalItems !== 0"
+            :class="[
+              'itbms-badge flex items-center justify-center text-xs text-white',
+              { 'itbms-badge-animate': badgeAnimate },
+            ]"
+            aria-live="polite"
+          >
+            {{ cart.totalItems }}
+          </span>
+        </div>
+
         <div class="flex justify-center items-center gap-2">
           <img
             src="/src/assets/imgs/account-symbol.png"
@@ -201,4 +259,41 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbms-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ef4444, #dc2626); /* red gradient */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transform-origin: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.itbms-badge-animate {
+  animation: badge-pop 0.6s ease forwards;
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.6);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  }
+}
+</style>

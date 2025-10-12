@@ -52,24 +52,26 @@ public class OrderController {
     }
 
     @GetMapping("/v2/orders/{id}")
-    public ResponseEntity<ResponseOrderDto> getBuyerOrderById(Authentication authentication , @PathVariable int id){
+    public ResponseEntity<ResponseOrderDto> getBuyerOrderById(Authentication authentication, @PathVariable int id) {
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }
-        Order order =  orderService.getOrderByOrderId(id);
+        Order order = orderService.getOrderByOrderId(id);
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
-        User user = userService.getUserById(order.getBuyer().getId());
+        User user = userService.getUserById(userIdFromToken);
+        System.out.println(user);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
         }
-        if (!user.getId().equals(userIdFromToken)) {
-            throw new ForbiddenException("Request user id not matched with id in access token.");
-        }
+
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        order.setOrderItems(new ArrayList<>(order.getOrderItems()));
-        ResponseOrderDto dto = modelMapper.map(order,ResponseOrderDto.class);
+
+        if (!user.getId().equals(order.getBuyer().getId()) && !user.getId().equals(order.getSeller().getId())) {
+            throw new ForbiddenException("User id not an owner (seller/buyer) of the order.");
+        }
+        ResponseOrderDto dto = modelMapper.map(order, ResponseOrderDto.class);
         return ResponseEntity.ok(dto);
     }
 }

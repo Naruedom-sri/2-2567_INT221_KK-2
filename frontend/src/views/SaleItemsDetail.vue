@@ -11,8 +11,12 @@ import {
   deleteSaleItemById,
   getImageOfSaleItem,
   getSaleItemById,
-} from "@/libs/saleItemApi";  
+  getFirstImageOfSaleItem,
+} from "@/libs/saleItemApi";
 import { decodeToken } from "@/libs/jwtToken";
+import { useCartStore } from "@/stores/cartStore";
+
+const cart = useCartStore();
 const {
   params: { itemId },
 } = useRoute();
@@ -61,6 +65,93 @@ onMounted(() => getSaleItem());
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
 });
+
+const buyQty = ref(1);
+
+function increaseQty() {
+  if (buyQty.value < (item.value?.quantity ?? 9999)) buyQty.value++;
+}
+function decreaseQty() {
+  if (buyQty.value > 1) buyQty.value--;
+}
+
+async function addItemToCart(saleItem, qty = 1) {
+  if (!saleItem) return;
+
+  const token = localStorage.getItem("accessToken");
+  let currentUserId = null;
+
+  if(accessToken === null) {
+    router.push({ name: "Login" });
+    return;
+  }
+
+  if (token) {
+    const decoded = decodeToken(token);
+    currentUserId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
+  }
+
+  const sellerId =
+    saleItem.seller?.id ??
+    saleItem.sellerId ??
+    saleItem.userId ??
+    saleItem.shopId ??
+    saleItem.ownerId ??
+    "unknown";
+
+  if (sellerId === currentUserId) {
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    400,
+    "You cannot add your own product to the cart."
+  );
+  return;
+}
+
+  let imageUrl = null;
+  try {
+    imageUrl = await getFirstImageOfSaleItem(`${BASE_API_DOMAIN}`, saleItem.id);
+  } catch (e) {
+    console.warn("Failed to fetch image:", e);
+  }
+
+  if (!imageUrl && saleItem.saleItemImages?.length) {
+    imageUrl = saleItem.saleItemImages[0].url ?? null;
+  }
+
+  const itemPayload = {
+    itemId: saleItem.id,
+    brand: saleItem.brandName ?? "Brand",
+    color: saleItem.color ?? null,
+    storageGb: saleItem.storageGb ?? null,
+    name: saleItem.model ?? saleItem.brandName ?? "Item",
+    price: Number(saleItem.price ?? 0),
+    availableStock: saleItem.quantity ?? 0,
+    image: imageUrl ?? "",
+  };
+
+  const sellerPayload = {
+    sellerId,
+    sellerNickname:
+      saleItem.seller?.nickName ??
+      saleItem.seller?.fullName ??
+      saleItem.sellerName ??
+      saleItem.shopName ??
+      saleItem.brandName ??
+      "Seller",
+  };
+
+  cart.addToCart(itemPayload, sellerPayload, Number(qty));
+
+   
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "cart",
+    "add",
+    200,
+    "Add to cart successfully."
+  );
+}
 </script>
 
 <template>
@@ -247,48 +338,30 @@ onUnmounted(() => {
           </h1>
           <button
             class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            type="button"
+            @click="decreaseQty"
           >
             -
           </button>
           <input
             type="number"
             min="1"
-            value="1"
+            v-model.number="buyQty"
             :max="item.quantity"
             class="mx-3 border rounded-md text-center"
           />
           <button
             class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            type="button"
+            @click="increaseQty"
           >
             +
           </button>
         </div>
-        <div class="btn-add-buy mt-10">
-          <div
-            v-if="decoded.role === 'SELLER'"
-            class="flex justify-between gap-4 space-y-5"
-          >
-            <button
-              @click="showDialog = true"
-              class="itbms-delete-button w-full flex-1 py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
-            >
-              Delete
-            </button>
-            <RouterLink
-              :to="{
-                name: 'EditSaleItems',
-                params: { itemId: item.id },
-              }"
-              class="itbms-edit-button flex-1"
-              ><button
-                class="w-full py-3 rounded-4xl border text-base hover:bg-white hover:text-black hover:cursor-pointer duration-200"
-              >
-                Edit
-              </button></RouterLink
-            >
-          </div>
+        <div class="btn-add-to-cart mt-10">
           <button
             class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
+            @click.stop="addItemToCart(item, buyQty)"
           >
             Add to Cart
           </button>

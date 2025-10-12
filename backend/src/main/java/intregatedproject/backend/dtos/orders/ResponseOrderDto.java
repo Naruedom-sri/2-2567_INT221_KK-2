@@ -5,7 +5,6 @@ import lombok.Data;
 
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -17,6 +16,6 @@ public class ResponseOrderDto {
     private Instant paymentDate;
     private String shippingAddress;
     private String orderNote;
-    private List<OrderItemDto>  orderItems = new ArrayList<>();
+    private List<OrderItemDto> orderItems;
     private String orderStatus;
 }

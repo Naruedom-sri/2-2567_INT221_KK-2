@@ -178,6 +178,7 @@ const getUserById = async (url, id, token) => {
   return response.json();
 };
 
+
 const editProfile = async (url, id, token, form) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/users/${id}`, {
@@ -217,7 +218,6 @@ const editProfile = async (url, id, token, form) => {
 };
 
 const refreshAccessToken = async (url) => {
-  const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/refresh`, {
     method: "POST",
     credentials: "include", // ส่ง cookie refresh token ไป
@@ -230,12 +230,6 @@ const refreshAccessToken = async (url) => {
     } catch {
       errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
     }
-    // statusStore.setEntityAndMethodAndStatusAndMessage(
-    //   "user",
-    //   "refresh",
-    //   response.status,
-    //   errorMessage
-    // );
     throw new Error(
       `Can't create new access token (status: ${response.status}) - ${errorMessage}`
     );
@@ -277,6 +271,36 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
+const getAllOrder = async (url, id, accessToken, params) => {
+const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/users/${id}/orders?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't get order (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return response.json();
+};
+
 export {
   loginUser,
   register,
@@ -286,4 +310,5 @@ export {
   logoutUser,
   editProfile,
   verifyEmail,
+  getAllOrder
 };

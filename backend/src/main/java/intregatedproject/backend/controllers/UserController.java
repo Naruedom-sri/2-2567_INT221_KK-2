@@ -46,9 +46,6 @@ public class UserController {
     private ModelMapper modelMapper;
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private OrderRepository orderRepository;
-
 
     @GetMapping("/v2/sellers/{id}/sale-items")
     public ResponseEntity<PageSellerDto> getSaleItemsOfSeller(@PathVariable int id,
@@ -184,17 +181,17 @@ public class UserController {
 
 
     @GetMapping("/v2/users/{id}/orders")
-    public ResponseEntity<PageBuyerOrder> getOrdersByUserId(@PathVariable int id,
+    public ResponseEntity<PageBuyerOrder> getAllOrderByUserId(@PathVariable int id,
                                                     Authentication authentication,
                                                     @RequestParam(required = false) Integer page,
                                                     @RequestParam(defaultValue = "10") Integer size,
                                                     @RequestParam(defaultValue = "id") String sortField,
                                                     @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
-        if (authentication == null) {
-            throw new UnauthorizedException("Invalid token.");
-        }
+                if (authentication == null) {
+                    throw new UnauthorizedException("Invalid token.");
+                }
 
-        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+                Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(id);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
@@ -205,7 +202,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id, null,  sortField, sortDirection, page, size);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size);
         List<ResponseOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseOrderDto.class))
                 .collect(Collectors.toList());
