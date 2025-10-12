@@ -42,7 +42,8 @@ public class OrderService {
             String sortField,
             String sortDirection,
             Integer page,
-            Integer size
+            Integer size,
+            Boolean isSeller
     ) throws BadRequestException {
         size = size <= 0 ? 10 : size;
 
@@ -67,7 +68,7 @@ public class OrderService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId));
+        Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId, isSeller));
 
         return orderRepository.findAll(filterSpec, pageable);
     }

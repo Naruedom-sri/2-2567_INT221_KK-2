@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ResponseSellerDto {
+public class ResponseSellerOrderDto {
     private Integer id;
     private Integer sellerId;
     private BuyerDto buyer;
@@ -16,6 +16,6 @@ public class ResponseSellerDto {
     private Instant paymentDate;
     private String shippingAddress;
     private String orderNote;
-    private List<OrderItemDto> orderItems = new ArrayList<>();
+    private List<OrderItemDto> orderItems;
     private String orderStatus;
 }

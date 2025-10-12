@@ -4,12 +4,17 @@ import intregatedproject.backend.entities.Order;
 import org.springframework.data.jpa.domain.Specification;
 
 public class OrderSpecification {
-    public static Specification<Order> hasUser(Integer userId) {
+    public static Specification<Order> hasUser(Integer userId, Boolean isSeller) {
         return (root, query, criteriaBuilder) -> {
             if (userId == null || userId <= 0) return criteriaBuilder.conjunction();
-            return criteriaBuilder.equal(root.join("buyer").get("id"), userId);
+            if (isSeller) {
+                return criteriaBuilder.equal(root.join("seller").get("id"), userId);
+            } else {
+                return criteriaBuilder.equal(root.join("buyer").get("id"), userId);
+            }
         };
     }
+
 
     public static Specification<Order> hasKeyword(String searchContent) {
         return (root, query, criteriaBuilder) -> {

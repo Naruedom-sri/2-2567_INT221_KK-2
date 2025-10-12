@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class PageSellerOrder {
-    private List<ResponseSellerDto> content;
+    private List<ResponseSellerOrderDto> content;
     private boolean last;
     private boolean first;
     private Integer totalPages;

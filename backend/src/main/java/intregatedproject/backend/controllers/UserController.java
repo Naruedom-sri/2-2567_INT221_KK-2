@@ -3,6 +3,7 @@ package intregatedproject.backend.controllers;
 import intregatedproject.backend.dtos.orders.PageBuyerOrder;
 import intregatedproject.backend.dtos.orders.PageSellerOrder;
 import intregatedproject.backend.dtos.orders.ResponseOrderDto;
+import intregatedproject.backend.dtos.orders.ResponseSellerOrderDto;
 import intregatedproject.backend.dtos.saleitems.*;
 import intregatedproject.backend.dtos.users.RequestUserEditDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
@@ -14,7 +15,6 @@ import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
-import intregatedproject.backend.repositories.OrderRepository;
 import intregatedproject.backend.services.OrderService;
 import intregatedproject.backend.services.SaleItemService;
 import intregatedproject.backend.services.UserService;
@@ -202,7 +202,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size,false);
         List<ResponseOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseOrderDto.class))
                 .collect(Collectors.toList());
@@ -240,9 +240,9 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id, null,  sortField, sortDirection, page, size);
-        List<ResponseSellerDto> ordersDto = resultPage.getContent().stream()
-                .map(order -> modelMapper.map(order, ResponseOrderDto.class))
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size,true);
+        List<ResponseSellerOrderDto> ordersDto = resultPage.getContent().stream()
+                .map(order -> modelMapper.map(order, ResponseSellerOrderDto.class))
                 .collect(Collectors.toList());
         PageSellerOrder dto = new PageSellerOrder();
         dto.setContent(ordersDto);
