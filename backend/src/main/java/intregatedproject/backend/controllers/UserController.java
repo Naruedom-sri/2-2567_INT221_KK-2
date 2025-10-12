@@ -5,6 +5,7 @@ import intregatedproject.backend.dtos.orders.PageSellerOrder;
 import intregatedproject.backend.dtos.orders.ResponseOrderDto;
 import intregatedproject.backend.dtos.orders.ResponseSellerOrderDto;
 import intregatedproject.backend.dtos.saleitems.*;
+import intregatedproject.backend.dtos.users.RequestChangePasswordDto;
 import intregatedproject.backend.dtos.users.RequestUserEditDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
@@ -254,5 +255,35 @@ public class UserController {
         dto.setTotalPages(resultPage.getTotalPages());
         dto.setTotalElements((int) resultPage.getTotalElements());
         return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/v2/users/{id}/changePassword")
+    public ResponseEntity<String> changePassword(@PathVariable Integer id,
+                                                 Authentication authentication,
+                                                 @RequestBody RequestChangePasswordDto request) throws BadRequestException {
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+        if (!user.getId().equals(userIdFromToken)) {
+            throw new ForbiddenException("Request user id not matched with id in access token.");
+        }
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+
+        if (request.getOldPassword() == null || request.getNewPassword() == null || request.getConfirmNewPassword() == null) {
+            throw new BadRequestException("Missing required fields.");
+        }
+        if (request.getNewPassword().equals(request.getOldPassword())) {
+            throw new BadRequestException("New password must be different from old password.");
+        }
+        userService.changePassword(id, request);
+        return ResponseEntity.ok("Password changed successfully.");
     }
 }

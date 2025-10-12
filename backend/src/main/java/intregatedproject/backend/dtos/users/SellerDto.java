@@ -12,5 +12,4 @@ public class SellerDto {
     @JsonProperty("userType")
     private String role;
     private String nickName;
-
 }

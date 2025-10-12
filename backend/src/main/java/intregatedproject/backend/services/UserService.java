@@ -6,6 +6,7 @@ import intregatedproject.backend.entities.Seller;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.InvalidRoleException;
 import intregatedproject.backend.exceptions.users.RequiredFileMissingException;
+import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
@@ -154,5 +155,18 @@ public class UserService {
         dto.setBankAccountNumber(saved.getSeller().getBankAccountNumber());
         dto.setBankName(saved.getSeller().getBankName());
         return dto;
+    }
+
+
+    public void changePassword(Integer id, RequestChangePasswordDto request) {
+        User user = getUserById(id);
+        if(user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+        if(!user.getPassword().equals(request.getOldPassword())) {
+            throw new UnauthorizedException("Old password is incorrect.");
+        }
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
     }
 }
