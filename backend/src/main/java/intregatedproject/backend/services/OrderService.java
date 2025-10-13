@@ -87,7 +87,6 @@ public class OrderService {
     public Order createOrder(RequestOrderDto requestOrderDto) {
         User buyer = userService.getUserById(requestOrderDto.getBuyerId());
         User seller = userService.getUserById(requestOrderDto.getSellerId());
-
         if (buyer == null) {
             throw new ResourceNotFoundException("Buyer not found.");
         }
@@ -99,32 +98,45 @@ public class OrderService {
         }
         Order order = new Order();
         covertOrderDtoToEntity(requestOrderDto, order, buyer, seller);
-        var savedOrder = orderRepository.save(order);
-        requestOrderDto.getOrderItems().forEach(item -> {
+        orderRepository.save(order);
+        boolean hasInsufficientStock = false;
+
+        for (OrderItemDto item : requestOrderDto.getOrderItems()) {
+            SaleItem saleItem = saleItemService.getSaleItemById(Math.toIntExact(item.getSaleItemId()));
+            if (saleItem.getQuantity() < item.getQuantity()) {
+                hasInsufficientStock = true;
+            }
+        }
+
+
+        for (OrderItemDto item : requestOrderDto.getOrderItems()) {
             OrderItem orderItem = new OrderItem();
             RequestSaleItemDto saleItemDto = new RequestSaleItemDto();
             SaleItem saleItem = saleItemService.getSaleItemById(Math.toIntExact(item.getSaleItemId()));
-            if (saleItem.getQuantity() < item.getQuantity()) {
-                throw new InsufficientQuantityException("Insufficient quantity.");
-            }
             covertOrderItemDtoToEntity(item, orderItem, order, saleItem);
+            if (!hasInsufficientStock) {
+                saleItemDto.setModel(saleItem.getModel());
+                saleItemDto.setBrandId(saleItem.getBrand().getId());
+                saleItemDto.setPrice(saleItem.getPrice());
+                saleItemDto.setColor(saleItem.getColor());
+                saleItemDto.setQuantity(saleItem.getQuantity() - item.getQuantity());
+                saleItemDto.setDescription(saleItem.getDescription());
+                saleItemDto.setScreenSizeInch(saleItem.getScreenSizeInch());
+                saleItemDto.setStorageGb(saleItem.getStorageGb());
+                saleItemDto.setRamGb(saleItem.getRamGb());
+                saleItemService.updateSaleItem(saleItem.getId(), saleItemDto);
+            }
             orderItemRepository.save(orderItem);
-            saleItemDto.setModel(saleItem.getModel());
-            saleItemDto.setBrandId(saleItem.getBrand().getId());
-            saleItemDto.setPrice(saleItem.getPrice());
-            saleItemDto.setColor(saleItem.getColor());
-            saleItemDto.setQuantity(saleItem.getQuantity() - item.getQuantity());
-            saleItemDto.setDescription(saleItem.getDescription());
-            saleItemDto.setScreenSizeInch(saleItem.getScreenSizeInch());
-            saleItemDto.setStorageGb(saleItem.getStorageGb());
-            saleItemDto.setRamGb(saleItem.getRamGb());
-            saleItemService.updateSaleItem(saleItem.getId(),saleItemDto);
-            savedOrder.getOrderItems().add(orderItem);
-        });
-        entityManager.refresh(savedOrder);
-        return savedOrder;
+            order.getOrderItems().add(orderItem);
+        }
+        if (hasInsufficientStock) {
+            order.setOrderStatus("CANCELLED");
+            order = orderRepository.save(order);
+        }
+        orderRepository.flush();
+        entityManager.refresh(order);
+        return order;
     }
-
 
 
     private void covertOrderDtoToEntity(RequestOrderDto requestOrderDto, Order order, User buyer, User seller) {
