@@ -277,7 +277,7 @@ public class UserController {
             throw new ForbiddenException("Account is not active.");
         }
 
-        if (request.getOldPassword() == null || request.getNewPassword() == null || request.getConfirmNewPassword() == null) {
+        if (request.getOldPassword() == null || request.getNewPassword() == null ) {
             throw new BadRequestException("Missing required fields.");
         }
         if (request.getNewPassword().equals(request.getOldPassword())) {
