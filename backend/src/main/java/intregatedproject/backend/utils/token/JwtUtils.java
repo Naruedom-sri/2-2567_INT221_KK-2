@@ -43,6 +43,23 @@ public class JwtUtils {
         this.key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
     }
 
+    public String generateTokenForResetPW(String email){
+        return Jwts.builder()
+                .claim("email", email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                .signWith(key)
+                .compact();
+    }
+
+    public String extractEmail(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("email", String.class);
+    }
 
     public String generateAccessToken(User user, HttpServletRequest request) {
         String issuer = request.getRequestURL().toString().replace(request.getRequestURI(), "");
