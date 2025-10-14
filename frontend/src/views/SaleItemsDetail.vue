@@ -364,7 +364,8 @@ async function addItemToCart(saleItem, qty = 1) {
         </div>
         <div class="btn-add-to-cart mt-10">
           <button
-            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
+            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-black"
+            :disabled="cart.getCartQuantity(item.id) >= item.quantity"
             @click.stop="addItemToCart(item, buyQty)"
           >
             Add to Cart
