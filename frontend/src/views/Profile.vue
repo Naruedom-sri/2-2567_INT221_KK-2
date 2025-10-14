@@ -96,14 +96,24 @@ onMounted(() => {
           <p><strong>Bank Name:</strong> {{ userStore.bankName }}</p>
         </div>
 
-        <div class="mt-5">
-          <router-link :to="{ name: 'EditProfile' }"
-            ><button
-              class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
-            >
-              Edit Profile
-            </button></router-link
-          >
+        <div class="mt-2 flex flex-col gap-2 items-center">
+          <div>
+              <button
+                class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
+              >
+                Change Password
+              </button>
+          </div>
+
+          <div>
+            <router-link :to="{ name: 'EditProfile' }"
+              ><button
+                class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
+              >
+                Edit Profile
+              </button>
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
