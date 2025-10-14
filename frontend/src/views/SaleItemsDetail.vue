@@ -40,7 +40,7 @@ const getSaleItem = async () => {
           itemId,
           img.imageViewOrder
         );
-        imageUrlList.value.push(imgUrl); // set ตาม index
+        imageUrlList.value.push(imgUrl); 
       }
       mainImage.value = imageUrlList.value[0];
     }
@@ -107,47 +107,6 @@ async function addItemToCart(saleItem, qty = 1) {
     );
     return;
   }
-
-  let latestStock = 0;
-  try {
-    const res = await fetch(`${BASE_API_DOMAIN}/v1/sale-items/${saleItem.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) throw new Error("Failed to fetch sale item");
-
-    const data = await res.json();
-    latestStock =
-      data.quantity ??
-      data.availableStock ??
-      data.stock ??
-      data.remaining ??
-      0;
-  } catch (e) {
-    console.warn("Failed to fetch latest stock:", e);
-    latestStock = saleItem.quantity ?? 0;
-  }
-
-  if (latestStock <= 0) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      400,
-      "This item is out of stock."
-    );
-    return;
-  }
-
-  if (qty > latestStock) {
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "cart",
-      "add",
-      400,
-      `Only ${latestStock} item(s) available in stock.`
-    );
-    return;
-  }
-
 
   let imageUrl = null;
   try {
@@ -380,8 +339,9 @@ async function addItemToCart(saleItem, qty = 1) {
             Quantity. <span class="text-white/80">How many do you want?</span>
           </h1>
           <button
-            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100 disabled:opacity-40 disabled:hover:bg-black disabled:hover:text-white disabled:cursor-not-allowed"
             type="button"
+            :disabled="buyQty === 1"
             @click="decreaseQty"
           >
             -
@@ -394,8 +354,9 @@ async function addItemToCart(saleItem, qty = 1) {
             class="mx-3 border rounded-md text-center"
           />
           <button
-            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100 disabled:opacity-40 disabled:hover:bg-black disabled:hover:text-white disabled:cursor-not-allowed"
             type="button"
+            :disabled="buyQty === item.quantity"
             @click="increaseQty"
           >
             +

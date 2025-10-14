@@ -383,25 +383,6 @@ async function addItemToCart(saleItem, qty = 1) {
       return;
     }
 
-    const availableStock =
-      saleItem.quantity ??
-      saleItem.availableStock ??
-      saleItem.stock ??
-      saleItem.remaining ??
-      0;
-
-    console.log("Checking stock:", availableStock, "requested:", qty);
-
-    if (availableStock < qty) {
-      statusStore.setEntityAndMethodAndStatusAndMessage(
-        "cart",
-        "add",
-        400,
-        `Only ${availableStock} items in stock.`
-      );
-      return;
-    }
-
     let imageUrl = null;
     try {
       imageUrl = await getFirstImageOfSaleItem(
