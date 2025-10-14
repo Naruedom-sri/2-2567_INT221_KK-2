@@ -199,7 +199,7 @@ async function addItemToCart(saleItem, qty = 1) {
       </div>
       <div class="truck-bag flex justify-end gap-6 h-7 mx-20">
         <div class="flex gap-2">
-          <p class="self-center">{{ item.seller.nickName }}</p>
+          <p class="self-center">{{ item.seller?.nickName }}</p>
         </div>
         <p class="self-center">|</p>
         <div class="flex gap-2">
