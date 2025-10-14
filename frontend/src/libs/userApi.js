@@ -217,6 +217,49 @@ const editProfile = async (url, id, token, form) => {
   return response.json();
 };
 
+const editPassword = async (url, id, token, payload) => {
+  const statusStore = useStatusStore();
+
+  const response = await fetch(`${url}/v2/users/${id}/changePassword`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); 
+    }
+
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      401,
+      errorMessage
+    );
+
+    throw new Error(
+      `Can't edit password (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "password",
+    "edit",
+    response.status,
+    "Password updated successfully."
+  );
+
+  return response.json();
+}
+
 const refreshAccessToken = async (url) => {
   const response = await fetch(`${url}/v2/auth/refresh`, {
     method: "POST",
@@ -309,6 +352,7 @@ export {
   getUserById,
   logoutUser,
   editProfile,
+  editPassword,
   verifyEmail,
   getAllOrder
 };

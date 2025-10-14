@@ -98,11 +98,13 @@ onMounted(() => {
 
         <div class="mt-2 flex flex-col gap-2 items-center">
           <div>
+            <router-link :to="{ name: 'ChangePassword' }">
               <button
                 class="border-2 border-gray-400 rounded-md px-3 py-1 bg-gray-400 text-white hover:bg-gray-950 hover:border-gray-950"
               >
                 Change Password
               </button>
+            </router-link>
           </div>
 
           <div>
