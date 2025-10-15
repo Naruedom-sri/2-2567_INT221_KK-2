@@ -23,13 +23,13 @@ import ChangePassword from "@/views/ChangePassword.vue";
 const history = createWebHistory("/kk2/");
 const routes = [
   {
+    path: "/",
+    redirect: { name: "Login" },
+  },
+  {
     path: "/sale-items",
     name: "SaleItemsGallery",
     component: SaleItemsGallery,
-  },
-  {
-    path: "/",
-    redirect: { name: "Login" },
   },
   {
     path: "/home",
