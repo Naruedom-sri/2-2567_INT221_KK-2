@@ -171,7 +171,6 @@ async function placeOrder() {
           buyerId,
           sellerId: Number(seller.sellerId),
           orderDate: new Date().toISOString(),
-          paymentDate: null,
           shippingAddress: shippingAddress.value || "",
           orderNote: orderNote.value || "",
           orderItems: items.map((it) => ({

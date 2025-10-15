@@ -2,6 +2,7 @@ package intregatedproject.backend.controllers;
 
 import intregatedproject.backend.dtos.orders.RequestOrderDto;
 import intregatedproject.backend.dtos.orders.ResponseOrderDto;
+import intregatedproject.backend.dtos.orders.ResponseSellerOrderDto;
 import intregatedproject.backend.entities.Order;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
@@ -35,9 +36,9 @@ public class OrderController {
 
     @PostMapping("/v2/orders")
     public ResponseEntity<List<ResponseOrderDto>> createOrder(Authentication authentication, @RequestBody List<RequestOrderDto> requestOrderDto) throws BadRequestException {
-//        if (authentication == null) {
-//            throw new UnauthorizedException("invalid token.");
-//        }
+        if (authentication == null) {
+            throw new UnauthorizedException("invalid token.");
+        }
         if (requestOrderDto == null || requestOrderDto.isEmpty()) {
             throw new BadRequestException("Missing request parameters or invalid request parameter.");
         }
@@ -59,7 +60,6 @@ public class OrderController {
         Order order = orderService.getOrderByOrderId(id);
         Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(userIdFromToken);
-        System.out.println(user);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
         }
@@ -72,6 +72,26 @@ public class OrderController {
             throw new ForbiddenException("User id not an owner (seller/buyer) of the order.");
         }
         ResponseOrderDto dto = modelMapper.map(order, ResponseOrderDto.class);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/v2/orders/{id}/viewed")
+    public ResponseEntity<ResponseSellerOrderDto> markOrderAsViewed(Authentication authentication, @PathVariable int id) {
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+        Order order = orderService.getOrderByOrderId(id);
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(userIdFromToken);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+        if (!user.getId().equals(order.getSeller().getId())) {
+            throw new ForbiddenException("User id not an owner of the order.");
+        }
+
+        Order updatedOrder = orderService.updateMarkOrderAsViewed(id);
+        ResponseSellerOrderDto dto = modelMapper.map(updatedOrder, ResponseSellerOrderDto.class);
         return ResponseEntity.ok(dto);
     }
 }

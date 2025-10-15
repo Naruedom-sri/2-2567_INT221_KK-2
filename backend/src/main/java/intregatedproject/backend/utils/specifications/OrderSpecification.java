@@ -14,12 +14,17 @@ public class OrderSpecification {
             }
         };
     }
+    public static Specification<Order> hasOrderStatus(String orderStatus) {
+        return (root, query, criteriaBuilder) -> {
+            if (orderStatus == null || orderStatus.isBlank()) return criteriaBuilder.conjunction();
+            return criteriaBuilder.equal(root.get("orderStatus"), orderStatus);
+        };
+    }
 
 
     public static Specification<Order> hasKeyword(String searchContent) {
         return (root, query, criteriaBuilder) -> {
             if (searchContent == null || searchContent.isBlank()) return criteriaBuilder.conjunction();
-            // ตัวอย่าง: ค้นหาใน orderNote หรือ shippingAddress
             return criteriaBuilder.or(
                     criteriaBuilder.like(root.get("orderNote"), "%" + searchContent + "%"),
                     criteriaBuilder.like(root.get("shippingAddress"), "%" + searchContent + "%")

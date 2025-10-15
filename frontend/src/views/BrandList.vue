@@ -58,7 +58,7 @@ onMounted(() => {
     v-if="statusStore.getStatus() !== null"
     :brandName="brandName"
   />
-  <div class="brand-container text-white">
+  <div class="brand-container text-white text-sm">
     <AlertMessage
       v-if="showDialog"
       :title="haveSaleItem ? 'Warning!' : 'Are you sure?'"

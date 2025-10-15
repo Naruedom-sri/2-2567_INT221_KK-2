@@ -174,7 +174,7 @@ public class AuthController {
 
         Claims claims = jwtUtil.validateToken(refreshToken);
         if (claims == null) {
-            throw new BadRequestException("Invalid refresh token.");
+            throw new UnauthorizedException("Invalid refresh token.");
         }
 
         User user = userService.getUserById(Integer.valueOf(claims.getSubject()));

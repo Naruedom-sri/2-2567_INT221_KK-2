@@ -47,7 +47,6 @@ public class Order {
     private String shippingAddress;
 
     @Size(max = 100)
-    @NotNull
     @Column(name = "orderNote", nullable = false, length = 100)
     private String orderNote;
 
@@ -55,6 +54,11 @@ public class Order {
     @Lob
     @Column(name = "orderStatus")
     private String orderStatus;
+
+    @ColumnDefault("0")
+    @NotNull
+    @Column(name = "isViewed")
+    private Boolean isViewed;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();

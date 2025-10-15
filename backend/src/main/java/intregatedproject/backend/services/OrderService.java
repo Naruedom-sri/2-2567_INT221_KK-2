@@ -4,7 +4,6 @@ import intregatedproject.backend.dtos.orders.OrderItemDto;
 import intregatedproject.backend.dtos.orders.RequestOrderDto;
 import intregatedproject.backend.dtos.saleitems.RequestSaleItemDto;
 import intregatedproject.backend.entities.*;
-import intregatedproject.backend.exceptions.saleitems.InsufficientQuantityException;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.repositories.OrderItemRepository;
 import intregatedproject.backend.repositories.OrderRepository;
@@ -39,6 +38,7 @@ public class OrderService {
 
     public Page<Order> getAllOrdersFilter(
             Integer userId,
+            String orderStatus,
             String sortField,
             String sortDirection,
             Integer page,
@@ -49,6 +49,9 @@ public class OrderService {
 
         if (page == null || page < 0) {
             throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
+        }
+        if (orderStatus == null || orderStatus.isBlank() || (!orderStatus.equalsIgnoreCase("completed") && !orderStatus.equalsIgnoreCase("cancelled"))) {
+            orderStatus = null;
         }
 
         Sort sort;
@@ -68,7 +71,8 @@ public class OrderService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId, isSeller));
+        Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId, isSeller))
+                .and(OrderSpecification.hasOrderStatus(orderStatus));
 
         return orderRepository.findAll(filterSpec, pageable);
     }
@@ -139,6 +143,13 @@ public class OrderService {
         return order;
     }
 
+    public Order updateMarkOrderAsViewed(int orderId) {
+        Order updateOrder = getOrderByOrderId(orderId);
+        updateOrder.setIsViewed(true);
+        orderRepository.save(updateOrder);
+        return updateOrder;
+    }
+
 
     private void covertOrderDtoToEntity(RequestOrderDto requestOrderDto, Order order, User buyer, User seller) {
         order.setBuyer(buyer);
@@ -147,6 +158,7 @@ public class OrderService {
         order.setShippingAddress(requestOrderDto.getShippingAddress());
         order.setOrderNote(requestOrderDto.getOrderNote());
         order.setOrderStatus(requestOrderDto.getOrderStatus());
+        order.setIsViewed(requestOrderDto.getIsViewed());
     }
 
     private void covertOrderItemDtoToEntity(OrderItemDto item, OrderItem orderItem, Order order, SaleItem saleItem) {

@@ -1,11 +1,27 @@
 <script setup>
 import { useRouter } from "vue-router";
-defineProps({
+const props = defineProps({
   orderList: { type: Array, default: [] },
   totalPriceList: { type: Array, default: [] },
   imageUrlList: { type: Array, default: [] },
+  isSeller: { type: Boolean, default: false },
 });
 const router = useRouter();
+const emit = defineEmits(["markAsViewed"]);
+const handleClickView = async (orderId) => {
+  emit("markAsViewed", orderId);
+  if (props.isSeller) {
+    router.push({
+      name: "OrderSellerDetail",
+      params: { orderId: orderId },
+    });
+  } else {
+    router.push({
+      name: "OrderDetail",
+      params: { orderId: orderId },
+    });
+  }
+};
 </script>
 
 <template>
@@ -20,10 +36,11 @@ const router = useRouter();
     v-for="(order, indexOrder) in orderList"
     :key="indexOrder"
     class="itbms-row my-4 p-10 rounded bg-gray-200"
-    @click="router.push({ name: 'OrderDetail', params: { orderId: order.id } })"
   >
     <div class="order-title flex justify-between">
-      <h1 class="w-32 font-medium text-center">Seller</h1>
+      <h1 class="w-32 font-medium text-center">
+        {{ isSeller ? "Buyer" : "Seller" }}
+      </h1>
       <h1 class="w-32 font-medium text-center">Order No</h1>
       <h1 class="w-32 font-medium text-center">Order Date</h1>
       <h1 class="w-32 font-medium text-center">Payment Date</h1>
@@ -32,7 +49,7 @@ const router = useRouter();
     </div>
     <div class="order-detail my-3 flex justify-between">
       <p class="itbms-nickname w-32 text-center">
-        {{ order.seller.nickName }}
+        {{ isSeller ? order.buyer.userName : order.seller.nickName }}
       </p>
       <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
       <p class="itbms-order-date w-32 text-center">
@@ -42,9 +59,14 @@ const router = useRouter();
         {{ new Date(order.paymentDate).toLocaleDateString() }}
       </p>
       <p class="itbms-total-order-price w-32 text-center">
-        {{ totalPriceList.at(indexOrder).toLocaleString() }}
+        {{ totalPriceList.at(indexOrder)?.toLocaleString() }}
       </p>
-      <p class="itbms-order-status w-32 text-center">
+      <p
+        class="itbms-order-status w-32 text-center font-semibold"
+        :class="
+          order.orderStatus === 'COMPLETED' ? 'text-green-500' : 'text-red-500'
+        "
+      >
         {{ order.orderStatus }}
       </p>
     </div>
@@ -57,6 +79,14 @@ const router = useRouter();
         <h1 class="font-medium">Note:</h1>
         <p class="Itbms-order-note">{{ order.orderNote }}</p>
       </div>
+    </div>
+    <div class="mb-4">
+      <button
+        @click="handleClickView(order.id)"
+        class="itbms-view-button py-1.5 px-3 bg-blue-500 rounded text-white cursor-pointer hover:bg-blue-600"
+      >
+        View
+      </button>
     </div>
     <div class="item-row-container space-y-2 text-white">
       <div

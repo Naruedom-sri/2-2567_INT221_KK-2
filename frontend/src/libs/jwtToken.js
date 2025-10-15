@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "./userApi";
+import { useCartStore } from "@/stores/cartStore";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 
 function isAccessTokenExpired(token) {
@@ -13,12 +14,16 @@ function isAccessTokenExpired(token) {
 }
 const isAuth = async () => {
   const accessToken = localStorage.getItem("accessToken");
+  const cartStore = useCartStore();
   if (!accessToken || isAccessTokenExpired(accessToken)) {
     try {
       const data = await refreshAccessToken(`${BASE_API_DOMAIN}`);
       localStorage.setItem("accessToken", data.access_token);
       return true;
     } catch (error) {
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
       console.log(error);
       return false;
     }
