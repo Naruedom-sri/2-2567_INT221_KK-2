@@ -25,6 +25,11 @@ export const useCartStore = defineStore("cart", {
       }
       return Array.from(map.values());
     },
+
+    getCartQuantity: (state) => (itemId) => {
+    const found = state.items.find((it) => it.itemId === itemId);
+    return found ? found.quantity : 0;
+    },
   },
   actions: {
     _save() {

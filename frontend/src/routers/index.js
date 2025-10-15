@@ -19,6 +19,7 @@ import { decodeToken, isAuth } from "@/libs/jwtToken";
 import OrderUser from "@/views/OrderUser.vue";
 import OrderDetail from "@/views/OrderDetail.vue";
 import OrderSeller from "@/views/OrderSeller.vue";
+import ChangePassword from "@/views/ChangePassword.vue";
 const history = createWebHistory("/kk2/");
 const routes = [
   {
@@ -59,6 +60,11 @@ const routes = [
     path: "/profile/edit",
     name: "EditProfile",
     component: EditProfile,
+  },
+  {
+    path: "/change-password",
+    name: "ChangePassword",
+    component: ChangePassword,
   },
   {
     path: "/cart",

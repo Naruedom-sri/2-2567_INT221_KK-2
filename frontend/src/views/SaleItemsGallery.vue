@@ -428,6 +428,7 @@ async function addItemToCart(saleItem, qty = 1) {
       };
 
       cart.addToCart(itemPayload, sellerPayload, Number(qty));
+
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "cart",
         "add",
@@ -793,8 +794,9 @@ onUnmounted(() => {
 
         <div class="flex justify-center">
           <button
-            class="itbms-add-to-cart-button px-10 py-2 my-4 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300"
+            class="itbms-add-to-cart-button px-10 py-2 my-4 rounded-2xl bg-white text-black hover:bg-blue-500 hover:text-white hover:cursor-pointer duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-black"
             :class="[showButtonItem === index ? '' : 'opacity-0']"
+            :disabled="cart.getCartQuantity(item.id) >= item.quantity"
             type="button"
             @click.stop="addItemToCart(item, 1)"
           >

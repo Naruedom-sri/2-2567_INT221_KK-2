@@ -8,6 +8,7 @@ import intregatedproject.backend.dtos.users.ResponseSellerRegisterDto;
 import intregatedproject.backend.entities.User;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
+import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
 import intregatedproject.backend.utils.token.JwtUtils;
@@ -38,6 +39,8 @@ public class AuthController {
     private JwtUtils jwtUtil;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/v2/users/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String jwtToken) {
@@ -186,5 +189,22 @@ public class AuthController {
         return ResponseEntity.ok(responseToken);
     }
 
+    @GetMapping("/v2/login/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("Email not found."));
+        String token = jwtUtil.generateTokenForResetPW(email);
+        emailService.sendResetPWEmail(email, token);
+        return ResponseEntity.ok("send email success");
+    }
+
+    @PostMapping("/v2/change-password")
+    public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken){
+        String email = jwtUtil.extractEmail(jwtToken);
+
+        userService.forgotPassword(password, email);
+
+        return ResponseEntity.noContent().build();
+    }
 }
 

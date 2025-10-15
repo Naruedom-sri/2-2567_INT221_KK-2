@@ -8,8 +8,6 @@ import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationToken
 import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.utils.token.JwtUtils;
 import jakarta.mail.internet.MimeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -37,6 +35,8 @@ public class EmailService {
     private SpringTemplateEngine templateEngine;
     @Value("${app.base-url}")
     private String baseUrl;
+    @Value("${app.base-url2}")
+    private String resetBaseUrl;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -66,8 +66,29 @@ public class EmailService {
         }
     }
 
-    //ใช้ตอน deploy จริง
-//        String verificationUrl = "http://intproj24.sit.kmutt.ac.th/kk2/verify-email/?token="+token ;
+    @Async
+    public void sendResetPWEmail(String toEmail, String token) {
+        String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String resetUrl = resetBaseUrl + encoded;
+
+        Context context = new Context();
+        context.setVariable("resetUrl", resetUrl);
+        context.setVariable("token", encoded);
+
+        String htmlContent = templateEngine.process("resetPasswordEmail", context);
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject("Reset Your Password");
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send reset password email", e);
+        }
+    }
+
 
     public User verifyEmail(String jwtToken) {
         try {

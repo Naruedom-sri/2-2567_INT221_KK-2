@@ -142,7 +142,6 @@ public class UserService {
 
         user.setNickname(request.getNickname());
         user.setFullName(request.getFullName());
-        // role ไม่ต้องแก้ ให้ใช้ของเดิม (seller)
 
         User saved = userRepository.save(user);
 
@@ -167,6 +166,14 @@ public class UserService {
             throw new UnauthorizedException("Old password is incorrect.");
         }
         user.setPassword(request.getNewPassword());
+        userRepository.save(user);
+    }
+
+
+    public void forgotPassword(String password,String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found."));
+        user.setPassword(password);
         userRepository.save(user);
     }
 }

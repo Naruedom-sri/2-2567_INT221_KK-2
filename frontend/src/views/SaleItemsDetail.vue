@@ -40,7 +40,7 @@ const getSaleItem = async () => {
           itemId,
           img.imageViewOrder
         );
-        imageUrlList.value.push(imgUrl); // set ตาม index
+        imageUrlList.value.push(imgUrl); 
       }
       mainImage.value = imageUrlList.value[0];
     }
@@ -339,8 +339,9 @@ async function addItemToCart(saleItem, qty = 1) {
             Quantity. <span class="text-white/80">How many do you want?</span>
           </h1>
           <button
-            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100 disabled:opacity-40 disabled:hover:bg-black disabled:hover:text-white disabled:cursor-not-allowed"
             type="button"
+            :disabled="buyQty === 1"
             @click="decreaseQty"
           >
             -
@@ -353,8 +354,9 @@ async function addItemToCart(saleItem, qty = 1) {
             class="mx-3 border rounded-md text-center"
           />
           <button
-            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100"
+            class="w-7 border rounded-md hover:bg-white hover:text-black hover:cursor-pointer duration-100 disabled:opacity-40 disabled:hover:bg-black disabled:hover:text-white disabled:cursor-not-allowed"
             type="button"
+            :disabled="buyQty === item.quantity"
             @click="increaseQty"
           >
             +
@@ -362,7 +364,8 @@ async function addItemToCart(saleItem, qty = 1) {
         </div>
         <div class="btn-add-to-cart mt-10">
           <button
-            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200"
+            class="w-full py-3 rounded-4xl bg-white text-black text-base hover:cursor-pointer hover:bg-blue-500 hover:text-white duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-black"
+            :disabled="cart.getCartQuantity(item.id) >= item.quantity"
             @click.stop="addItemToCart(item, buyQty)"
           >
             Add to Cart
