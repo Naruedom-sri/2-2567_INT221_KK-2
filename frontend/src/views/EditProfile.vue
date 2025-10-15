@@ -33,7 +33,7 @@ async function saveProfile() {
     form.fullName = payload.fullName;
     router.push({ name: "Profile" });
   } catch (error) {
-    console.error( error);
+    console.error(error);
   }
 }
 
