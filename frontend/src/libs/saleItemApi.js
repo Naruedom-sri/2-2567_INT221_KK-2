@@ -122,12 +122,6 @@ const createSaleItem = async (url, formData) => {
       `Can't create sale-items with status :  ${response.status} and body: ${response.json}`
     );
   }
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "sale-items",
-    "add",
-    response.status,
-    "The sale item has been successfully added."
-  );
   const data = await response.json();
   return data;
 };

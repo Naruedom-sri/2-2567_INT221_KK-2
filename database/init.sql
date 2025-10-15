@@ -69,8 +69,9 @@ CREATE TABLE orders (
 	orderDate DATETIME NOT NULL,
     paymentDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     shippingAddress VARCHAR(100) NOT NULL,
-    orderNote VARCHAR(100) NOT NULL,
-	orderStatus ENUM('COMPLETED','CANCELED') DEFAULT 'COMPLETED',
+    orderNote VARCHAR(100),
+	orderStatus ENUM('COMPLETED','CANCELLED') DEFAULT 'COMPLETED',
+    isViewed BOOLEAN NOT NULL DEFAULT false,
 	FOREIGN KEY fk_order_buyer_id (buyerId) REFERENCES users(userId),
     FOREIGN KEY fk_order_seller_id (sellerId) REFERENCES users(userId)
 );
@@ -86,6 +87,24 @@ CREATE TABLE order_items (
     FOREIGN KEY fk_order_item_sale_item_id(saleItemId) REFERENCES sale_items(saleItemId)
 );
 
+-- CREATE TABLE carts (
+--   cartId INT AUTO_INCREMENT PRIMARY KEY,
+--   shippingAddress VARCHAR(100) NOT NULL,
+--   userId INT NOT NULL,
+--   status ENUM('ACTIVE', 'CHECKED_OUT') DEFAULT 'ACTIVE',
+--   createdOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+--   updatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   FOREIGN KEY fk_cart_user_id (userId) REFERENCES users(userId) ON DELETE CASCADE
+-- );
+
+-- CREATE TABLE cart_items (
+--   cartNo INT AUTO_INCREMENT PRIMARY KEY,
+--   cartId INT NOT NULL,
+--   saleItemId INT NOT NULL,
+--   quantity INT DEFAULT 1,
+--   FOREIGN KEY fk_cart_id (cartiId) REFERENCES carts(cartId)ON DELETE CASCADE,
+--   FOREIGN KEY fk_cart_item_sale_item_id(saleItemId) REFERENCES sale_items(saleItemId) ON DELETE CASCADE
+-- );
 
 INSERT INTO brands (brandId, name, countryOfOrigin, webSiteUrl, isActive) VALUES
 (1, 'Samsung', 'South Korea', 'https://www.samsung.com', 1),

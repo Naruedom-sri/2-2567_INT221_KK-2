@@ -9,6 +9,7 @@ import { deleteSaleItemById } from "@/libs/saleItemApi";
 import { getAllSaleItemOfSeller } from "@/libs/userApi";
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
+import { getAllSellerOrder } from "@/libs/userApi";
 const statusStore = useStatusStore();
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
@@ -27,6 +28,20 @@ const totalPage = ref(0);
 const totalSaleItems = ref(0);
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
+const orders = ref([]);
+const getAllOrder = async () => {
+  try {
+    const data = await getAllSellerOrder(
+      `${BASE_API_DOMAIN}`,
+      decoded.jti,
+      accessToken,
+      params
+    );
+    orders.value = data.content;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const getAllSaleItems = async () => {
   try {
@@ -210,6 +225,7 @@ onMounted(() => {
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
   getAllSaleItems();
   getAllBrands();
+  getAllOrder();
 });
 </script>
 
@@ -305,8 +321,8 @@ onMounted(() => {
       </div>
     </div>
     <div class="table w-full px-10 mt-10">
-      <div class="flex justify-center mb-10">
-        <div class="w-sm flex bg-[rgba(22,22,23,255)] rounded-2xl">
+      <div class="flex justify-around mb-10">
+        <div class="flex pr-10 bg-[rgba(22,22,23,255)] rounded-2xl">
           <img
             src="/src/assets/imgs/phone-symbol.png"
             alt="phone"
@@ -319,6 +335,24 @@ onMounted(() => {
             </p>
           </div>
         </div>
+        <RouterLink
+          :to="{ name: 'OrderSeller' }"
+          class="flex pr-10 bg-[rgba(22,22,23,255)] rounded-2xl hover:scale-105 duration-200"
+        >
+          <img
+            src="/src/assets/imgs/phone-symbol.png"
+            alt="phone"
+            class="w-36 object-cover"
+          />
+          <div class="self-center space-y-2">
+            <h1 class="text-2xl">Sale Orders</h1>
+            <p
+              class="itbms-bag-quantity w-fit mx-auto p-1 rounded-full text-xl bg-blue-500"
+            >
+              {{ orders.length }}
+            </p>
+          </div>
+        </RouterLink>
       </div>
       <h1 class="text-4xl">My Product</h1>
       <table v-if="items.length !== 0" class="w-full my-5">

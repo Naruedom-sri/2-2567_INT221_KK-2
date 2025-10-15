@@ -301,6 +301,69 @@ const statusStore = useStatusStore();
   return response.json();
 };
 
+
+const getAllSellerOrder= async (url, id, accessToken, params) => {
+const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/sellers/${id}/orders?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't get order (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return response.json();
+};
+
+const getSellerOrderById = async (url, id, accessToken) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(`${url}/v2/sellers/orders/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "order",
+      "get",
+      response.status,
+      errorMessage
+    );
+    throw new Error(
+      `Can't get order (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return response.json();
+};
+
+
+
 export {
   loginUser,
   register,
@@ -310,5 +373,7 @@ export {
   logoutUser,
   editProfile,
   verifyEmail,
-  getAllOrder
+  getAllOrder,
+  getAllSellerOrder,
+  getSellerOrderById
 };

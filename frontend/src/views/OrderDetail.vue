@@ -1,10 +1,11 @@
 <script setup>
-import { getOrderById } from "@/libs/orderApi";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { getSaleItemById, getImageOfSaleItem } from "@/libs/saleItemApi";
 import NavBar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
+import { getSellerOrderById } from "@/libs/userApi";
+import { getOrderById } from "@/libs/orderApi";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const accessToken = localStorage.getItem("accessToken");
 const router = useRouter();
@@ -12,11 +13,23 @@ const imageUrlList = ref([]);
 const {
   params: { orderId },
 } = useRoute();
+const props = defineProps({
+  isSeller: { type: Boolean, default: false },
+});
 const order = ref(null);
 const totalPrice = ref(0);
+
 const getOrder = async () => {
   try {
-    order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken);
+    if (props.isSeller) {
+      order.value = await getSellerOrderById(
+        BASE_API_DOMAIN,
+        orderId,
+        accessToken
+      );
+    } else {
+      order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken);
+    }
     order.value.orderItems.forEach((item) => {
       totalPrice.value += item.quantity * item.price;
     });
@@ -44,7 +57,15 @@ const getImageOfAllItem = async () => {
     }
   }
 };
-onMounted(() => getOrder());
+
+const handelClickButton = () => {
+  if (props.isSeller) router.push({ name: "OrderSeller" });
+  else router.push({ name: "OrderUser" });
+};
+onMounted(() => {
+  console.log(props.isSeller);
+  getOrder();
+});
 </script>
 
 <template>
@@ -52,17 +73,20 @@ onMounted(() => getOrder());
   <div class="order-container mx-35 my-10 text-black text-sm">
     <div class="flex gap-2 my-2 text-white text-2xl font-semibold">
       <button
-        @click="router.push({ name: 'OrderUser' })"
+        @click="handelClickButton"
         class="hover:text-blue-500 duration-200 cursor-pointer"
+        :class="
+          isSeller ? 'itbms-sale-orders-button' : 'itbms-your-orders-button'
+        "
       >
-        Your Orders
+        {{ isSeller ? "Sale Orders" : "Your Orders" }}
       </button>
       <p>-</p>
       <button
         v-if="order !== null"
         class="py-0.5 px-2 rounded-2xl bg-gray-200 text-black"
       >
-        {{ order?.seller.nickName }},
+        {{ isSeller ? order.buyer?.userName : order.seller?.nickName }},
         {{ new Date(order?.orderDate).toLocaleString() }}
       </button>
       <button v-else class="py-0.5 px-2 rounded-2xl bg-gray-200 text-black">
@@ -72,7 +96,9 @@ onMounted(() => getOrder());
 
     <div v-if="order !== null" class="itbms-row my-4 p-10 rounded bg-gray-200">
       <div class="order-title flex justify-between">
-        <h1 class="w-32 font-medium text-center">Seller</h1>
+        <h1 class="w-32 font-medium text-center">
+          {{ isSeller ? "Buyer" : "Seller" }}
+        </h1>
         <h1 class="w-32 font-medium text-center">Order No</h1>
         <h1 class="w-32 font-medium text-center">Order Date</h1>
         <h1 class="w-32 font-medium text-center">Payment Date</h1>
@@ -81,7 +107,7 @@ onMounted(() => getOrder());
       </div>
       <div class="order-detail my-3 flex justify-between">
         <p class="itbms-nickname w-32 text-center">
-          {{ order.seller.nickName }}
+          {{ isSeller ? order.buyer?.userName : order.seller?.nickName }}
         </p>
         <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
         <p class="itbms-order-date w-32 text-center">
@@ -93,7 +119,14 @@ onMounted(() => getOrder());
         <p class="itbms-total-order-price w-32 text-center">
           {{ totalPrice.toLocaleString() }}
         </p>
-        <p class="itbms-order-status w-32 text-center">
+        <p
+          class="itbms-order-status w-32 text-center font-semibold"
+          :class="
+            order.orderStatus === 'COMPLETED'
+              ? 'text-green-500'
+              : 'text-red-500'
+          "
+        >
           {{ order.orderStatus }}
         </p>
       </div>
@@ -133,7 +166,10 @@ onMounted(() => getOrder());
               Quantity: <span class="text-white/80">{{ item.quantity }}</span>
             </p>
             <p>
-              Unit Price: <span class="text-white/80">{{ item.price.toLocaleString() }}</span>
+              Unit Price:
+              <span class="text-white/80">{{
+                item.price.toLocaleString()
+              }}</span>
             </p>
             <p class="itbms-item-total-price w-52 text-center">
               Price:

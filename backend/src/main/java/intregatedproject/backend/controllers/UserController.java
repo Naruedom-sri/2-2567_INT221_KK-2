@@ -183,16 +183,17 @@ public class UserController {
 
     @GetMapping("/v2/users/{id}/orders")
     public ResponseEntity<PageBuyerOrder> getAllOrderByUserId(@PathVariable int id,
-                                                    Authentication authentication,
-                                                    @RequestParam(required = false) Integer page,
-                                                    @RequestParam(defaultValue = "10") Integer size,
-                                                    @RequestParam(defaultValue = "id") String sortField,
-                                                    @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
-                if (authentication == null) {
-                    throw new UnauthorizedException("Invalid token.");
-                }
+                                                              Authentication authentication,
+                                                              @RequestParam(required = false) Integer page,
+                                                              @RequestParam(required = false) String orderStatus,
+                                                              @RequestParam(defaultValue = "10") Integer size,
+                                                              @RequestParam(defaultValue = "id") String sortField,
+                                                              @RequestParam(defaultValue = "desc") String sortDirection) throws BadRequestException {
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
 
-                Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
         User user = userService.getUserById(id);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
@@ -203,7 +204,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size,false);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id,orderStatus, sortField, sortDirection, page, size, false);
         List<ResponseOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseOrderDto.class))
                 .collect(Collectors.toList());
@@ -222,10 +223,11 @@ public class UserController {
     @GetMapping("/v2/sellers/{id}/orders")
     public ResponseEntity<PageSellerOrder> getOrdersBySellerId(@PathVariable int id,
                                                                Authentication authentication,
+                                                               @RequestParam(defaultValue = "all") String orderStatus,
                                                                @RequestParam(required = false) Integer page,
                                                                @RequestParam(defaultValue = "10") Integer size,
                                                                @RequestParam(defaultValue = "id") String sortField,
-                                                               @RequestParam(defaultValue = "asc") String sortDirection) throws BadRequestException {
+                                                               @RequestParam(defaultValue = "desc") String sortDirection) throws BadRequestException {
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }
@@ -241,7 +243,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id ,sortField, sortDirection, page, size,true);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id, orderStatus, sortField, sortDirection, page, size, true);
         List<ResponseSellerOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseSellerOrderDto.class))
                 .collect(Collectors.toList());
@@ -256,6 +258,30 @@ public class UserController {
         dto.setTotalElements((int) resultPage.getTotalElements());
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/v2/sellers/orders/{id}")
+    public ResponseEntity<ResponseSellerOrderDto> getSellerOrderById(Authentication authentication, @PathVariable int id)  {
+        if (authentication == null) {
+            throw new UnauthorizedException("Invalid token.");
+        }
+        Order order = orderService.getOrderByOrderId(id);
+        Integer userIdFromToken = Integer.valueOf((String) authentication.getPrincipal());
+        User user = userService.getUserById(userIdFromToken);
+        if (user == null) {
+            throw new UnauthorizedException("User not found.");
+        }
+
+        if (Objects.equals(user.getStatus(), "INACTIVE")) {
+            throw new ForbiddenException("Account is not active.");
+        }
+
+        if (!user.getId().equals(order.getBuyer().getId()) && !user.getId().equals(order.getSeller().getId())) {
+            throw new ForbiddenException("User id not an owner (seller/buyer) of the order.");
+        }
+        ResponseSellerOrderDto dto = modelMapper.map(order, ResponseSellerOrderDto.class);
+        return ResponseEntity.ok(dto);
+    }
+
 
     @PutMapping("/v2/users/{id}/changePassword")
     public ResponseEntity<String> changePassword(@PathVariable Integer id,
@@ -277,7 +303,7 @@ public class UserController {
             throw new ForbiddenException("Account is not active.");
         }
 
-        if (request.getOldPassword() == null || request.getNewPassword() == null ) {
+        if (request.getOldPassword() == null || request.getNewPassword() == null) {
             throw new BadRequestException("Missing required fields.");
         }
         if (request.getNewPassword().equals(request.getOldPassword())) {

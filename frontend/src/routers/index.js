@@ -18,8 +18,8 @@ import Cart from "@/views/Cart.vue";
 import { decodeToken, isAuth } from "@/libs/jwtToken";
 import OrderUser from "@/views/OrderUser.vue";
 import OrderDetail from "@/views/OrderDetail.vue";
+import OrderSeller from "@/views/OrderSeller.vue";
 const history = createWebHistory("/kk2/");
-
 const routes = [
   {
     path: "/sale-items",
@@ -136,6 +136,17 @@ const routes = [
     component: OrderDetail,
   },
   {
+    path: "/sale-orders",
+    name: "OrderSeller",
+    component: OrderSeller,
+  },
+  {
+    path: "/sale-orders/:orderId",
+    name: "OrderSellerDetail",
+    component: OrderDetail,
+    props: { isSeller: true },
+  },
+  {
     path: "/:pathMatch(.*)*",
     redirect: { name: "NotFoundPage" },
   },
@@ -179,7 +190,9 @@ router.beforeEach((to, from, next) => {
           to.name === "EditBrand" ||
           to.name === "BrandList" ||
           to.name === "EditSaleItems" ||
-          to.name === "AddSaleItems"
+          to.name === "AddSaleItems" ||
+          to.name === "OrderSeller" ||
+          to.name === "OrderSellerDetail"
         ) {
           return next({ name: "SaleItemsGallery" });
         }

@@ -1,21 +1,23 @@
 <script setup>
 import Footer from "@/components/Footer.vue";
 import NavBar from "@/components/NavBar.vue";
-import { getAllOrder } from "@/libs/userApi";
+import { getAllSellerOrder } from "@/libs/userApi";
 import { onMounted, onUnmounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
 import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
 import OrderList from "@/components/OrderList.vue";
 import Notification from "@/components/Notification.vue";
 import { useStatusStore } from "@/stores/statusStore";
+import { markOrderAsViewed } from "@/libs/orderApi";
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const statusStore = useStatusStore();
 const orders = ref([]);
+const orderIsNotViewed = ref([]);
 const totalPriceList = ref([]);
-const orderStatus = ref("all");
+const orderStatus = ref("completed");
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const pageSize = ref(10);
@@ -25,11 +27,13 @@ const isLastPage = ref();
 const isFirstPage = ref();
 const totalPage = ref(0);
 const imageUrlList = ref([]);
+const isViewedTap = ref(true);
 
 const getAllOrderUser = async () => {
   try {
     totalPriceList.value = [];
     imageUrlList.value = [];
+    orderIsNotViewed.value = [];
 
     params.delete("page");
     params.delete("size");
@@ -47,7 +51,7 @@ const getAllOrderUser = async () => {
     params.append("sortField", isSort.value.sortFiled);
     params.append("sortDirection", isSort.value.sortDirection);
     params.append("orderStatus", orderStatus.value);
-    const data = await getAllOrder(
+    const data = await getAllSellerOrder(
       `${BASE_API_DOMAIN}`,
       decoded.jti,
       accessToken,
@@ -72,6 +76,10 @@ const getAllOrderUser = async () => {
         totalPrice += item.quantity * item.price;
       });
       totalPriceList.value.push(totalPrice);
+      if (!order.isViewed && order.orderStatus === "COMPLETED") {
+        orderIsNotViewed.value.push(order);
+      }
+
       await getImageOfAllItem(order.orderItems);
     }
   } catch (e) {
@@ -99,6 +107,15 @@ const getImageOfAllItem = async (orderItems) => {
     }
   }
   imageUrlList.value.push({ imgOrder });
+};
+
+const updateMarkAsViewed = async (orderId) => {
+  try {
+    const data = await markOrderAsViewed(BASE_API_DOMAIN, orderId, accessToken);
+    console.log(data);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const clearSort = () => {
@@ -229,9 +246,8 @@ onUnmounted(() => {
 
 <template>
   <NavBar />
-  <Notification v-if="statusStore.getStatus() !== null" />
   <div class="order-container mx-35 my-10 text-black text-sm">
-    <h1 class="text-2xl text-white font-semibold">Your Orders</h1>
+    <h1 class="text-2xl text-white font-semibold">Sale Orders</h1>
     <div class="filter-container flex justify-between my-4 text-white">
       <div class="sort-page flex items-center gap-1 p-2 bg-gray-200 rounded">
         <div class="page space-x-3 text-black">
@@ -356,45 +372,52 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
-    <div class="all-completed-cancel space-x-2 my-4 text-white">
+    <div class="completed-cancel space-x-2 my-4 text-white">
       <button
-        @click="(orderStatus = 'all'), getAllOrderUser()"
-        class="py-1 px-2"
+        @click="
+          (orderStatus = 'completed'), (isViewedTap = true), getAllOrderUser()
+        "
+        class="itbms-new-orders-button py-1 px-2"
         :class="[
-          orderStatus === 'all'
+          orderStatus === 'completed' && isViewedTap
             ? 'text-black bg-gray-200 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
         ]"
       >
-        All Orders
+        New Orders
       </button>
       <button
-        @click="(orderStatus = 'completed'), getAllOrderUser()"
-        class=" itbms-completed-orders-button py-1 px-2"
-        :class="[
-          orderStatus === 'completed'
-            ? 'text-black bg-gray-200 rounded'
-            : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
-        Completed
-      </button>
-      <button
-        @click="(orderStatus = 'cancelled'), getAllOrderUser()"
-        class=" itbms-canceled-orders-button py-1 px-2"
+        @click="
+          (orderStatus = 'cancelled'), (isViewedTap = false), getAllOrderUser()
+        "
+        class="itbms-canceled-orders-button py-1 px-2"
         :class="[
           orderStatus === 'cancelled'
             ? 'text-black bg-gray-200 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
         ]"
       >
-        Cancelled
+        Canceled
+      </button>
+      <button
+        @click="
+          (orderStatus = 'completed'), (isViewedTap = false), getAllOrderUser()
+        "
+        class="itbms-all-orders-button py-1 px-2"
+        :class="[
+          orderStatus === 'completed' && !isViewedTap
+            ? 'text-black bg-gray-200 rounded'
+            : 'hover:text-blue-500 cursor-pointer duration-200',
+        ]"
+      >
+        All Orders
       </button>
     </div>
     <OrderList
-      :order-list="orders"
+      :order-list="isViewedTap ? orderIsNotViewed : orders"
       :total-price-list="totalPriceList"
       :image-url-list="imageUrlList"
+      :is-seller="true"
       @mark-as-viewed="updateMarkAsViewed"
     />
   </div>
