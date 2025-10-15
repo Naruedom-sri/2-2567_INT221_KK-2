@@ -20,6 +20,8 @@ import OrderUser from "@/views/OrderUser.vue";
 import OrderDetail from "@/views/OrderDetail.vue";
 import OrderSeller from "@/views/OrderSeller.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
+import ForgotPassword from "@/views/ForgotPassword.vue";
+
 const history = createWebHistory("/kk2/");
 const routes = [
   {
@@ -125,7 +127,11 @@ const routes = [
     name: "Login",
     component: Login,
   },
-
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: ForgotPassword,
+  },
   {
     path: "/not-founds",
     name: "NotFoundPage",
@@ -177,7 +183,8 @@ router.beforeEach((to, from, next) => {
           to.name === "VerifyEmail" ||
           to.name === "Home" ||
           to.name === "SaleItemsGallery" ||
-          to.name === "SaleItemsDetail"
+          to.name === "SaleItemsDetail" ||
+          to.name === "ForgotPassword"
         ) {
           return next();
         }

@@ -141,7 +141,11 @@ watch(
             <input type="checkbox" />
             <label>Remember me</label>
           </div>
-          <label>Forgot password?</label>
+          <div>
+            <button type="button" class="text-red-500" @click="router.push({ name: 'ForgotPassword'})"
+            >Forgot password?
+          </button>
+          </div>
         </div>
         <button
           type="submit"
