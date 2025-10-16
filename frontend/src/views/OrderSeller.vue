@@ -6,14 +6,12 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { decodeToken } from "@/libs/jwtToken";
 import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
 import OrderList from "@/components/OrderList.vue";
-import Notification from "@/components/Notification.vue";
-import { useStatusStore } from "@/stores/statusStore";
 import { markOrderAsViewed } from "@/libs/orderApi";
+
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
-const statusStore = useStatusStore();
 const orders = ref([]);
 const orderIsNotViewed = ref([]);
 const totalPriceList = ref([]);
@@ -29,7 +27,7 @@ const totalPage = ref(0);
 const imageUrlList = ref([]);
 const isViewedTap = ref(true);
 
-const getAllOrderUser = async () => {
+const getAllUserOrder = async () => {
   try {
     totalPriceList.value = [];
     imageUrlList.value = [];
@@ -57,13 +55,23 @@ const getAllOrderUser = async () => {
       accessToken,
       params
     );
-    sessionStorage.setItem("pageSize-order", String(pageSize.value));
-    sessionStorage.setItem("indexPage-order", String(indexPage.value));
-    sessionStorage.setItem("tempIndexPage-order", String(tempIndexPage.value));
-    sessionStorage.setItem("sortField-order", isSort.value.sortFiled);
-    sessionStorage.setItem("sortDirection-order", isSort.value.sortDirection);
-    sessionStorage.setItem("pageList-order", JSON.stringify(pageList.value));
-    sessionStorage.setItem("orderStatus-order", orderStatus.value);
+    sessionStorage.setItem("pageSize-order-seller", String(pageSize.value));
+    sessionStorage.setItem("indexPage-order-seller", String(indexPage.value));
+    sessionStorage.setItem(
+      "tempIndexPage-order-seller",
+      String(tempIndexPage.value)
+    );
+    sessionStorage.setItem("sortField-order-seller", isSort.value.sortFiled);
+    sessionStorage.setItem(
+      "sortDirection-order-seller",
+      isSort.value.sortDirection
+    );
+    sessionStorage.setItem(
+      "pageList-order-seller",
+      JSON.stringify(pageList.value)
+    );
+    sessionStorage.setItem("orderStatus-order-seller", orderStatus.value);
+    sessionStorage.setItem("isViewedTap", isViewedTap.value);
 
     orders.value = data.content;
     totalPage.value = data.totalPages;
@@ -123,7 +131,7 @@ const clearSort = () => {
   isSort.value.sortDirection = "none";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const sortAsc = () => {
@@ -131,7 +139,7 @@ const sortAsc = () => {
   isSort.value.sortDirection = "asc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const sortDesc = () => {
@@ -139,7 +147,7 @@ const sortDesc = () => {
   isSort.value.sortDirection = "desc";
   indexPage.value = 0;
   tempIndexPage.value = 0;
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const nextNavPage = () => {
@@ -150,7 +158,7 @@ const nextNavPage = () => {
     pageList.value.push(pageList.value[indexPage.value] + 1);
     pageList.value.shift();
   }
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const previousNavPage = () => {
@@ -158,7 +166,7 @@ const previousNavPage = () => {
     pageList.value.unshift(pageList.value[indexPage.value] - 1);
     pageList.value.pop();
   }
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const nextPage = () => {
@@ -174,7 +182,7 @@ const nextPage = () => {
       tempIndexPage.value = pageList.value[indexPage.value] - 1;
     }
   }
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const previousPage = () => {
@@ -190,20 +198,20 @@ const previousPage = () => {
       tempIndexPage.value = pageList.value[indexPage.value] - 1;
     }
   }
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const clickPageNumber = (numPage) => {
   indexPage.value = pageList.value.findIndex((page) => page === numPage);
   tempIndexPage.value = numPage - 1;
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const firstPage = () => {
   indexPage.value = 0;
   tempIndexPage.value = 0;
   pageList.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  getAllOrderUser();
+  getAllUserOrder();
 };
 
 const lastPage = () => {
@@ -219,16 +227,21 @@ const lastPage = () => {
       (page) => page === totalPage.value
     );
   }
-  getAllOrderUser();
+  getAllUserOrder();
 };
 onMounted(() => {
-  const savedSize = sessionStorage.getItem("pageSize-order");
-  const savedSortField = sessionStorage.getItem("sortField-order");
-  const savedSortDirection = sessionStorage.getItem("sortDirection-order");
-  const savedIndexPage = sessionStorage.getItem("indexPage-order");
-  const savedTempIndexPage = sessionStorage.getItem("tempIndexPage-order");
-  const savedPageList = sessionStorage.getItem("pageList-order");
-  const savedOrderStatus = sessionStorage.getItem("orderStatus-order");
+  const savedSize = sessionStorage.getItem("pageSize-order-seller");
+  const savedSortField = sessionStorage.getItem("sortField-order-seller");
+  const savedSortDirection = sessionStorage.getItem(
+    "sortDirection-order-seller"
+  );
+  const savedIndexPage = sessionStorage.getItem("indexPage-order-seller");
+  const savedTempIndexPage = sessionStorage.getItem(
+    "tempIndexPage-order-seller"
+  );
+  const savedPageList = sessionStorage.getItem("pageList-order-seller");
+  const savedOrderStatus = sessionStorage.getItem("orderStatus-order-seller");
+  const savedIsViewedTap = sessionStorage.getItem("isViewedTap");
 
   if (savedPageList) pageList.value = JSON.parse(savedPageList);
   if (savedSize) pageSize.value = parseInt(savedSize);
@@ -237,7 +250,8 @@ onMounted(() => {
   if (savedIndexPage) indexPage.value = parseInt(savedIndexPage);
   if (savedTempIndexPage) tempIndexPage.value = parseInt(savedTempIndexPage);
   if (savedOrderStatus) orderStatus.value = savedOrderStatus;
-  getAllOrderUser();
+  if (savedIsViewedTap) isViewedTap.value = savedIsViewedTap === "true";
+  getAllUserOrder();
 });
 onUnmounted(() => {
   imageUrlList.value.forEach((url) => URL.revokeObjectURL(url));
@@ -253,7 +267,7 @@ onUnmounted(() => {
         <div class="page space-x-3 text-black">
           <label>show</label>
           <select
-            @change="(indexPage = 0), (tempIndexPage = 0), getAllOrderUser()"
+            @change="(indexPage = 0), (tempIndexPage = 0), getAllUserOrder()"
             v-model="pageSize"
             class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300"
           >
@@ -375,7 +389,7 @@ onUnmounted(() => {
     <div class="completed-cancel space-x-2 my-4 text-white">
       <button
         @click="
-          (orderStatus = 'completed'), (isViewedTap = true), getAllOrderUser()
+          (orderStatus = 'completed'), (isViewedTap = true), getAllUserOrder()
         "
         class="itbms-new-orders-button py-1 px-2"
         :class="[
@@ -388,7 +402,7 @@ onUnmounted(() => {
       </button>
       <button
         @click="
-          (orderStatus = 'cancelled'), (isViewedTap = false), getAllOrderUser()
+          (orderStatus = 'cancelled'), (isViewedTap = false), getAllUserOrder()
         "
         class="itbms-canceled-orders-button py-1 px-2"
         :class="[
@@ -401,7 +415,7 @@ onUnmounted(() => {
       </button>
       <button
         @click="
-          (orderStatus = 'completed'), (isViewedTap = false), getAllOrderUser()
+          (orderStatus = 'completed'), (isViewedTap = false), getAllUserOrder()
         "
         class="itbms-all-orders-button py-1 px-2"
         :class="[
