@@ -260,6 +260,36 @@ const editPassword = async (url, id, token, payload) => {
   return response.json();
 }
 
+const sendEmailforgotPassword = async (url, email) => {
+  const statusStore = useStatusStore();
+
+  const response = await fetch(`${url}/v2/login/forgot-password?email=${encodeURIComponent(email)}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); 
+    }
+
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "reset",
+      response.status,
+      errorMessage
+    );
+
+    throw new Error(
+      `Can't reset password (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+  return await response.text();
+};
+
 const refreshAccessToken = async (url) => {
   const response = await fetch(`${url}/v2/auth/refresh`, {
     method: "POST",
@@ -416,6 +446,7 @@ export {
   logoutUser,
   editProfile,
   editPassword,
+  sendEmailforgotPassword,
   verifyEmail,
   getAllOrder,
   getAllSellerOrder,

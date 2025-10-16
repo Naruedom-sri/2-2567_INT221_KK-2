@@ -163,7 +163,7 @@ const isUnchanged = computed(() => {
 
         <div class="mt-4 flex gap-4 justify-center">
           <button
-            @click="saveNewPassword"
+            @click.stop="saveNewPassword"
             :disabled="isUnchanged"
             :class="[
               'border-2 border-gray-500 rounded-md px-3 py-1',
