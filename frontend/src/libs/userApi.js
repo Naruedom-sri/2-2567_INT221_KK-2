@@ -257,7 +257,7 @@ const editPassword = async (url, id, token, payload) => {
     "Password updated successfully."
   );
 
-  return response.json();
+  return response;
 }
 
 const sendEmailforgotPassword = async (url, email) => {

@@ -21,6 +21,7 @@ const form = reactive({
 
 const isShowOldPassword = ref(false);
 const isShowNewPassword = ref(false);
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
 async function saveNewPassword() {
   const payload = {
@@ -28,12 +29,22 @@ async function saveNewPassword() {
     newPassword: (form.newPassword || "").trim(),
   };
 
+   if (!passwordPattern.test(payload.newPassword)) {
+    isShowError.value = true;
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      400,
+      "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+    );
+    return; 
+  }
+
   try {
     await editPassword(BASE_API_DOMAIN, decoded.jti, accessToken, payload);
 
     isShowError.value = false;
     router.push({ name: "Profile" });
-
   } catch (error) {
     console.error("Failed to change password", error);
 
@@ -87,9 +98,7 @@ const isUnchanged = computed(() => {
         >
           <p v-if="isShowError">
             {{
-              statusStore.getStatus() === 401
-                ? "Old password is incorrect."
-                : statusStore.getMessage()
+              statusStore.getMessage()
             }}
           </p>
           <p v-else>
@@ -159,6 +168,10 @@ const isUnchanged = computed(() => {
               />
             </button>
           </div>
+          <small class="text-xs text-gray-500 mt-1">
+            Minimum 8 chars, including upper, lower, number, and special
+            character
+          </small>
         </div>
 
         <div class="mt-4 flex gap-4 justify-center">
