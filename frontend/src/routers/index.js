@@ -177,7 +177,6 @@ router.beforeEach((to, from, next) => {
   isAuth()
     .then((haveAccessToken) => {
       if (!haveAccessToken) {
-        localStorage.removeItem("accessToken");
         if (
           to.name === "Register" ||
           to.name === "VerifyEmail" ||
