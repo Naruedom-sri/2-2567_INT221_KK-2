@@ -51,16 +51,60 @@ async function placeOrder(url, requestPayload, accessToken, router) {
   return { status: res.status, data };
 }
 
-const getOrderById = async (url, id, accessToken) => {
+const getOrderById = async (url, id, accessToken, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/orders/${id}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  if (!response.ok) {
+  if (res.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const response = await fetch(`${url}/v2/orders/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+    if (!response.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await response.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "order",
+        "get",
+        response.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't get order (status: ${response.status}) - ${errorMessage}`
+      );
+    }
+    return response.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -77,8 +121,9 @@ const getOrderById = async (url, id, accessToken) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 async function markOrderAsViewed(url, id, accessToken) {
