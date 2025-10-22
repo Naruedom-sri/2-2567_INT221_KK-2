@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { logoutUser } from "@/libs/userApi";
-import { decodeToken } from "@/libs/jwtToken";
+import { logoutUser, refreshAccessToken } from "@/libs/userApi";
+import { decodeToken} from "@/libs/jwtToken";
 import { useStatusStore } from "@/stores/statusStore";
 import { useCartStore } from "@/stores/cartStore";
 
@@ -53,6 +53,33 @@ const logout = async () => {
       router.go(0);
     }
   } catch (error) {
+    if (statusStore.getStatus() === 401) {
+      try {
+        const data = await refreshAccessToken(BASE_API_DOMAIN);
+        await logoutUser(`${BASE_API_DOMAIN}`, data.access_token);
+        localStorage.clear();
+        sessionStorage.clear();
+        cartStore.clearCart();
+        if (router.currentRoute.value.name !== "SaleItemsGallery") {
+          router.push({ name: "SaleItemsGallery" });
+        } else {
+          router.replace({ name: "SaleItemsGallery" });
+          router.go(0);
+        }
+      } catch (error) {
+        console.log(error);
+        localStorage.clear();
+        sessionStorage.clear();
+        cartStore.clearCart();
+        statusStore.setEntityAndMethodAndStatusAndMessage(
+          "user",
+          "logout",
+          400,
+          "Session expired. Please log in again."
+        );
+        router.push({ name: "Login" });
+      }
+    }
     console.log(error);
   }
 };

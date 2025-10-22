@@ -183,7 +183,8 @@ router.beforeEach((to, from, next) => {
           to.name === "Home" ||
           to.name === "SaleItemsGallery" ||
           to.name === "SaleItemsDetail" ||
-          to.name === "ForgotPassword"
+          to.name === "ForgotPassword" ||
+          to.name === "NotFoundPage"
         ) {
           return next();
         }

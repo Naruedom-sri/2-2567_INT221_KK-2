@@ -127,7 +127,7 @@ public class AuthController {
         }
 
     @PostMapping("/v2/auth/logout")
-    public ResponseEntity<ResponseToken> logoutUser(Authentication authentication, HttpServletResponse response) {
+    public ResponseEntity<ResponseToken> logoutUser(Authentication authentication) {
         if (authentication == null) {
             throw new UnauthorizedException("invalid token.");
         }

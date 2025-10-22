@@ -27,6 +27,7 @@ const verifyEmail = async (url, token) => {
     "The account has been successfully activated."
   );
 };
+
 const loginUser = async (url, newData) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/auth/login`, {
@@ -88,7 +89,6 @@ const logoutUser = async (url, accessToken) => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
   if (response.status !== 204) {
     let errorMessage = "";
     try {
@@ -178,7 +178,6 @@ const getUserById = async (url, id, token) => {
   return response.json();
 };
 
-
 const editProfile = async (url, id, token, form) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/users/${id}`, {
@@ -235,7 +234,7 @@ const editPassword = async (url, id, token, payload) => {
       const errorData = await response.json();
       errorMessage = errorData.message || JSON.stringify(errorData);
     } catch {
-      errorMessage = await response.text(); 
+      errorMessage = await response.text();
     }
 
     statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -258,14 +257,17 @@ const editPassword = async (url, id, token, payload) => {
   );
 
   return response.json();
-}
+};
 
 const sendEmailforgotPassword = async (url, email) => {
   const statusStore = useStatusStore();
 
-  const response = await fetch(`${url}/v2/login/forgot-password?email=${encodeURIComponent(email)}`, {
-    method: "GET",
-  });
+  const response = await fetch(
+    `${url}/v2/login/forgot-password?email=${encodeURIComponent(email)}`,
+    {
+      method: "GET",
+    }
+  );
 
   if (!response.ok) {
     let errorMessage = "";
@@ -273,7 +275,7 @@ const sendEmailforgotPassword = async (url, email) => {
       const errorData = await response.json();
       errorMessage = errorData.message || JSON.stringify(errorData);
     } catch {
-      errorMessage = await response.text(); 
+      errorMessage = await response.text();
     }
 
     statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -345,13 +347,16 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
 };
 
 const getAllOrder = async (url, id, accessToken, params) => {
-const statusStore = useStatusStore();
-  const response = await fetch(`${url}/v2/users/${id}/orders?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const statusStore = useStatusStore();
+  const response = await fetch(
+    `${url}/v2/users/${id}/orders?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     let errorMessage = "";
@@ -374,15 +379,17 @@ const statusStore = useStatusStore();
   return response.json();
 };
 
-
-const getAllSellerOrder= async (url, id, accessToken, params) => {
-const statusStore = useStatusStore();
-  const response = await fetch(`${url}/v2/sellers/${id}/orders?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+const getAllSellerOrder = async (url, id, accessToken, params) => {
+  const statusStore = useStatusStore();
+  const response = await fetch(
+    `${url}/v2/sellers/${id}/orders?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     let errorMessage = "";
@@ -435,8 +442,6 @@ const getSellerOrderById = async (url, id, accessToken) => {
   return response.json();
 };
 
-
-
 export {
   loginUser,
   register,
@@ -450,5 +455,5 @@ export {
   verifyEmail,
   getAllOrder,
   getAllSellerOrder,
-  getSellerOrderById
+  getSellerOrderById,
 };

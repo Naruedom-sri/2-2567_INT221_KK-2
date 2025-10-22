@@ -1,6 +1,10 @@
 import { useStatusStore } from "@/stores/statusStore";
+import { refreshAccessToken } from "./userApi";
+import { useCartStore } from "@/stores/cartStore";
 
-async function placeOrder(url, requestPayload, accessToken) {
+async function placeOrder(url, requestPayload, accessToken,router) {
+  const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const res = await fetch(`${url}/v2/orders`, {
     method: "POST",
     headers: {
@@ -11,7 +15,37 @@ async function placeOrder(url, requestPayload, accessToken) {
       Array.isArray(requestPayload) ? requestPayload : [requestPayload]
     ),
   });
-
+  if (res.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const res = await fetch(`${url}/v2/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+      body: JSON.stringify(
+        Array.isArray(requestPayload) ? requestPayload : [requestPayload]
+      ),
+    });
+    const data = await res.json().catch(() => null);
+    return { status: res.status, data };
+  }
   const data = await res.json().catch(() => null);
   return { status: res.status, data };
 }
