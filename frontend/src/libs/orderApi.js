@@ -50,7 +50,7 @@ async function placeOrder(url, requestPayload, accessToken, router) {
   const data = await res.json().catch(() => null);
   return { status: res.status, data };
 }
-
+  
 const getOrderById = async (url, id, accessToken, router) => {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
@@ -160,7 +160,7 @@ async function markOrderAsViewed(url, id, accessToken) {
     "The order has been successfully updated."
   );
 
-  return res.json();
+  return response.json();
 }
 
 export { getOrderById, placeOrder, markOrderAsViewed };
