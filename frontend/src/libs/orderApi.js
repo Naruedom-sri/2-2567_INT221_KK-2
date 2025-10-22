@@ -2,7 +2,7 @@ import { useStatusStore } from "@/stores/statusStore";
 import { refreshAccessToken } from "./userApi";
 import { useCartStore } from "@/stores/cartStore";
 
-async function placeOrder(url, requestPayload, accessToken,router) {
+async function placeOrder(url, requestPayload, accessToken, router) {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
   const res = await fetch(`${url}/v2/orders`, {
@@ -33,11 +33,12 @@ async function placeOrder(url, requestPayload, accessToken,router) {
       router.push({ name: "Login" });
       return;
     }
+    const newAccessToken = localStorage.getItem("accessToken");
     const res = await fetch(`${url}/v2/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        Authorization: `Bearer ${newAccessToken}`,
       },
       body: JSON.stringify(
         Array.isArray(requestPayload) ? requestPayload : [requestPayload]
