@@ -1,3 +1,4 @@
+import { useCartStore } from "@/stores/cartStore";
 import { useStatusStore } from "@/stores/statusStore";
 const verifyEmail = async (url, token) => {
   const statusStore = useStatusStore();
@@ -79,8 +80,9 @@ const loginUser = async (url, newData) => {
   return response.json();
 };
 
-const logoutUser = async (url, accessToken) => {
+const logoutUser = async (url, accessToken, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/auth/logout`, {
     method: "POST",
     credentials: "include",
@@ -89,7 +91,58 @@ const logoutUser = async (url, accessToken) => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  if (response.status !== 204) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+    if (newResponse.status !== 204) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text(); // fallback ถ้าไม่ใช่ JSON
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't logout (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "logout",
+      newResponse.status,
+      "Logout successfully."
+    );
+  } else if (response.status !== 204) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -117,11 +170,11 @@ const logoutUser = async (url, accessToken) => {
 
 const register = async (url, form) => {
   const statusStore = useStatusStore();
-  const res = await fetch(`${url}/v2/auth/register`, {
+  const response = await fetch(`${url}/v2/auth/register`, {
     method: "POST",
     body: form,
   });
-  if (res.status !== 201) {
+  if (response.status !== 201) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -132,7 +185,7 @@ const register = async (url, form) => {
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "user",
       "register",
-      res.status,
+      response.status,
       errorMessage
     );
     throw new Error(
@@ -142,22 +195,66 @@ const register = async (url, form) => {
   statusStore.setEntityAndMethodAndStatusAndMessage(
     "user",
     "register",
-    res.status,
+    response.status,
     "The user account has been successfully registered."
   );
-  return res.json();
+  return response.json();
 };
 
-const getUserById = async (url, id, token) => {
+const getUserById = async (url, id, accessToken, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/users/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "get",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't get user (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -178,17 +275,70 @@ const getUserById = async (url, id, token) => {
   return response.json();
 };
 
-const editProfile = async (url, id, token, form) => {
+const editProfile = async (url, id, accessToken, form, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/users/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(form),
   });
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/users/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+      body: JSON.stringify(form),
+    });
+    if (!response.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text(); // fallback ถ้าไม่ใช่ JSON
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "edit",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't edit user (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "profile",
+      "edit",
+      newResponse.status,
+      "Profile data is updated successfully."
+    );
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -216,19 +366,73 @@ const editProfile = async (url, id, token, form) => {
   return response.json();
 };
 
-const editPassword = async (url, id, token, payload) => {
+const editPassword = async (url, id, accessToken, payload, router) => {
   const statusStore = useStatusStore();
-
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/users/${id}/changePassword`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(payload),
   });
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/users/${id}/changePassword`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text();
+      }
 
-  if (!response.ok) {
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "password",
+        "edit",
+        401,
+        errorMessage
+      );
+
+      throw new Error(
+        `Can't edit password (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      newResponse.status,
+      "Password updated successfully."
+    );
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -259,7 +463,7 @@ const editPassword = async (url, id, token, payload) => {
   return response.json();
 };
 
-const sendEmailforgotPassword = async (url, email) => {
+const sendEmailForgotPassword = async (url, email) => {
   const statusStore = useStatusStore();
 
   const response = await fetch(
@@ -312,8 +516,9 @@ const refreshAccessToken = async (url) => {
   return response.json();
 };
 
-const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
+const getAllSaleItemOfSeller = async (url, id, accessToken, params, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(
     `${url}/v2/sellers/${id}/sale-items?${params.toString()}`,
     {
@@ -324,8 +529,55 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
       },
     }
   );
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(
+      `${url}/v2/sellers/${id}/sale-items?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+          Authorization: `Bearer ${newAccessToken}`,
+        },
+      }
+    );
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "get",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't fetch (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -346,8 +598,9 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-const getAllOrder = async (url, id, accessToken, params) => {
+const getAllOrder = async (url, id, accessToken, params, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(
     `${url}/v2/users/${id}/orders?${params.toString()}`,
     {
@@ -357,8 +610,54 @@ const getAllOrder = async (url, id, accessToken, params) => {
       },
     }
   );
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(
+      `${url}/v2/users/${id}/orders?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${newAccessToken}`,
+        },
+      }
+    );
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await response.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "get",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't get order (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -379,8 +678,9 @@ const getAllOrder = async (url, id, accessToken, params) => {
   return response.json();
 };
 
-const getAllSellerOrder = async (url, id, accessToken, params) => {
+const getAllSellerOrder = async (url, id, accessToken, params, router) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(
     `${url}/v2/sellers/${id}/orders?${params.toString()}`,
     {
@@ -390,8 +690,54 @@ const getAllSellerOrder = async (url, id, accessToken, params) => {
       },
     }
   );
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(
+      `${url}/v2/sellers/${id}/orders?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${newAccessToken}`,
+        },
+      }
+    );
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await response.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "get",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't get order (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -414,14 +760,58 @@ const getAllSellerOrder = async (url, id, accessToken, params) => {
 
 const getSellerOrderById = async (url, id, accessToken) => {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/sellers/orders/${id}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/sellers/orders/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "order",
+        "get",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't get order (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -451,7 +841,7 @@ export {
   logoutUser,
   editProfile,
   editPassword,
-  sendEmailforgotPassword,
+  sendEmailForgotPassword,
   verifyEmail,
   getAllOrder,
   getAllSellerOrder,

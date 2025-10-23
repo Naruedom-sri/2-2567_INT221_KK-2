@@ -153,16 +153,64 @@ const updateSaleItem = async (url, id, formData) => {
   return data;
 };
 
-const createSaleItemSeller = async (url, id, accessToken, formData) => {
+const createSaleItemSeller = async (url, id, accessToken, formData, router) => {
   const statusStore = useStatusStore();
   const response = await fetch(`${url}/v2/sellers/${id}/sale-items`, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
     body: formData,
   });
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/sellers/${id}/sale-items`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${newAccessToken}` },
+      body: formData,
+    });
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errJson = await newResponse.json();
+        errorMessage = errJson?.message || JSON.stringify(errJson);
+      } catch {
+        errorMessage = await newResponse.text().catch(() => "");
+      }
 
-  if (!response.ok) {
-    // try parse message (may throw)
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "sale-items",
+        "post",
+        newResponse.status,
+        errorMessage || "The sale-items could not be added."
+      );
+      throw new Error(
+        `Can't create sale-items (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "sale-items",
+      "post",
+      response.status,
+      "The sale item has been successfully added."
+    );
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errJson = await response.json();

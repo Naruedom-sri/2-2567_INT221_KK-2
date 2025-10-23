@@ -5,7 +5,7 @@ import { useCartStore } from "@/stores/cartStore";
 async function placeOrder(url, requestPayload, accessToken, router) {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
-  const res = await fetch(`${url}/v2/orders`, {
+  const response = await fetch(`${url}/v2/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -15,7 +15,7 @@ async function placeOrder(url, requestPayload, accessToken, router) {
       Array.isArray(requestPayload) ? requestPayload : [requestPayload]
     ),
   });
-  if (res.status === 401) {
+  if (response.status === 401) {
     try {
       const data = await refreshAccessToken(url);
       localStorage.setItem("accessToken", data.access_token);
@@ -34,7 +34,7 @@ async function placeOrder(url, requestPayload, accessToken, router) {
       return;
     }
     const newAccessToken = localStorage.getItem("accessToken");
-    const res = await fetch(`${url}/v2/orders`, {
+    const newResponse = await fetch(`${url}/v2/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -44,13 +44,13 @@ async function placeOrder(url, requestPayload, accessToken, router) {
         Array.isArray(requestPayload) ? requestPayload : [requestPayload]
       ),
     });
-    const data = await res.json().catch(() => null);
-    return { status: res.status, data };
+    const data = await newResponse.json().catch(() => null);
+    return { status: newResponse.status, data };
   }
-  const data = await res.json().catch(() => null);
-  return { status: res.status, data };
+  const data = await response.json().catch(() => null);
+  return { status: response.status, data };
 }
-  
+
 const getOrderById = async (url, id, accessToken, router) => {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
@@ -60,7 +60,7 @@ const getOrderById = async (url, id, accessToken, router) => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  if (res.status === 401) {
+  if (response.status === 401) {
     try {
       const data = await refreshAccessToken(url);
       localStorage.setItem("accessToken", data.access_token);
@@ -79,31 +79,31 @@ const getOrderById = async (url, id, accessToken, router) => {
       return;
     }
     const newAccessToken = localStorage.getItem("accessToken");
-    const response = await fetch(`${url}/v2/orders/${id}`, {
+    const newResponse = await fetch(`${url}/v2/orders/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${newAccessToken}`,
       },
     });
-    if (!response.ok) {
+    if (!newResponse.ok) {
       let errorMessage = "";
       try {
-        const errorData = await response.json();
+        const errorData = await newResponse.json();
         errorMessage = errorData.message || JSON.stringify(errorData);
       } catch {
-        errorMessage = await response.text();
+        errorMessage = await newResponse.text();
       }
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "order",
         "get",
-        response.status,
+        newResponse.status,
         errorMessage
       );
       throw new Error(
-        `Can't get order (status: ${response.status}) - ${errorMessage}`
+        `Can't get order (status: ${newResponse.status}) - ${errorMessage}`
       );
     }
-    return response.json();
+    return newResponse.json();
   } else if (!response.ok) {
     let errorMessage = "";
     try {
@@ -121,21 +121,64 @@ const getOrderById = async (url, id, accessToken, router) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
-  } else {
-    return response.json();
   }
+  return response.json();
 };
 
-async function markOrderAsViewed(url, id, accessToken) {
+async function markOrderAsViewed(url, id, accessToken, router) {
   const statusStore = useStatusStore();
+  const cartStore = useCartStore();
   const response = await fetch(`${url}/v2/orders/${id}/viewed`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  if (!response.ok) {
+  if (response.status === 401) {
+    try {
+      const data = await refreshAccessToken(url);
+      localStorage.setItem("accessToken", data.access_token);
+    } catch (error) {
+      console.log(error);
+      localStorage.clear();
+      sessionStorage.clear();
+      cartStore.clearCart();
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "user",
+        "logout",
+        400,
+        "Session expired. Please log in again."
+      );
+      router.push({ name: "Login" });
+      return;
+    }
+    const newAccessToken = localStorage.getItem("accessToken");
+    const newResponse = await fetch(`${url}/v2/orders/${id}/viewed`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+    if (!newResponse.ok) {
+      let errorMessage = "";
+      try {
+        const errorData = await newResponse.json();
+        errorMessage = errorData.message || JSON.stringify(errorData);
+      } catch {
+        errorMessage = await newResponse.text();
+      }
+      statusStore.setEntityAndMethodAndStatusAndMessage(
+        "order",
+        "update",
+        newResponse.status,
+        errorMessage
+      );
+      throw new Error(
+        `Can't update order (status: ${newResponse.status}) - ${errorMessage}`
+      );
+    }
+    return newResponse.json();
+  } else if (!response.ok) {
     let errorMessage = "";
     try {
       const errorData = await response.json();
@@ -159,7 +202,6 @@ async function markOrderAsViewed(url, id, accessToken) {
     response.status,
     "The order has been successfully updated."
   );
-
   return response.json();
 }
 

@@ -41,7 +41,7 @@ async function saveNewPassword() {
   }
 
   try {
-    await editPassword(BASE_API_DOMAIN, decoded.jti, accessToken, payload);
+    await editPassword(BASE_API_DOMAIN, decoded.jti, accessToken, payload,router);
     isShowError.value = false;
     router.push({ name: "Profile" });
   } catch (error) {

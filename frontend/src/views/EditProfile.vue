@@ -23,10 +23,16 @@ async function saveProfile() {
   };
 
   try {
-    await editProfile(BASE_API_DOMAIN, decoded.jti, accessToken, {
-      nickname: payload.nickname,
-      fullName: payload.fullName,
-    });
+    await editProfile(
+      BASE_API_DOMAIN,
+      decoded.jti,
+      accessToken,
+      {
+        nickname: payload.nickname,
+        fullName: payload.fullName,
+      },
+      router
+    );
 
     Object.assign(userData, payload);
     form.nickname = payload.nickname;
