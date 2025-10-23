@@ -10,10 +10,12 @@ import { getAllSaleItemOfSeller } from "@/libs/userApi";
 import { getAllBrand } from "@/libs/brandApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { getAllSellerOrder } from "@/libs/userApi";
+import { useRouter } from "vue-router";
 const statusStore = useStatusStore();
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
+const router = useRouter();
 const items = ref([]);
 const brands = ref([]);
 const itemId = ref();
@@ -29,13 +31,15 @@ const totalSaleItems = ref(0);
 const indexPage = ref(0);
 const tempIndexPage = ref(0);
 const orders = ref([]);
+
 const getAllOrder = async () => {
   try {
     const data = await getAllSellerOrder(
       `${BASE_API_DOMAIN}`,
       decoded.jti,
       accessToken,
-      params
+      params,
+      router
     );
     orders.value = data.content;
   } catch (error) {
@@ -64,7 +68,8 @@ const getAllSaleItems = async () => {
       `${BASE_API_DOMAIN}`,
       decoded.jti,
       accessToken,
-      params
+      params,
+      router
     );
 
     sessionStorage.setItem("pageSize-list", String(pageSize.value));
