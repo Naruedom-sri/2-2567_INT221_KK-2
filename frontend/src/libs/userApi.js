@@ -159,13 +159,14 @@ const logoutUser = async (url, accessToken, router) => {
     throw new Error(
       `Can't logout (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "user",
+      "logout",
+      response.status,
+      "Logout successfully."
+    );
   }
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "user",
-    "logout",
-    response.status,
-    "Logout successfully."
-  );
 };
 
 const register = async (url, form) => {
@@ -271,8 +272,9 @@ const getUserById = async (url, id, accessToken, router) => {
     throw new Error(
       `Can't get user (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 const editProfile = async (url, id, accessToken, form, router) => {
@@ -355,15 +357,15 @@ const editProfile = async (url, id, accessToken, form, router) => {
     throw new Error(
       `Can't edit user (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "profile",
+      "edit",
+      response.status,
+      "Profile data is updated successfully."
+    );
+    return response.json();
   }
-
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "profile",
-    "edit",
-    response.status,
-    "Profile data is updated successfully."
-  );
-  return response.json();
 };
 
 const editPassword = async (url, id, accessToken, payload, router) => {
@@ -451,16 +453,16 @@ const editPassword = async (url, id, accessToken, payload, router) => {
     throw new Error(
       `Can't edit password (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      response.status,
+      "Password updated successfully."
+    );
+
+    return response.json();
   }
-
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "password",
-    "edit",
-    response.status,
-    "Password updated successfully."
-  );
-
-  return response.json();
 };
 
 const sendEmailForgotPassword = async (url, email) => {
@@ -594,8 +596,9 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params, router) => {
     throw new Error(
       `Can't fetch (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 const getAllOrder = async (url, id, accessToken, params, router) => {
@@ -674,8 +677,9 @@ const getAllOrder = async (url, id, accessToken, params, router) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 const getAllSellerOrder = async (url, id, accessToken, params, router) => {
@@ -754,8 +758,9 @@ const getAllSellerOrder = async (url, id, accessToken, params, router) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 const getSellerOrderById = async (url, id, accessToken) => {
@@ -828,8 +833,9 @@ const getSellerOrderById = async (url, id, accessToken) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 export {

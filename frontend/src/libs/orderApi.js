@@ -121,8 +121,9 @@ const getOrderById = async (url, id, accessToken, router) => {
     throw new Error(
       `Can't get order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    return response.json();
   }
-  return response.json();
 };
 
 async function markOrderAsViewed(url, id, accessToken, router) {
@@ -195,14 +196,15 @@ async function markOrderAsViewed(url, id, accessToken, router) {
     throw new Error(
       `Can't update order (status: ${response.status}) - ${errorMessage}`
     );
+  } else {
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "order",
+      "update",
+      response.status,
+      "The order has been successfully updated."
+    );
+    return response.json();
   }
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "order",
-    "update",
-    response.status,
-    "The order has been successfully updated."
-  );
-  return response.json();
 }
 
 export { getOrderById, placeOrder, markOrderAsViewed };
