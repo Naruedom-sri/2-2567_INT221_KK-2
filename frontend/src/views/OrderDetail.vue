@@ -28,7 +28,7 @@ const getOrder = async () => {
         accessToken
       );
     } else {
-      order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken);
+      order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken,router);
     }
     order.value.orderItems.forEach((item) => {
       totalPrice.value += item.quantity * item.price;

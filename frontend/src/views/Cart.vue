@@ -197,9 +197,9 @@ async function placeOrder() {
     const { status, data } = await placeOrderApi(
       BASE_API_DOMAIN,
       selectedGrouped,
-      accessToken
+      accessToken,
+      router
     );
-
     if (status === 201) {
       cart.items = cart.items.filter(
         (it) => !selectedItems.value.has(`${it.sellerId}::${it.itemId}`)
@@ -210,7 +210,6 @@ async function placeOrder() {
       selectAll.value = false;
       localStorage.setItem("shippingAddress", shippingAddress.value);
       router.push({ name: "OrderUser" });
-
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "orders",
         "place",

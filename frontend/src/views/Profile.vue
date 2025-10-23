@@ -24,7 +24,8 @@ const fetchUserData = async () => {
     const userData = await getUserById(
       BASE_API_DOMAIN,
       decoded.jti,
-      accessToken
+      accessToken,
+      router
     );
     userStore.setUser(userData);
   } catch (error) {

@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { logoutUser } from "@/libs/userApi";
+import { logoutUser, refreshAccessToken } from "@/libs/userApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useStatusStore } from "@/stores/statusStore";
 import { useCartStore } from "@/stores/cartStore";
@@ -42,7 +42,7 @@ function goToProfile() {
 
 const logout = async () => {
   try {
-    await logoutUser(`${BASE_API_DOMAIN}`, accessToken);
+    await logoutUser(`${BASE_API_DOMAIN}`, accessToken, router);
     localStorage.clear();
     sessionStorage.clear();
     cartStore.clearCart();

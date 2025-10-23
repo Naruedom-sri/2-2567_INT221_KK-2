@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { sendEmailforgotPassword } from "@/libs/userApi";
+import { sendEmailForgotPassword } from "@/libs/userApi";
 import { useStatusStore } from "@/stores/statusStore";
 
 const statusStore = useStatusStore();
@@ -19,7 +19,7 @@ async function sendEmail() {
   };
 
   try {
-    await sendEmailforgotPassword(BASE_API_DOMAIN, payload.email);
+    await sendEmailForgotPassword(BASE_API_DOMAIN, payload.email);
 
     isShowError.value = false;
     router.push({ name: "Login" });

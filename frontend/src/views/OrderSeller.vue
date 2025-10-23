@@ -7,10 +7,12 @@ import { decodeToken } from "@/libs/jwtToken";
 import { getImageOfSaleItem, getSaleItemById } from "@/libs/saleItemApi";
 import OrderList from "@/components/OrderList.vue";
 import { markOrderAsViewed } from "@/libs/orderApi";
+import { useRoute } from "vue-router";
 
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const params = new URLSearchParams();
 const accessToken = localStorage.getItem("accessToken");
+const router = useRoute();
 const decoded = decodeToken(accessToken);
 const orders = ref([]);
 const orderIsNotViewed = ref([]);
@@ -53,7 +55,8 @@ const getAllUserOrder = async () => {
       `${BASE_API_DOMAIN}`,
       decoded.jti,
       accessToken,
-      params
+      params,
+      router
     );
     sessionStorage.setItem("pageSize-order-seller", String(pageSize.value));
     sessionStorage.setItem("indexPage-order-seller", String(indexPage.value));
@@ -119,7 +122,12 @@ const getImageOfAllItem = async (orderItems) => {
 
 const updateMarkAsViewed = async (orderId) => {
   try {
-    const data = await markOrderAsViewed(BASE_API_DOMAIN, orderId, accessToken);
+    const data = await markOrderAsViewed(
+      BASE_API_DOMAIN,
+      orderId,
+      accessToken,
+      router
+    );
     console.log(data);
   } catch (error) {
     console.log(error);
