@@ -21,6 +21,7 @@ import OrderDetail from "@/views/OrderDetail.vue";
 import OrderSeller from "@/views/OrderSeller.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
 import ForgotPassword from "@/views/ForgotPassword.vue";
+import ResetPassword from "@/views/ResetPassword.vue";
 
 const history = createWebHistory("/kk2/");
 const routes = [
@@ -67,6 +68,11 @@ const routes = [
     path: "/change-password",
     name: "ChangePassword",
     component: ChangePassword,
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: ResetPassword
   },
   {
     path: "/cart",
@@ -183,7 +189,8 @@ router.beforeEach((to, from, next) => {
           to.name === "Home" ||
           to.name === "SaleItemsGallery" ||
           to.name === "SaleItemsDetail" ||
-          to.name === "ForgotPassword"
+          to.name === "ForgotPassword" ||
+          to.name === "ResetPassword"
         ) {
           return next();
         }

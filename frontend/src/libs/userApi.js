@@ -195,7 +195,7 @@ const editProfile = async (url, id, token, form) => {
       const errorData = await response.json();
       errorMessage = errorData.message || JSON.stringify(errorData);
     } catch {
-      errorMessage = await response.text(); // fallback ถ้าไม่ใช่ JSON
+      errorMessage = await response.text(); 
     }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "user",
@@ -289,6 +289,48 @@ const sendEmailforgotPassword = async (url, email) => {
   }
   return await response.text();
 };
+
+const resetPassword = async (url, payload, token) => {
+  const statusStore = useStatusStore();
+
+  const response = await fetch(`${url}/v2/change-password?token=${encodeURIComponent(token)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text(); 
+    }
+
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      response.status,
+      errorMessage
+    );
+
+    throw new Error(
+      `Can't reset password (status: ${response.status}) - ${errorMessage}`
+    );
+  }
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "password",
+    "edit",
+    response.status,
+    "Password updated successfully."
+  );
+
+  return response;
+}
 
 const refreshAccessToken = async (url) => {
   const response = await fetch(`${url}/v2/auth/refresh`, {
@@ -446,6 +488,7 @@ export {
   logoutUser,
   editProfile,
   editPassword,
+  resetPassword,
   sendEmailforgotPassword,
   verifyEmail,
   getAllOrder,
