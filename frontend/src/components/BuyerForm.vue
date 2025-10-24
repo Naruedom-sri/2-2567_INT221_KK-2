@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref} from "vue";
+import { computed, ref } from "vue";
 const props = defineProps({
   submitting: { type: Boolean, default: false },
   statusErr: { default: null },
@@ -12,6 +12,8 @@ const buyer = ref({
 });
 
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+const isShowNewPassword = ref(false);
+
 const isValid = computed(() => {
   const b = buyer.value;
   return (
@@ -66,12 +68,33 @@ function onSubmit() {
         >Password
         <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
       ></label>
-      <input
-        class="border rounded px-3 py-2"
-        type="password"
-        id="password"
-        v-model.trim="buyer.password"
-      />
+
+      <div class="relative">
+        <input
+          class="border rounded px-3 py-2 pr-10 flex-1 outline-none w-full"
+          :type="isShowNewPassword ? 'text' : 'password'"
+          id="password"
+          v-model.trim="buyer.password"
+        />
+        <button
+          type="button"
+          @click="isShowNewPassword = !isShowNewPassword"
+          class="absolute inset-y-0 right-0 flex items-center px-2"
+          aria-label="Toggle password visibility"
+        >
+          <img
+            v-if="isShowNewPassword"
+            src="/src/assets/imgs/eye-off.png"
+            class="w-6 opacity-50"
+          />
+          <img
+            v-else
+            src="/src/assets/imgs/eye-open.png"
+            class="w-6 opacity-50"
+          />
+        </button>
+      </div>
+
       <small class="text-xs text-gray-500 mt-1">
         Minimum 8 chars, including upper, lower, number, and special character
       </small>

@@ -25,7 +25,7 @@ const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const accessToken = localStorage.getItem("accessToken");
 const decoded = decodeToken(accessToken);
 const statusStore = useStatusStore();
-
+const router = useRouter();
 const route = useRouter();
 const item = ref({});
 const brands = ref([]);
@@ -430,7 +430,8 @@ const addUpdateNewSaleItem = async () => {
         `${BASE_API_DOMAIN}`,
         decoded.jti,
         accessToken,
-        formData
+        formData,
+        router
       );
     } else {
       await updateSaleItem(`${BASE_API_DOMAIN}`, itemId, formData);

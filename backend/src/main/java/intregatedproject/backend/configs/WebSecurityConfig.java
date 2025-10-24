@@ -29,7 +29,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // เปิด register & verify-email แบบ public
                         .requestMatchers("/itb-mshop/v2/auth/register","/itb-mshop/v2/auth/login","/itb-mshop/v2/users/verify-email"
-                                ,"/itb-mshop/v2/**","/itb-mshop/v1/**").permitAll()
+                                ,"/itb-mshop/v2/login/forgot-password","/itb-mshop/v2/change-password","/itb-mshop/v1/**").permitAll()
                         // ที่เหลือต้อง login ด้วย JWT
                         .anyRequest().authenticated()
                 )

@@ -6,6 +6,7 @@ const props = defineProps({
   statusErr: { default: null },
 });
 const emit = defineEmits(["submit", "cancel"]);
+const isShowNewPassword = ref(false);
 
 const seller = ref({
   nickname: "",
@@ -56,7 +57,6 @@ function onFrontChange(e) {
 function onBackChange(e) {
   const file = e?.target?.files?.[0];
   if (!file) return;
-  // Revoke previous preview to avoid memory leaks
   if (cardPhotos.value.backPreview)
     URL.revokeObjectURL(cardPhotos.value.backPreview);
   cardPhotos.value.backFile = file;
@@ -110,17 +110,39 @@ function onSubmit() {
         Email Already Exists
       </p>
     </div>
+
     <div class="flex flex-col">
       <label for="sellerPassword" class="mb-1 flex gap-2 items-center"
         >Password
         <span><img src="../assets/imgs/asterisk.png" class="w-3" /></span
       ></label>
+      
+      <div class="relative">
       <input
-        class="border rounded px-3 py-2"
-        type="password"
+        class="border rounded px-3 py-2 w-full outline-none"
+        :type="isShowNewPassword ? 'text' : 'password'"
         id="sellerPassword"
         v-model="seller.password"
       />
+       <button
+          type="button"
+          @click="isShowNewPassword = !isShowNewPassword"
+          class="absolute inset-y-0 right-0 flex items-center px-2"
+          aria-label="Toggle password visibility"
+        >
+          <img
+            v-if="isShowNewPassword"
+            src="/src/assets/imgs/eye-off.png"
+            class="w-6 opacity-50"
+          />
+          <img
+            v-else
+            src="/src/assets/imgs/eye-open.png"
+            class="w-6 opacity-50"
+          />
+        </button>
+      </div>
+
       <small class="text-xs text-gray-500 mt-1">
         Minimum 8 chars, including upper, lower, number, and special character
       </small>

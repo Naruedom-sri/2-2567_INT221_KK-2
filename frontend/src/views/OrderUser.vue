@@ -395,7 +395,7 @@ onUnmounted(() => {
       :order-list="orders"
       :total-price-list="totalPriceList"
       :image-url-list="imageUrlList"
-      @mark-as-viewed="updateMarkAsViewed"
+    
     />
   </div>
   <Footer />

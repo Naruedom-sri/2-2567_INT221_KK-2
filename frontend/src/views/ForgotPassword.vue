@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { sendEmailforgotPassword } from "@/libs/userApi";
+import { sendEmailForgotPassword } from "@/libs/userApi";
 import { useStatusStore } from "@/stores/statusStore";
 
 const statusStore = useStatusStore();
@@ -19,7 +19,7 @@ async function sendEmail() {
   };
 
   try {
-    await sendEmailforgotPassword(BASE_API_DOMAIN, payload.email);
+    await sendEmailForgotPassword(BASE_API_DOMAIN, payload.email);
 
     isShowError.value = false;
     router.push({ name: "Login" });
@@ -42,7 +42,7 @@ const isUnchanged = computed(() => {
     <div class="w-full max-w-2xl rounded-2xl bg-white pt-10 pb-6 px-6 relative">
       <div class="text-center">
         <p class="text-3xl font-bold">Forgot Password?</p>
-        <span>send your email to reset password</span>
+        <span class="opacity-50">send your email for reset password</span>
       </div>
       <div class="p-5 text-black">
         <div
@@ -66,10 +66,10 @@ const isUnchanged = computed(() => {
           </p>
         </div>
 
-        <div class="form-row gap-1 flex flex-row items-center text-center">
+        <div class="form-row gap-1 flex flex-col">
           <label><strong>Email:</strong></label>
           <div
-            class="flex items-center border border-gray-800 rounded-md p-2 w-150"
+            class="flex items-center border border-gray-800 rounded-md p-2 w-145"
           >
             <input
               v-model="form.email"
@@ -78,6 +78,9 @@ const isUnchanged = computed(() => {
               placeholder="Enter Your Email"
             />
           </div>
+          <div>
+          <small class="opacity-50">Please check your email for a link to reset your password.</small>
+        </div>
         </div>
 
         <div class="mt-4 flex gap-4 justify-center">
@@ -103,6 +106,7 @@ const isUnchanged = computed(() => {
         </div>
       </div>
     </div>
+    
   </div>
 </template>
 

@@ -1,28 +1,25 @@
 <script setup>
 import { reactive, computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { resetPassword } from "@/libs/userApi";
 import { useStatusStore } from "@/stores/statusStore";
-import { decodeToken } from "@/libs/jwtToken";
 
 const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
+const route = useRoute(); // <- added to read token from URL
 const isShowError = ref(false);
-const accessToken = localStorage.getItem("accessToken");
-const decoded = decodeToken(accessToken);
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+const isShowNewPassword = ref(false);
 
 const form = reactive({
   password: "",
 });
 
 async function submitToResetPassword() {
-  const payload = {
-    password: (form.password || "").trim(),
-  };
+  const payloadPassword = (form.password || "").trim();
 
-  if (!passwordPattern.test(payload.password)) {
+  if (!passwordPattern.test(payloadPassword)) {
     isShowError.value = true;
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "password",
@@ -30,26 +27,37 @@ async function submitToResetPassword() {
       400,
       "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
     );
-    return; 
+    return;
+  }
+
+  const tokenFromQuery = route.query.token || null;
+  if (!tokenFromQuery) {
+    isShowError.value = true;
+    statusStore.setEntityAndMethodAndStatusAndMessage(
+      "password",
+      "edit",
+      400,
+      "Missing or invalid reset token."
+    );
+    return;
   }
 
   try {
-    // const tokenUrl = router.query.token
-    await resetPassword(BASE_API_DOMAIN, payload.password, decoded.jti, accessToken);
+    await resetPassword(BASE_API_DOMAIN, payloadPassword, tokenFromQuery);
 
     isShowError.value = false;
     router.push({ name: "Login" });
   } catch (error) {
-    console.error("Failed to send reset password email", error);
+    console.error("Failed to reset password", error);
   }
 }
 
 function cancelSend() {
-  router.back();
+  router.push({ name: "Login" });
 }
 
 const isUnchanged = computed(() => {
-  return !form.email;
+  return !form.password;
 });
 </script>
 
@@ -58,7 +66,7 @@ const isUnchanged = computed(() => {
     <div class="w-full max-w-2xl rounded-2xl bg-white pt-10 pb-6 px-6 relative">
       <div class="text-center">
         <p class="text-3xl font-bold">Reset Password</p>
-        <span>enter your new password to reset password</span>
+        <span class="opacity-50">enter your new password to reset password</span>
       </div>
       <div class="p-5 text-black">
         <div
@@ -86,14 +94,30 @@ const isUnchanged = computed(() => {
           <label><strong>New Password:</strong></label>
           <div class="flex flex-col">
           <div
-            class="flex border border-gray-800 rounded-md p-2 w-110"
+            class="flex border border-gray-800 rounded-md p-2 w-145"
           >
             <input
               v-model="form.password"
-              type="password"
+              :type="isShowNewPassword ? 'text' : 'password'"
               class="flex-1 outline-none"
               placeholder="Enter Your New Password"
             /> 
+            <button
+              type="button"
+              @click="isShowNewPassword = !isShowNewPassword"
+              class="px-2"
+            >
+              <img
+                v-if="isShowNewPassword"
+                src="/src/assets/imgs/eye-off.png"
+                class="w-6 opacity-50"
+              />
+              <img
+                v-else
+                src="/src/assets/imgs/eye-open.png"
+                class="w-6 opacity-50"
+              />
+            </button>
           </div>
             <small class="text-xs text-gray-500 mt-1 w-110">
             Minimum 8 chars, including upper, lower, number, and special
@@ -104,7 +128,7 @@ const isUnchanged = computed(() => {
 
         <div class="mt-4 flex gap-4 justify-center">
           <button
-            @click.stop="submitToResetPassword"
+            @click="submitToResetPassword"
             :disabled="isUnchanged"
             :class="[
               'border-2 border-gray-500 rounded-md px-3 py-1',

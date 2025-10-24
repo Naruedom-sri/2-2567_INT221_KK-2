@@ -127,7 +127,7 @@ public class AuthController {
         }
 
     @PostMapping("/v2/auth/logout")
-    public ResponseEntity<ResponseToken> logoutUser(Authentication authentication, HttpServletResponse response) {
+    public ResponseEntity<ResponseToken> logoutUser(Authentication authentication) {
         if (authentication == null) {
             throw new UnauthorizedException("invalid token.");
         }
@@ -189,16 +189,18 @@ public class AuthController {
         return ResponseEntity.ok(responseToken);
     }
 
-    @GetMapping("/v2/login/forgot-password")
+    @PostMapping("/v2/login/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        System.out.println(email);
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Email not found."));
         String token = jwtUtil.generateTokenForResetPW(email);
+        System.out.println(token);
         emailService.sendResetPWEmail(email, token);
         return ResponseEntity.ok("send email success");
     }
 
-    @PostMapping("/v2/change-password")
+    @PutMapping("/v2/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken){
         String email = jwtUtil.extractEmail(jwtToken);
 
