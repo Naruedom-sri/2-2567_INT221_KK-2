@@ -12,7 +12,7 @@ import {
   getFirstImageOfSaleItem,
 } from "@/libs/saleItemApi";
 import { getAllBrand } from "@/libs/brandApi";
-import { decodeToken } from "@/libs/jwtToken";
+import { decodeToken, isAuth } from "@/libs/jwtToken";
 import { useCartStore } from "@/stores/cartStore";
 import { useRouter } from "vue-router";
 
@@ -358,9 +358,12 @@ const getImageOfAllItem = async () => {
 };
 
 async function addItemToCart(saleItem, qty = 1) {
-  if (!saleItem) return;
+  statusStore.clearEntityAndMethodAndStatusAndMessage();
 
-  if (accessToken === null) {
+  if (!(await isAuth())) {
+    localStorage.clear();
+    sessionStorage.clear();
+    cart.clearCart();
     router.push({ name: "Login" });
   } else {
     const currentUserId =
@@ -798,7 +801,7 @@ onUnmounted(() => {
             :class="[showButtonItem === index ? '' : 'opacity-0']"
             :disabled="cart.getCartQuantity(item.id) >= item.quantity"
             type="button"
-            @click.stop="addItemToCart(item, 1)"
+            @click="addItemToCart(item, 1)"
           >
             Add to Cart
           </button>

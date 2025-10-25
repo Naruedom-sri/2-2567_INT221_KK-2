@@ -16,7 +16,6 @@ import intregatedproject.backend.utils.token.TokenType;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
@@ -189,18 +188,16 @@ public class AuthController {
         return ResponseEntity.ok(responseToken);
     }
 
-    @PostMapping("/v2/login/forgot-password")
+    @PostMapping("/v2/auth/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-        System.out.println(email);
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Email not found."));
         String token = jwtUtil.generateTokenForResetPW(email);
-        System.out.println(token);
         emailService.sendResetPWEmail(email, token);
         return ResponseEntity.ok("send email success");
     }
 
-    @PutMapping("/v2/change-password")
+    @PutMapping("/v2/auth/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken){
         String email = jwtUtil.extractEmail(jwtToken);
 

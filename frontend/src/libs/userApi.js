@@ -467,7 +467,7 @@ const sendEmailForgotPassword = async (url, email) => {
   const statusStore = useStatusStore();
 
   const response = await fetch(
-    `${url}/v2/login/forgot-password?email=${encodeURIComponent(email)}`,
+    `${url}/v2/auth/forgot-password?email=${encodeURIComponent(email)}`,
     {
       method: "POST",
     }
@@ -514,7 +514,7 @@ const resetPassword = async (url, password, token) => {
     token: token,
   });
 
-  const response = await fetch(`${url}/v2/change-password?${params.toString()}`, {
+  const response = await fetch(`${url}/v2/auth/change-password?${params.toString()}`, {
     method: "PUT",
   });
 
