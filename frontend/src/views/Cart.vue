@@ -326,7 +326,11 @@ onMounted(() => {
                 -
               </button>
               <div class="px-3">{{ it.quantity }}</div>
-              <button class="px-2 bg-gray-500 rounded" @click="onIncrement(it)">
+              <button 
+              @click="onIncrement(it)"
+              :disabled="it.quantity >= it.availableStock"
+              class="px-2 bg-gray-500 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              >
                 +
               </button>
               <div class="w-32 text-right text-sm">
