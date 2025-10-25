@@ -369,98 +369,74 @@ const editProfile = async (url, id, accessToken, form, router) => {
 const editPassword = async (url, id, accessToken, payload, router) => {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
-  const response = await fetch(`${url}/v2/users/${id}/changePassword`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (response.status === 401) {
-    try {
-      const data = await refreshAccessToken(url);
-      localStorage.setItem("accessToken", data.access_token);
-    } catch (error) {
-      console.log(error);
-      localStorage.clear();
-      sessionStorage.clear();
-      cartStore.clearCart();
-      statusStore.setEntityAndMethodAndStatusAndMessage(
-        "user",
-        "logout",
-        400,
-        "Session expired. Please log in again."
-      );
-      router.push({ name: "Login" });
-      return;
-    }
-    const newAccessToken = localStorage.getItem("accessToken");
-    const newResponse = await fetch(`${url}/v2/users/${id}/changePassword`, {
+
+  const sendRequest = async (token) => {
+    const response = await fetch(`${url}/v2/users/${id}/changePassword`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${newAccessToken}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
-    if (!newResponse.ok) {
-      let errorMessage = "";
-      try {
-        const errorData = await newResponse.json();
-        errorMessage = errorData.message || JSON.stringify(errorData);
-      } catch {
-        errorMessage = await newResponse.text();
-      }
 
+    // อ่าน response body ครั้งเดียว
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text); // ถ้าเป็น JSON
+    } catch {
+      data = { message: text }; // ถ้าเป็นข้อความธรรมดา
+    }
+
+    if (!response.ok) {
+      const errorMessage = data.message || text;
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "password",
         "edit",
-        401,
+        response.status,
         errorMessage
       );
-
-      throw new Error(
-        `Can't edit password (status: ${newResponse.status}) - ${errorMessage}`
-      );
+      throw new Error(`Can't edit password (status: ${response.status}) - ${errorMessage}`);
     }
 
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "password",
       "edit",
-      newResponse.status,
-      "Password updated successfully."
+      response.status,
+      data.message || "Password updated successfully."
     );
-    return newResponse.json();
-  } else if (!response.ok) {
-    let errorMessage = "";
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || JSON.stringify(errorData);
-    } catch {
-      errorMessage = await response.text();
+
+    return data;
+  };
+
+  try {
+    const responseData = await sendRequest(accessToken);
+    return responseData;
+  } catch (err) {
+    if (err.message.includes("401")) {
+      try {
+        const data = await refreshAccessToken(url);
+        localStorage.setItem("accessToken", data.access_token);
+        const newToken = localStorage.getItem("accessToken");
+        return await sendRequest(newToken);
+      } catch (refreshErr) {
+        console.log(refreshErr);
+        localStorage.clear();
+        sessionStorage.clear();
+        cartStore.clearCart();
+        statusStore.setEntityAndMethodAndStatusAndMessage(
+          "user",
+          "logout",
+          400,
+          "Session expired. Please log in again."
+        );
+        router.push({ name: "Login" });
+      }
+    } else {
+      throw err;
     }
-
-    statusStore.setEntityAndMethodAndStatusAndMessage(
-      "password",
-      "edit",
-      401,
-      errorMessage
-    );
-
-    throw new Error(
-      `Can't edit password (status: ${response.status}) - ${errorMessage}`
-    );
   }
-
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "password",
-    "edit",
-    response.status,
-    "Password updated successfully."
-  );
-
-  return response.json();
 };
 
 const sendEmailForgotPassword = async (url, email) => {
