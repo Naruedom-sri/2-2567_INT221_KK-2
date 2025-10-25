@@ -1,5 +1,5 @@
 <h1>Integrated Information Technology ( KK-2 )</h1>
-<h2>IT Bangmod mobile shop</h2>
+<h1>IT Bangmod mobile shop</h1>
 <h2>Link: https://intproj24.sit.kmutt.ac.th/kk2/</h2>
 <h2>Members</h2>
 <table>
