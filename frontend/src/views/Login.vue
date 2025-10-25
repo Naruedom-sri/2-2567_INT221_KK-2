@@ -63,6 +63,7 @@ watch(
       >
         <h1 class="text-4xl font-semibold">Welcome to IT Bangmod Shop!</h1>
         <p>You can login into access with your existing account.</p>
+        <button>Store</button>
       </div>
       <form
         @submit.prevent="login"
@@ -142,9 +143,13 @@ watch(
             <label>Remember me</label>
           </div>
           <div>
-            <button type="button" class="text-red-500" @click="router.push({ name: 'ForgotPassword'})"
-            >Forgot password?
-          </button>
+            <button
+              type="button"
+              class="text-blue-500 hover:underline cursor-pointer"
+              @click="router.push({ name: 'ForgotPassword' })"
+            >
+              Forgot password?
+            </button>
           </div>
         </div>
         <button
@@ -156,7 +161,9 @@ watch(
         </button>
         <button type="button" @click="router.push({ name: 'Register' })">
           Don't have account?
-          <span class="text-blue-500">Create an Account</span>
+          <span class="text-blue-500 hover:underline cursor-pointer"
+            >Create an Account</span
+          >
         </button>
       </form>
     </div>
