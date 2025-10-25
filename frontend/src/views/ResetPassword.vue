@@ -12,6 +12,7 @@ const isShowError = ref(false);
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 const isShowNewPassword = ref(false);
 
+
 const form = reactive({
   password: "",
 });

@@ -5,12 +5,14 @@ import BuyerForm from "../components/BuyerForm.vue";
 import SellerForm from "../components/SellerForm.vue";
 import { useStatusStore } from "@/stores/statusStore";
 import { register } from "@/libs/userApi";
+import GeneralAlertMessage from "@/components/GeneralAlertMessage.vue";
 
 const accountType = ref("buyer");
 const isSubmitting = ref(false);
 const router = useRouter();
 const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
+const showConfirmModal = ref(false);
 
 const safeTrim = (v) => (v ?? "").toString().trim();
 
@@ -41,7 +43,8 @@ const handleSubmit = async (payload) => {
       if (payload.files?.back) form.append("back", payload.files.back);
       const data = await register(BASE_API_DOMAIN, form);
     }
-    router.push({ name: "Login" });
+    showConfirmModal.value = true;
+    isSubmitting.value = false;
   } catch (e) {
     console.log(e);
     isSubmitting.value = false;
@@ -53,6 +56,10 @@ const handleCancel = () => {
   router.back();
 };
 
+function confirmed() {
+  router.push({ name: "Login" });
+  showConfirmModal.value = false;
+}
 </script>
 
 <template>
@@ -94,6 +101,12 @@ const handleCancel = () => {
         @cancel="handleCancel"
       />
     </div>
+    <GeneralAlertMessage
+    v-if="showConfirmModal"
+    title="Registration Successful"
+    message="Please check your email for verification."
+    @ok="confirmed"
+    />
   </div>
 </template>
 
