@@ -97,7 +97,7 @@ const logoutUser = async (url, accessToken, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -216,7 +216,7 @@ const getUserById = async (url, id, accessToken, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -292,7 +292,7 @@ const editProfile = async (url, id, accessToken, form, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -369,7 +369,7 @@ const editProfile = async (url, id, accessToken, form, router) => {
 const editPassword = async (url, id, accessToken, payload, router) => {
   const statusStore = useStatusStore();
   const cartStore = useCartStore();
-  const response = await fetch(`${url}/v2/users/${id}/changePassword`, {
+  const response = await fetch(`${url}/v2/users/${id}/change-password`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -383,7 +383,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -396,7 +396,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
       return;
     }
     const newAccessToken = localStorage.getItem("accessToken");
-    const newResponse = await fetch(`${url}/v2/users/${id}/changePassword`, {
+    const newResponse = await fetch(`${url}/v2/users/${id}/change-password`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -416,7 +416,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "password",
         "edit",
-        401,
+        newResponse.status,
         errorMessage
       );
 
@@ -431,7 +431,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
       newResponse.status,
       "Password updated successfully."
     );
-    return newResponse.json();
+    return newResponse;
   } else if (!response.ok) {
     let errorMessage = "";
     try {
@@ -444,7 +444,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "password",
       "edit",
-      401,
+      response.status,
       errorMessage
     );
 
@@ -460,7 +460,7 @@ const editPassword = async (url, id, accessToken, payload, router) => {
     "Password updated successfully."
   );
 
-  return response.json();
+  return response;
 };
 
 const sendEmailForgotPassword = async (url, email) => {
@@ -514,9 +514,12 @@ const resetPassword = async (url, password, token) => {
     token: token,
   });
 
-  const response = await fetch(`${url}/v2/auth/change-password?${params.toString()}`, {
-    method: "PUT",
-  });
+  const response = await fetch(
+    `${url}/v2/auth/change-password?${params.toString()}`,
+    {
+      method: "PUT",
+    }
+  );
 
   if (!response.ok) {
     let errorMessage = "";
@@ -547,7 +550,7 @@ const resetPassword = async (url, password, token) => {
   );
 
   return response;
-}
+};
 
 const refreshAccessToken = async (url) => {
   const response = await fetch(`${url}/v2/auth/refresh`, {
@@ -588,7 +591,7 @@ const getAllSaleItemOfSeller = async (url, id, accessToken, params, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -669,7 +672,7 @@ const getAllOrder = async (url, id, accessToken, params, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -749,7 +752,7 @@ const getAllSellerOrder = async (url, id, accessToken, params, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -826,7 +829,7 @@ const getSellerOrderById = async (url, id, accessToken) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(

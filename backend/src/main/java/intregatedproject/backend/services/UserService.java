@@ -11,6 +11,7 @@ import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -157,13 +158,13 @@ public class UserService {
     }
 
 
-    public void changePassword(Integer id, RequestChangePasswordDto request) {
+    public void changePassword(Integer id, RequestChangePasswordDto request) throws BadRequestException {
         User user = getUserById(id);
         if(user == null) {
             throw new UnauthorizedException("User not found.");
         }
         if(!user.getPassword().equals(request.getOldPassword())) {
-            throw new UnauthorizedException("Old password is incorrect.");
+            throw new BadRequestException("Current password is incorrect.");
         }
         user.setPassword(request.getNewPassword());
         userRepository.save(user);

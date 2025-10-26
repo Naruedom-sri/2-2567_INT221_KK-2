@@ -43,7 +43,7 @@ public class JwtUtils {
         this.key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
     }
 
-    public String generateTokenForResetPW(String email){
+    public String generateTokenForResetPW(String email) {
         return Jwts.builder()
                 .claim("email", email)
                 .setIssuedAt(new Date())
@@ -71,6 +71,7 @@ public class JwtUtils {
                 .claim("role", user.getRole())
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000))
                 .signWith(key)
                 .compact();
@@ -83,24 +84,18 @@ public class JwtUtils {
                 .setSubject(user.getId().toString()) // ใช้ userId หรือ email ก็ได้
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3 * 60 * 1000))
 //                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + 2 * 60 * 1000))
                 .signWith(key)
                 .compact();
     }
 
-
-    public Claims validateToken(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (JwtException e) {
-            System.out.println("JWT validate error: " + e.getMessage());
-            return null;
-        }
+    public Claims validateToken(String token) throws JwtException {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     @PostConstruct

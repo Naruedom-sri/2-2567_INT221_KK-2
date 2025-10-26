@@ -10,10 +10,7 @@ import intregatedproject.backend.dtos.users.RequestUserEditDto;
 import intregatedproject.backend.dtos.users.ResponseBuyerDto;
 import intregatedproject.backend.dtos.users.ResponseSellerDto;
 
-import intregatedproject.backend.entities.Order;
-import intregatedproject.backend.entities.SaleItem;
-import intregatedproject.backend.entities.Seller;
-import intregatedproject.backend.entities.User;
+import intregatedproject.backend.entities.*;
 import intregatedproject.backend.exceptions.users.ForbiddenException;
 import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.services.OrderService;
@@ -24,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -186,6 +185,11 @@ public class UserController {
                                                               Authentication authentication,
                                                               @RequestParam(required = false) Integer page,
                                                               @RequestParam(required = false) String orderStatus,
+                                                              @RequestParam(required = false) List<String> filterBrands,
+                                                              @RequestParam(required = false) List<String> filterUsers,
+                                                              @RequestParam(required = false) String searchContent,
+                                                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startOrderDate,
+                                                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endOrderDate,
                                                               @RequestParam(defaultValue = "10") Integer size,
                                                               @RequestParam(defaultValue = "id") String sortField,
                                                               @RequestParam(defaultValue = "desc") String sortDirection) throws BadRequestException {
@@ -204,7 +208,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id,orderStatus, sortField, sortDirection, page, size, false);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id, orderStatus, filterBrands, filterUsers, searchContent, null, startOrderDate, endOrderDate, sortField, sortDirection, page, size, false);
         List<ResponseOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseOrderDto.class))
                 .collect(Collectors.toList());
@@ -224,6 +228,12 @@ public class UserController {
     public ResponseEntity<PageSellerOrder> getOrdersBySellerId(@PathVariable int id,
                                                                Authentication authentication,
                                                                @RequestParam(defaultValue = "all") String orderStatus,
+                                                               @RequestParam(required = false) List<String> filterBrands,
+                                                               @RequestParam(required = false) List<String> filterUsers,
+                                                               @RequestParam(required = false) String searchContent,
+                                                               @RequestParam(required = false) Boolean isViewed,
+                                                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startOrderDate,
+                                                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endOrderDate,
                                                                @RequestParam(required = false) Integer page,
                                                                @RequestParam(defaultValue = "10") Integer size,
                                                                @RequestParam(defaultValue = "id") String sortField,
@@ -243,7 +253,7 @@ public class UserController {
         if (Objects.equals(user.getStatus(), "INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        Page<Order> resultPage = orderService.getAllOrdersFilter(id, orderStatus, sortField, sortDirection, page, size, true);
+        Page<Order> resultPage = orderService.getAllOrdersFilter(id, orderStatus, filterBrands, filterUsers, searchContent, isViewed, startOrderDate, endOrderDate, sortField, sortDirection, page, size, true);
         List<ResponseSellerOrderDto> ordersDto = resultPage.getContent().stream()
                 .map(order -> modelMapper.map(order, ResponseSellerOrderDto.class))
                 .collect(Collectors.toList());
@@ -260,7 +270,7 @@ public class UserController {
     }
 
     @GetMapping("/v2/sellers/orders/{id}")
-    public ResponseEntity<ResponseSellerOrderDto> getSellerOrderById(Authentication authentication, @PathVariable int id)  {
+    public ResponseEntity<ResponseSellerOrderDto> getSellerOrderById(Authentication authentication, @PathVariable int id) {
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");
         }
@@ -283,9 +293,8 @@ public class UserController {
     }
 
 
-    @PutMapping("/v2/users/{id}/changePassword")
-    public ResponseEntity<String> changePassword(@PathVariable Integer id,
-                                                 Authentication authentication,
+    @PutMapping("/v2/users/{id}/change-password")
+    public ResponseEntity<String> changePassword(Authentication authentication, @PathVariable Integer id,
                                                  @RequestBody RequestChangePasswordDto request) throws BadRequestException {
         if (authentication == null) {
             throw new UnauthorizedException("Invalid token.");

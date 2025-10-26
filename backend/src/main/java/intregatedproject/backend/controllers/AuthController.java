@@ -171,9 +171,11 @@ public class AuthController {
             throw new BadRequestException("No refresh token.");
         }
 
-        Claims claims = jwtUtil.validateToken(refreshToken);
-        if (claims == null) {
-            throw new UnauthorizedException("Invalid refresh token.");
+        Claims claims;
+        try {
+            claims = jwtUtil.validateToken(refreshToken);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new UnauthorizedException("invalid refresh token.");
         }
 
         User user = userService.getUserById(Integer.valueOf(claims.getSubject()));
@@ -200,7 +202,6 @@ public class AuthController {
     @PutMapping("/v2/auth/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken){
         String email = jwtUtil.extractEmail(jwtToken);
-
         userService.forgotPassword(password, email);
 
         return ResponseEntity.noContent().build();

@@ -340,8 +340,11 @@ onMounted(() => {
             </p>
           </div>
         </div>
-        <RouterLink
-          :to="{ name: 'OrderSeller' }"
+        <div
+          @click="
+            router.push({ name: 'OrderSeller' }),
+              statusStore.clearEntityAndMethodAndStatusAndMessage()
+          "
           class="flex pr-10 bg-[rgba(22,22,23,255)] rounded-2xl hover:scale-105 duration-200"
         >
           <img
@@ -357,7 +360,7 @@ onMounted(() => {
               {{ orders.length }}
             </p>
           </div>
-        </RouterLink>
+        </div>
       </div>
       <h1 class="text-4xl">My Product</h1>
       <table v-if="items.length !== 0" class="w-full my-5">

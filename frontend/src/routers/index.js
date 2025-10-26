@@ -18,10 +18,10 @@ import Cart from "@/views/Cart.vue";
 import { decodeToken, isAuth } from "@/libs/jwtToken";
 import OrderUser from "@/views/OrderUser.vue";
 import OrderDetail from "@/views/OrderDetail.vue";
-import OrderSeller from "@/views/OrderSeller.vue";
 import ChangePassword from "@/views/ChangePassword.vue";
 import ForgotPassword from "@/views/ForgotPassword.vue";
 import ResetPassword from "@/views/ResetPassword.vue";
+import { useCartStore } from "@/stores/cartStore";
 
 const history = createWebHistory("/kk2/");
 const routes = [
@@ -72,7 +72,7 @@ const routes = [
   {
     path: "/reset-password",
     name: "ResetPassword",
-    component: ResetPassword
+    component: ResetPassword,
   },
   {
     path: "/cart",
@@ -145,18 +145,20 @@ const routes = [
   },
   {
     path: "/your-orders",
-    name: "OrderUser",
+    name: "OrderBuyer",
     component: OrderUser,
+    props: { isSeller: false },
   },
   {
     path: "/your-orders/:orderId",
-    name: "OrderDetail",
+    name: "OrderBuyerDetail",
     component: OrderDetail,
   },
   {
     path: "/sale-orders",
     name: "OrderSeller",
-    component: OrderSeller,
+    component: OrderUser,
+    props: { isSeller: true },
   },
   {
     path: "/sale-orders/:orderId",
@@ -203,6 +205,8 @@ router.beforeEach((to, from, next) => {
       }
       const accessToken = localStorage.getItem("accessToken");
       const decoded = decodeToken(accessToken);
+      const cartStore = useCartStore();
+      cartStore.loadCart();
       if (decoded?.role === "BUYER") {
         if (
           to.name === "SaleItemsList" ||

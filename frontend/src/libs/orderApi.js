@@ -21,7 +21,7 @@ async function placeOrder(url, requestPayload, accessToken, router) {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -66,7 +66,7 @@ const getOrderById = async (url, id, accessToken, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+       localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -140,7 +140,7 @@ async function markOrderAsViewed(url, id, accessToken, router) {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+       localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -196,12 +196,6 @@ async function markOrderAsViewed(url, id, accessToken, router) {
       `Can't update order (status: ${response.status}) - ${errorMessage}`
     );
   }
-  statusStore.setEntityAndMethodAndStatusAndMessage(
-    "order",
-    "update",
-    response.status,
-    "The order has been successfully updated."
-  );
   return response.json();
 }
 

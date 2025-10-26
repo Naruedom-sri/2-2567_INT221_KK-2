@@ -33,6 +33,9 @@ const login = async () => {
 };
 
 onMounted(async () => {
+  if (statusStore.getMessage() === "Session expired. Please log in again.") {
+    isShowError.value = true;
+  }
   const accessToken = localStorage.getItem("accessToken");
   if (accessToken) {
     const decoded = decodeToken(accessToken);
@@ -80,7 +83,9 @@ watch(
         >
           <p v-if="isShowError">
             {{
-              statusStore.getStatus() === 400
+              statusStore.getStatus() === 400 &&
+              statusStore.getMessage() !==
+                "Session expired. Please log in again."
                 ? "Email or password is incorrect."
                 : statusStore.getMessage()
             }}

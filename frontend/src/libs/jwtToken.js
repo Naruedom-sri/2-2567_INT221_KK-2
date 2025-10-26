@@ -21,7 +21,7 @@ const isAuth = async () => {
       localStorage.setItem("accessToken", data.access_token);
       return true;
     } catch (error) {
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       console.log(error);
