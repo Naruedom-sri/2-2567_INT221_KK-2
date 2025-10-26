@@ -2,8 +2,15 @@ import { useStatusStore } from "@/stores/statusStore";
 const getAllBrand = async (url) => {
   const response = await fetch(`${url}/v1/brands`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch brand with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch brand with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -13,8 +20,15 @@ const getAllBrand = async (url) => {
 const getBrandById = async (url, id) => {
   const response = await fetch(`${url}/v1/brands/${id}`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch brand with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch brand with status: ${response.status} and with body: ${errorMessage}`
     );
   }
 
@@ -28,14 +42,21 @@ const deleteBrandById = async (url, id) => {
     method: "DELETE",
   });
   if (response.status !== 204) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "brand",
       "get",
       response.status,
-      `Can't fetch brand with id: ${id}.`
+      `Can't delete brand with id: ${id}.`
     );
     throw new Error(
-      `Can't delete brand with status: ${response.status} and with body: ${response.json}`
+      `Can't delete brand with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -57,6 +78,13 @@ const createBrand = async (url, newData) => {
     body: JSON.stringify({ ...newData }),
   });
   if (response.status !== 201) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "brand",
       "add",
@@ -64,7 +92,7 @@ const createBrand = async (url, newData) => {
       "The brand could not be added."
     );
     throw new Error(
-      `Can't create brand with status :  ${response.status} and body: ${response.json}`
+      `Can't create brand with status :  ${response.status} and body: ${errorMessage}`
     );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -87,6 +115,13 @@ const updateBrand = async (url, id, newData) => {
     body: JSON.stringify({ ...newData }),
   });
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "brand",
       "update",
@@ -94,7 +129,7 @@ const updateBrand = async (url, id, newData) => {
       "The brand could not be updated."
     );
     throw new Error(
-      `Can't update brand with status :  ${response.status} and body: ${response.json}`
+      `Can't update brand with status :  ${response.status} and body: ${errorMessage}`
     );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
