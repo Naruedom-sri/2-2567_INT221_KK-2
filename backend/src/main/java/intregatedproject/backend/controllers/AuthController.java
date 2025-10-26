@@ -11,6 +11,7 @@ import intregatedproject.backend.exceptions.users.UnauthorizedException;
 import intregatedproject.backend.repositories.UserRepository;
 import intregatedproject.backend.services.EmailService;
 import intregatedproject.backend.services.UserService;
+import intregatedproject.backend.utils.PasswordUtils;
 import intregatedproject.backend.utils.token.JwtUtils;
 import intregatedproject.backend.utils.token.TokenType;
 import io.jsonwebtoken.Claims;
@@ -91,39 +92,46 @@ public class AuthController {
     }
 
 
-        @PostMapping("/v2/auth/login")
-        public ResponseEntity<ResponseToken> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
-            List<User> userList = userService.getAllUsers();
-            ResponseToken responseToken = new ResponseToken();
-            for (User user : userList) {
-                if (user.getEmail().equals(requestLogin.getEmail())
-                        && user.getPassword().equals(requestLogin.getPassword())) {
-
-                    if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                        String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
-                        String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
-
-                        responseToken.setAccess_token(access_token);
-
-                        // refresh token อยู่ใน HttpOnly cookie
-                        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
-                                .httpOnly(true)       // JS อ่านไม่ได้
-                                .secure(false)         // เฉพาะ HTTPS (true)
-                                .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
-                                .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
-                                .sameSite("Strict")    // ป้องกัน CSRF
-                                .build();
-
-                        return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                                .body(responseToken);
-                    } else {
-                        throw new ForbiddenException("You need to activate your account before signing in.");
-                    }
-                }
-            }
+    @PostMapping("/v2/auth/login")
+    public ResponseEntity<ResponseToken> loginUser(@Valid @RequestBody RequestLogin requestLogin, HttpServletRequest httpServletRequest) {
+        User user = userService.getUserByEmail(requestLogin.getEmail());
+        ResponseToken responseToken = new ResponseToken();
+        if (user == null) {
             throw new UnauthorizedException("Email or password is incorrect.");
         }
+        boolean passwordMatches = false;
+        if (user.getPassword().startsWith("$2a$") || user.getPassword().startsWith("$2b$") || user.getPassword().startsWith("$2y$")) {
+            passwordMatches = PasswordUtils.matches(requestLogin.getPassword(), user.getPassword());
+        } else {
+            passwordMatches = user.getPassword().equals(requestLogin.getPassword());
+        }
+
+        if (passwordMatches) {
+            if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
+                String access_token = jwtUtil.generateAccessToken(user, httpServletRequest);
+                String refresh_token = jwtUtil.generateRefreshToken(user, httpServletRequest);
+
+                responseToken.setAccess_token(access_token);
+
+                // refresh token อยู่ใน HttpOnly cookie
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
+                        .httpOnly(true)       // JS อ่านไม่ได้
+                        .secure(false)         // เฉพาะ HTTPS (true)
+                        .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
+                        .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
+                        .sameSite("Strict")    // ป้องกัน CSRF
+                        .build();
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                        .body(responseToken);
+            } else {
+                throw new ForbiddenException("You need to activate your account before signing in.");
+            }
+        } else {
+            throw new UnauthorizedException("Email or password is incorrect.");
+        }
+    }
 
     @PostMapping("/v2/auth/logout")
     public ResponseEntity<ResponseToken> logoutUser(Authentication authentication) {
@@ -200,7 +208,7 @@ public class AuthController {
     }
 
     @PutMapping("/v2/auth/change-password")
-    public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken){
+    public ResponseEntity<?> changePassword(@RequestParam String password, @RequestParam("token") String jwtToken) {
         String email = jwtUtil.extractEmail(jwtToken);
         userService.forgotPassword(password, email);
 
