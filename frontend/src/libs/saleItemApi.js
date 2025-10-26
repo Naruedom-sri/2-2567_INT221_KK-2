@@ -3,10 +3,15 @@ import { useStatusStore } from "@/stores/statusStore";
 const getAllSaleItem = async (url) => {
   const response = await fetch(`${url}/v1/sale-items`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch sale-items with status: ${
-        response.status
-      } and with body: ${response.json()}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -16,10 +21,15 @@ const getAllSaleItem = async (url) => {
 const getAllSaleItemV2 = async (url, params) => {
   const response = await fetch(`${url}/v2/sale-items?${params.toString()}`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch sale-items with status: ${
-        response.status
-      } and with body: ${response.json()}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -29,8 +39,15 @@ const getAllSaleItemV2 = async (url, params) => {
 const getSaleItemById = async (url, id) => {
   const response = await fetch(`${url}/v2/sale-items/${id}`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -40,8 +57,15 @@ const getSaleItemById = async (url, id) => {
 const getSaleItemByIdForEdit = async (url, id) => {
   const response = await fetch(`${url}/v2/sale-items/edit/${id}`);
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -53,8 +77,15 @@ const getImageOfSaleItem = async (url, itemId, imgViewOrder) => {
     `${url}/v2/sale-items/${itemId}/images/${imgViewOrder}`
   );
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     throw new Error(
-      ` Can't get image with status:  ${response.status} and with body: ${response.json}`
+      ` Can't get image with status:  ${response.status} and with body: ${errorMessage}`
     );
   }
   const blob = await response.blob();
@@ -86,6 +117,13 @@ const deleteSaleItemById = async (url, id) => {
     method: "DELETE",
   });
   if (response.status !== 204) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "sale-items",
       "delete",
@@ -93,7 +131,7 @@ const deleteSaleItemById = async (url, id) => {
       `Can't delete sale-items with id: ${id}.`
     );
     throw new Error(
-      `Can't fetch sale-items with status: ${response.status} and with body: ${response.json}`
+      `Can't fetch sale-items with status: ${response.status} and with body: ${errorMessage}`
     );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
@@ -112,6 +150,13 @@ const createSaleItem = async (url, formData) => {
     body: formData,
   });
   if (response.status !== 201) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "sale-items",
       "add",
@@ -119,7 +164,7 @@ const createSaleItem = async (url, formData) => {
       "The sale-items could not be added."
     );
     throw new Error(
-      `Can't create sale-items with status :  ${response.status} and body: ${response.json}`
+      `Can't create sale-items with status :  ${response.status} and body: ${errorMessage}`
     );
   }
   const data = await response.json();
@@ -133,6 +178,13 @@ const updateSaleItem = async (url, id, formData) => {
     body: formData,
   });
   if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errJson = await response.json();
+      errorMessage = errJson?.message || JSON.stringify(errJson);
+    } catch {
+      errorMessage = await response.text().catch(() => "");
+    }
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "sale-items",
       "update",
@@ -140,7 +192,7 @@ const updateSaleItem = async (url, id, formData) => {
       "The sale-items could not be updated."
     );
     throw new Error(
-      `Can't update sale-items with status :  ${response.status} and body: ${response.json}`
+      `Can't update sale-items with status :  ${response.status} and body: ${errorMessage}`
     );
   }
   statusStore.setEntityAndMethodAndStatusAndMessage(
