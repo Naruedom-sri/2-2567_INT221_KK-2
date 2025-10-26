@@ -412,20 +412,6 @@ const editPassword = async (url, id, accessToken, payload, router) => {
       } catch {
         errorMessage = await newResponse.text();
       }
-
-      if (!response.ok) {
-        const errorMessage = data.message || text;
-        statusStore.setEntityAndMethodAndStatusAndMessage(
-          "password",
-          "edit",
-          newResponse.status,
-          errorMessage
-        );
-        throw new Error(
-          `Can't edit password (status: ${response.status}) - ${errorMessage}`
-        );
-      }
-
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "password",
         "edit",
@@ -433,36 +419,36 @@ const editPassword = async (url, id, accessToken, payload, router) => {
         data.message || "Password updated successfully."
       );
       return newResponse;
-    } else if (!response.ok) {
-      let errorMessage = "";
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || JSON.stringify(errorData);
-      } catch {
-        errorMessage = await response.text();
-      }
-
-      statusStore.setEntityAndMethodAndStatusAndMessage(
-        "password",
-        "edit",
-        response.status,
-        errorMessage
-      );
-
-      throw new Error(
-        `Can't edit password (status: ${response.status}) - ${errorMessage}`
-      );
+    }
+  } else if (!response.ok) {
+    let errorMessage = "";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await response.text();
     }
 
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "password",
       "edit",
       response.status,
-      "Password updated successfully."
+      errorMessage
     );
 
-    return response;
+    throw new Error(
+      `Can't edit password (status: ${response.status}) - ${errorMessage}`
+    );
   }
+
+  statusStore.setEntityAndMethodAndStatusAndMessage(
+    "password",
+    "edit",
+    response.status,
+    "Password updated successfully."
+  );
+
+  return response;
 };
 
 const sendEmailForgotPassword = async (url, email) => {

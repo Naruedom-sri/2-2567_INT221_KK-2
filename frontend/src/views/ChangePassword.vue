@@ -41,6 +41,7 @@ async function saveNewPassword() {
   }
 
   try {
+    console.log('asdadadas')
     await editPassword(
       BASE_API_DOMAIN,
       decoded.jti,
@@ -51,8 +52,7 @@ async function saveNewPassword() {
     isShowError.value = false;
     router.push({ name: "Profile" });
   } catch (error) {
-    console.error("Failed to change password", error);
-
+    console.log("Failed to change password", error);
     if (statusStore.getStatus() === 401 || statusStore.getStatus() == 400) {
       isShowError.value = true;
     } else {
