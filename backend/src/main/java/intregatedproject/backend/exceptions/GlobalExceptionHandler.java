@@ -7,6 +7,7 @@ import intregatedproject.backend.exceptions.users.*;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.exceptions.verifyEmail.InvalidVerificationTokenException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -108,6 +109,14 @@ public class GlobalExceptionHandler {
                 "Internal Server Error",
                 "Something went wrong: " + ex.getMessage(),
                 request);
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            fieldErrors.put(violation.getPropertyPath().toString(), violation.getMessage());
+        });
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", fieldErrors, request);
     }
 
 }
