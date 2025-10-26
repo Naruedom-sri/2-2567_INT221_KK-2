@@ -316,7 +316,7 @@ public class UserController {
             throw new BadRequestException("Missing required fields.");
         }
         if (request.getNewPassword().equals(request.getOldPassword())) {
-            throw new BadRequestException("New password must be different from old password.");
+            throw new BadRequestException("New password must be different from current password.");
         }
         userService.changePassword(id, request);
         return ResponseEntity.ok("Password changed successfully.");

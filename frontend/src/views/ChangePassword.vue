@@ -122,7 +122,7 @@ onMounted(() => {
         </div>
 
         <div class="form-row flex flex-col mb-4">
-          <label><strong>Old Password:</strong></label>
+          <label><strong>Current Password:</strong></label>
           <div class="flex items-center border border-gray-800 rounded-md p-2">
             <input
               v-model.trim="form.oldPassword"
