@@ -361,7 +361,7 @@ async function addItemToCart(saleItem, qty = 1) {
   statusStore.clearEntityAndMethodAndStatusAndMessage();
 
   if (!(await isAuth())) {
-    localStorage.clear();
+    localStorage.removeItem("accessToken");
     sessionStorage.clear();
     cart.clearCart();
     router.push({ name: "Login" });
@@ -558,17 +558,14 @@ onUnmounted(() => {
         :class="countImg === 2 ? 'object-top' : ''"
       />
     </div>
-    <div
-      v-if="decoded?.role === 'SELLER'"
-      class="flex justify-end mx-28 pt-7 pb-3"
-    >
+    <div v-if="decoded?.role === 'SELLER'" class="flex justify-end mx-28 pt-7">
       <RouterLink
         :to="{ name: 'SaleItemsList' }"
-        class="py-3 px-5 rounded bg-white text-black"
+        class="py-3 px-5 rounded bg-white text-black cursor-pointer"
         >My Product</RouterLink
       >
     </div>
-    <div class="filter-container mx-28 py-7 flex justify-between border-b">
+    <div class="filter-container mx-28 pb-7 pt-4 flex justify-between border-b">
       <div
         class="brand-price-filter-container gap-2 p-2 flex bg-gray-300 rounded"
       >
@@ -656,7 +653,9 @@ onUnmounted(() => {
           </button>
         </div>
       </div>
-      <div class="sort-page p-2 flex items-center gap-1 bg-gray-200 rounded">
+      <div
+        class="sort-page max-h-14 p-2 flex items-center gap-1 bg-gray-200 rounded"
+      >
         <div class="page space-x-3 text-black">
           <label>show</label>
           <select
@@ -756,7 +755,9 @@ onUnmounted(() => {
           >
             <p class="itbms-brand text-2xl font-bold">{{ item.brandName }}</p>
             <p class="itbms-model text-base">{{ item.model }}</p>
-            <p class="itbms-color">{{ item.color }}</p>
+            <p class="itbms-color">
+              {{ item.color === null ? "-" : item.color }}
+            </p>
             <div class="ram-storage flex items-center gap-4 text-xs">
               <p class="itbms-ramGb py-1 w-16 border rounded-xl text-center">
                 {{

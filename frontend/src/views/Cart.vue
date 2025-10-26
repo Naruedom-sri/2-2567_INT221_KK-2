@@ -156,8 +156,9 @@ async function placeOrder() {
   loading.value = true;
   try {
     let buyerId = null;
+    let decoded = null;
     if (accessToken) {
-      const decoded = decodeToken(accessToken);
+      decoded = decodeToken(accessToken);
       buyerId = decoded?.buyerId || decoded?.id || decoded?.sub || null;
     }
 
@@ -208,8 +209,11 @@ async function placeOrder() {
       selectedItems.value.clear();
       selectedSellers.value.clear();
       selectAll.value = false;
-      localStorage.setItem("shippingAddress", shippingAddress.value);
-      router.push({ name: "OrderUser" });
+      localStorage.setItem(
+        `shippingAddress-user-${decoded.id}`,
+        shippingAddress.value
+      );
+      router.push({ name: "OrderBuyer" });
       statusStore.setEntityAndMethodAndStatusAndMessage(
         "orders",
         "place",
@@ -243,7 +247,9 @@ function formatPrice(price) {
   });
 }
 onMounted(() => {
-  const savedAddress = localStorage.getItem("shippingAddress");
+  const savedAddress = localStorage.getItem(
+    `shippingAddress-user-${decodeToken(accessToken).id}`
+  );
   if (savedAddress) shippingAddress.value = savedAddress;
 });
 </script>
@@ -313,7 +319,8 @@ onMounted(() => {
               <div>
                 <div class="font-light">
                   <span class="font-semibold">{{ it.brand }}</span>
-                  {{ it.name }} ({{ it.storageGb }}GB, {{ it.color }})
+                  {{ it.name }} ({{ it.storageGb }}GB,
+                  {{ it.color == null ? "-" : it.color }})
                 </div>
                 <div class="text-sm">
                   Stock:

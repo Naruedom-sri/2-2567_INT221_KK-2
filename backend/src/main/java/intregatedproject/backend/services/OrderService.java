@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -39,6 +41,12 @@ public class OrderService {
     public Page<Order> getAllOrdersFilter(
             Integer userId,
             String orderStatus,
+            List<String> filterBrands,
+            List<String> filterUsers,
+            String searchContent,
+            Boolean isViewed,
+            LocalDate startOrderDate,
+            LocalDate endOrderDate,
             String sortField,
             String sortDirection,
             Integer page,
@@ -46,6 +54,9 @@ public class OrderService {
             Boolean isSeller
     ) throws BadRequestException {
         size = size <= 0 ? 10 : size;
+        filterBrands = filterBrands == null || filterBrands.isEmpty() ? null : filterBrands;
+        filterUsers = filterUsers == null || filterUsers.isEmpty() ? null : filterUsers;
+        searchContent = searchContent == null || searchContent.isBlank() ? null : searchContent;
 
         if (page == null || page < 0) {
             throw new BadRequestException("request parameter 'page' must be greater than or equal to zero.");
@@ -72,7 +83,12 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Specification<Order> filterSpec = Specification.where(OrderSpecification.hasUser(userId, isSeller))
-                .and(OrderSpecification.hasOrderStatus(orderStatus));
+                .and(OrderSpecification.hasOrderStatus(orderStatus))
+                .and(OrderSpecification.hasIsViewed(isViewed))
+                .and(OrderSpecification.hasSearchContent(searchContent))
+                .and(OrderSpecification.hasBrands(filterBrands))
+                .and(OrderSpecification.hasFilterUser(filterUsers,isSeller))
+                .and(OrderSpecification.hasOrderDateBetween(startOrderDate, endOrderDate));
 
         return orderRepository.findAll(filterSpec, pageable);
     }

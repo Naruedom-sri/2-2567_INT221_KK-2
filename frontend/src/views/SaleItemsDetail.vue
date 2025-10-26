@@ -197,9 +197,10 @@ async function addItemToCart(saleItem, qty = 1) {
           </p>
         </div>
       </div>
-      <div class="truck-bag flex justify-end gap-6 h-7 mx-20">
+      <div class="truck-bag-shop flex justify-end gap-6 h-7 mr-20">
         <div class="flex gap-2">
-          <p class="self-center">{{ item.seller?.nickName }}</p>
+          <img src="../assets/imgs/store-solid-full.svg" alt="shop">
+          <p class="self-center">{{ item.seller?.fullName }}</p>
         </div>
         <p class="self-center">|</p>
         <div class="flex gap-2">

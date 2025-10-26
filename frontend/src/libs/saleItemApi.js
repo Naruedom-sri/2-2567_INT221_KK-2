@@ -166,7 +166,7 @@ const createSaleItemSeller = async (url, id, accessToken, formData, router) => {
       localStorage.setItem("accessToken", data.access_token);
     } catch (error) {
       console.log(error);
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
       sessionStorage.clear();
       cartStore.clearCart();
       statusStore.setEntityAndMethodAndStatusAndMessage(

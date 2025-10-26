@@ -18,6 +18,7 @@ const props = defineProps({
 });
 const order = ref(null);
 const totalPrice = ref(0);
+const brandList = ref([]);
 
 const getOrder = async () => {
   try {
@@ -28,16 +29,37 @@ const getOrder = async () => {
         accessToken
       );
     } else {
-      order.value = await getOrderById(BASE_API_DOMAIN, orderId, accessToken,router);
+      order.value = await getOrderById(
+        BASE_API_DOMAIN,
+        orderId,
+        accessToken,
+        router
+      );
     }
     order.value.orderItems.forEach((item) => {
       totalPrice.value += item.quantity * item.price;
     });
     getImageOfAllItem();
+    getBrands();
   } catch (error) {
     console.log(error);
   }
 };
+
+const getBrands = async () => {
+  for (const item of order.value.orderItems) {
+    try {
+      const saleItem = await getSaleItemById(
+        `${BASE_API_DOMAIN}`,
+        item.saleItemId
+      );
+      brandList.value.push(saleItem.brandName);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
 const getImageOfAllItem = async () => {
   for (const item of order.value.orderItems) {
     try {
@@ -60,10 +82,10 @@ const getImageOfAllItem = async () => {
 
 const handelClickButton = () => {
   if (props.isSeller) router.push({ name: "OrderSeller" });
-  else router.push({ name: "OrderUser" });
+  else router.push({ name: "OrderBuyer" });
 };
+
 onMounted(() => {
-  console.log(props.isSeller);
   getOrder();
 });
 </script>
@@ -158,11 +180,14 @@ onMounted(() => {
               class="max-w-32 object-cover rounded"
             />
           </div>
-          <div class="item-row-detail w-full flex justify-between">
-            <p class="itbms-item-description w-52 text-center">
+          <div class="item-row-detail w-full grid grid-cols-5">
+            <p class="itbms-item-description text-center">
+              {{ brandList[index] }}
+            </p>
+            <p class="itbms-item-description text-center">
               {{ item.description }}
             </p>
-            <p class="itbms-item-quantity w-52 text-center">
+            <p class="itbms-item-quantity text-center">
               Quantity: <span class="text-white/80">{{ item.quantity }}</span>
             </p>
             <p>
@@ -171,7 +196,7 @@ onMounted(() => {
                 item.price.toLocaleString()
               }}</span>
             </p>
-            <p class="itbms-item-total-price w-52 text-center">
+            <p class="itbms-item-total-price text-center">
               Price:
               <span class="text-white/80">{{
                 (item.quantity * item.price).toLocaleString()

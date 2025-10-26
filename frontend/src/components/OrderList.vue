@@ -1,23 +1,28 @@
 <script setup>
 import { useRouter } from "vue-router";
+
 const props = defineProps({
   orderList: { type: Array, default: [] },
   totalPriceList: { type: Array, default: [] },
   imageUrlList: { type: Array, default: [] },
+  brandList: { type: Array, default: [] },
   isSeller: { type: Boolean, default: false },
 });
 const router = useRouter();
 const emit = defineEmits(["markAsViewed"]);
+
 const handleClickView = async (orderId) => {
-  emit("markAsViewed", orderId);
   if (props.isSeller) {
+    emit("markAsViewed", orderId);
+    sessionStorage.setItem("indexPage-order-seller", 0);
+    sessionStorage.setItem("tempIndexPage-order-seller", 0);
     router.push({
       name: "OrderSellerDetail",
       params: { orderId: orderId },
     });
   } else {
     router.push({
-      name: "OrderDetail",
+      name: "OrderBuyerDetail",
       params: { orderId: orderId },
     });
   }
@@ -49,7 +54,7 @@ const handleClickView = async (orderId) => {
     </div>
     <div class="order-detail my-3 flex justify-between">
       <p class="itbms-nickname w-32 text-center">
-        {{ isSeller ? order.buyer.userName : order.seller.nickName }}
+        {{ isSeller ? order.buyer.userName : order.seller.fullName }}
       </p>
       <p class="itbms-order-id w-32 text-center">{{ order.id }}</p>
       <p class="itbms-order-date w-32 text-center">
@@ -96,8 +101,8 @@ const handleClickView = async (orderId) => {
       >
         <div class="item-row-img w-32">
           <img
-            v-if="imageUrlList[indexOrder]?.imgOrder[indexItem]"
-            :src="imageUrlList[indexOrder]?.imgOrder[indexItem]"
+            v-if="imageUrlList[indexOrder]?.imgItemOrder[indexItem]"
+            :src="imageUrlList[indexOrder]?.imgItemOrder[indexItem]"
             class="max-w-32 max-h-32 object-cover rounded"
           />
           <img
@@ -106,14 +111,17 @@ const handleClickView = async (orderId) => {
             class="max-w-32 object-cover rounded"
           />
         </div>
-        <div class="item-row-detail w-full flex justify-between">
-          <p class="itbms-item-description w-52 text-center">
+        <div class="item-row-detail w-full grid grid-cols-4">
+          <p class="itbms-item-description text-center">
+            {{ brandList[indexOrder]?.brandItemOrder[indexItem] }}
+          </p>
+          <p class="itbms-item-description text-center">
             {{ item.description }}
           </p>
-          <p class="itbms-item-quantity w-52 text-center">
+          <p class="itbms-item-quantity text-center">
             Quantity: <span class="text-white/80">{{ item.quantity }}</span>
           </p>
-          <p class="itbms-item-total-price w-52 text-center">
+          <p class="itbms-item-total-price text-center">
             Price:
             <span class="text-white/80">{{
               (item.quantity * item.price).toLocaleString()

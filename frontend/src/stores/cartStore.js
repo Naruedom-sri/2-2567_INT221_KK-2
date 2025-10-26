@@ -3,11 +3,13 @@ import { decodeToken } from "@/libs/jwtToken";
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
-    items: JSON.parse(localStorage.getItem("cart_items_v1") || "[]"),
+    items: [],
   }),
   getters: {
     totalItems: (state) => state.items.reduce((s, i) => s + i.quantity, 0),
-    totalPrice: (state) => state.items.reduce((s, i) => s + i.quantity * i.price, 0),
+    totalPrice: (state) =>
+      state.items.reduce((s, i) => s + i.quantity * i.price, 0),
+
     groupedBySeller: (state) => {
       const map = new Map();
       for (const it of state.items) {
@@ -27,13 +29,30 @@ export const useCartStore = defineStore("cart", {
     },
 
     getCartQuantity: (state) => (itemId) => {
-    const found = state.items.find((it) => it.itemId === itemId);
-    return found ? found.quantity : 0;
+      const found = state.items.find((it) => it.itemId === itemId);
+      return found ? found.quantity : 0;
     },
   },
+
   actions: {
+    _getStorageKey() {
+      const token = localStorage.getItem("accessToken");
+      let userId = "guest";
+      if (token) {
+        const decoded = decodeToken(token);
+        userId = decoded?.buyerId || decoded?.id || decoded?.sub;
+      }
+      return `cart-user-${userId}`;
+    },
+    loadCart() {
+      const key = this._getStorageKey();
+      this.items = JSON.parse(localStorage.getItem(key) || "[]");
+    },
+
     _save() {
-      localStorage.setItem("cart_items_v1", JSON.stringify(this.items));
+      const key = this._getStorageKey();
+      if (key !== "cart-user-guest")
+        localStorage.setItem(key, JSON.stringify(this.items));
     },
 
     addToCart(item, seller, qty = 1) {
@@ -68,7 +87,14 @@ export const useCartStore = defineStore("cart", {
         const first = arr.find(Boolean);
         if (!first) return "";
         if (typeof first === "string") return first;
-        return first.url ?? first.src ?? first.imageUrl ?? first.thumbnail ?? first.thumb ?? "";
+        return (
+          first.url ??
+          first.src ??
+          first.imageUrl ??
+          first.thumbnail ??
+          first.thumb ??
+          ""
+        );
       };
 
       const image =
@@ -81,13 +107,18 @@ export const useCartStore = defineStore("cart", {
         item.picture ??
         resolveImageFromArray(item.images) ??
         resolveImageFromArray(item.pictures) ??
-        (item.media && item.media[0] && (item.media[0].url ?? item.media[0].src)) ??
+        (item.media &&
+          item.media[0] &&
+          (item.media[0].url ?? item.media[0].src)) ??
         "";
 
-      const avail = Number(item.availableStock ?? item.stock ?? item.qty ?? 9999);
+      const avail = Number(
+        item.availableStock ?? item.stock ?? item.qty ?? 9999
+      );
 
       const existing = this.items.find(
-        (i) => i.itemId === item.itemId && String(i.sellerId) === String(sellerId)
+        (i) =>
+          i.itemId === item.itemId && String(i.sellerId) === String(sellerId)
       );
 
       if (existing) {
@@ -123,7 +154,9 @@ export const useCartStore = defineStore("cart", {
 
     increment(item) {
       const it = this.items.find(
-        (i) => i.itemId === item.itemId && String(i.sellerId) === String(item.sellerId)
+        (i) =>
+          i.itemId === item.itemId &&
+          String(i.sellerId) === String(item.sellerId)
       );
       if (!it) return;
       if (it.quantity < (it.availableStock ?? 9999)) {
@@ -134,7 +167,9 @@ export const useCartStore = defineStore("cart", {
 
     decrement(item) {
       const it = this.items.find(
-        (i) => i.itemId === item.itemId && String(i.sellerId) === String(item.sellerId)
+        (i) =>
+          i.itemId === item.itemId &&
+          String(i.sellerId) === String(item.sellerId)
       );
       if (!it) return;
       if (it.quantity > 1) {
@@ -145,7 +180,9 @@ export const useCartStore = defineStore("cart", {
 
     updateQuantity(item, newQty) {
       const it = this.items.find(
-        (i) => i.itemId === item.itemId && String(i.sellerId) === String(item.sellerId)
+        (i) =>
+          i.itemId === item.itemId &&
+          String(i.sellerId) === String(item.sellerId)
       );
       if (!it) return;
       if (newQty <= 0) {
@@ -158,7 +195,11 @@ export const useCartStore = defineStore("cart", {
 
     removeItem(item) {
       this.items = this.items.filter(
-        (i) => !(i.itemId === item.itemId && String(i.sellerId) === String(item.sellerId))
+        (i) =>
+          !(
+            i.itemId === item.itemId &&
+            String(i.sellerId) === String(item.sellerId)
+          )
       );
       this._save();
     },

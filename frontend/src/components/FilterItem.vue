@@ -13,6 +13,7 @@ const emit = defineEmits([
   "toggleIsShow",
   "addMinMaxPriceToFilterList",
 ]);
+
 </script>
 
 <template>

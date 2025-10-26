@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { logoutUser, refreshAccessToken } from "@/libs/userApi";
+import { logoutUser } from "@/libs/userApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useStatusStore } from "@/stores/statusStore";
 import { useCartStore } from "@/stores/cartStore";
@@ -43,7 +43,7 @@ function goToProfile() {
 const logout = async () => {
   try {
     await logoutUser(`${BASE_API_DOMAIN}`, accessToken, router);
-    localStorage.clear();
+    localStorage.removeItem("accessToken")
     sessionStorage.clear();
     cartStore.clearCart();
     if (router.currentRoute.value.name !== "SaleItemsGallery") {
@@ -88,7 +88,7 @@ watch(
       <div class="your-or ders flex justify-center w-28 h-full">
         <button
           @click="
-            router.push({ name: 'OrderUser' }),
+            router.push({ name: 'OrderBuyer' }),
               statusStore.clearEntityAndMethodAndStatusAndMessage()
           "
           class="opacity-85 hover:opacity-100 cursor-pointer"

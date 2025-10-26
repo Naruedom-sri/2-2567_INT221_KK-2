@@ -3,21 +3,27 @@ import { ref, watch, computed } from "vue";
 import { useStatusStore } from "@/stores/statusStore";
 
 const statusStore = useStatusStore();
-
 const status = computed(() => statusStore.getStatus());
 const message = computed(() => statusStore.getMessage());
+let timeoutId = null;
 
 const showMessage = ref(false);
 
 watch(
   status,
   (newVal) => {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
     if (newVal !== null && newVal !== undefined) {
       showMessage.value = true;
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         showMessage.value = false;
         statusStore.clearEntityAndMethodAndStatusAndMessage();
+        timeoutId = null;
       }, 5000);
+    } else {
+      showMessage.value = false;
     }
   },
   { immediate: true }
@@ -40,7 +46,10 @@ watch(
           {{ status >= 400 ? "Error!" : "Success!" }}
         </h1>
         <button
-          @click="(showMessage = false), statusStore.clearEntityAndMethodAndStatusAndMessage()"
+          @click="
+            (showMessage = false),
+              statusStore.clearEntityAndMethodAndStatusAndMessage()
+          "
           class="w-6 h-6 text-center text-black bg-gray-300 rounded-full hover:cursor-pointer"
         >
           x

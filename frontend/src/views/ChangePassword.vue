@@ -1,8 +1,8 @@
 <script setup>
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
-import { editPassword } from "@/libs/userApi";
+import { editPassword, getUserById } from "@/libs/userApi";
 import { decodeToken } from "@/libs/jwtToken";
 import { useStatusStore } from "@/stores/statusStore";
 
@@ -29,7 +29,7 @@ async function saveNewPassword() {
     newPassword: (form.newPassword || "").trim(),
   };
 
-   if (!passwordPattern.test(payload.newPassword)) {
+  if (!passwordPattern.test(payload.newPassword)) {
     isShowError.value = true;
     statusStore.setEntityAndMethodAndStatusAndMessage(
       "password",
@@ -37,23 +37,38 @@ async function saveNewPassword() {
       400,
       "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
     );
-    return; 
+    return;
   }
 
   try {
-    await editPassword(BASE_API_DOMAIN, decoded.jti, accessToken, payload,router);
+    await editPassword(
+      BASE_API_DOMAIN,
+      decoded.jti,
+      accessToken,
+      payload,
+      router
+    );
     isShowError.value = false;
     router.push({ name: "Profile" });
   } catch (error) {
     console.error("Failed to change password", error);
 
-    if (statusStore.getStatus() === 401) {
+    if (statusStore.getStatus() === 401 || statusStore.getStatus() == 400) {
       isShowError.value = true;
     } else {
       isShowError.value = false;
     }
   }
 }
+const getUser = async () => {
+  const data = await getUserById(
+    BASE_API_DOMAIN,
+    decoded.id,
+    accessToken,
+    router
+  );
+  userData.setUser(data);
+};
 
 function cancelEdit() {
   router.back();
@@ -61,6 +76,9 @@ function cancelEdit() {
 
 const isUnchanged = computed(() => {
   return !form.oldPassword || !form.newPassword;
+});
+onMounted(() => {
+  getUser();
 });
 </script>
 
@@ -78,7 +96,7 @@ const isUnchanged = computed(() => {
       <div class="p-5 text-black">
         <div class="form-row gap-1 flex flex-row">
           <label><strong>Nickname:</strong></label>
-          <input v-model="userData.nickname" readonly type="text" />
+           <input v-model="userData.nickname" type="nickname" readonly class="w-100" />
         </div>
 
         <div class="form-row gap-1 flex flex-row">
@@ -96,9 +114,7 @@ const isUnchanged = computed(() => {
           "
         >
           <p v-if="isShowError">
-            {{
-              statusStore.getMessage()
-            }}
+            {{ statusStore.getMessage() }}
           </p>
           <p v-else>
             {{ statusStore.getMessage() }}
@@ -109,7 +125,7 @@ const isUnchanged = computed(() => {
           <label><strong>Old Password:</strong></label>
           <div class="flex items-center border border-gray-800 rounded-md p-2">
             <input
-              v-model="form.oldPassword"
+              v-model.trim="form.oldPassword"
               :type="isShowOldPassword ? 'text' : 'password'"
               class="flex-1 outline-none"
               placeholder="Enter old password"
@@ -141,7 +157,7 @@ const isUnchanged = computed(() => {
           <label><strong>New Password:</strong></label>
           <div class="flex items-center border border-gray-800 rounded-md p-2">
             <input
-              v-model="form.newPassword"
+              v-model.trim="form.newPassword"
               :type="isShowNewPassword ? 'text' : 'password'"
               class="flex-1 outline-none"
               placeholder="Enter new password"
