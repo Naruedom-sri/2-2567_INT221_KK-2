@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -201,7 +202,7 @@ public class AuthController {
     @PostMapping("/v2/auth/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         userRepository.findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("Email not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Email not found."));
         String token = jwtUtil.generateTokenForResetPW(email);
         emailService.sendResetPWEmail(email, token);
         return ResponseEntity.ok("send email success");

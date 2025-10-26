@@ -63,9 +63,7 @@ const isUnchanged = computed(() => {
         >
           <p v-if="isShowError">
             {{
-              statusStore.getStatus() === 401
-                ? "Current password is incorrect."
-                : statusStore.getMessage()
+              statusStore.getMessage()
             }}
           </p>
           <p v-else>
