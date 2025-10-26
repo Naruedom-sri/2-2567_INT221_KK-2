@@ -3,11 +3,13 @@ import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { sendEmailForgotPassword } from "@/libs/userApi";
 import { useStatusStore } from "@/stores/statusStore";
+import GeneralAlertMessage from "@/components/GeneralAlertMessage.vue";
 
 const statusStore = useStatusStore();
 const BASE_API_DOMAIN = import.meta.env.VITE_APP_URL;
 const router = useRouter();
 const isShowError = ref(false);
+const showConfirmModal = ref(false);
 
 const form = reactive({
   email: "",
@@ -20,16 +22,21 @@ async function sendEmail() {
 
   try {
     await sendEmailForgotPassword(BASE_API_DOMAIN, payload.email);
-
     isShowError.value = false;
-    router.push({ name: "Login" });
+    showConfirmModal.value = true;
   } catch (error) {
     console.error("Failed to send reset password email", error);
+    isShowError.value = true;
   }
 }
 
 function cancelSend() {
   router.back();
+}
+
+function confirmed() {
+  router.push({ name: "Login" });
+  showConfirmModal.value = false;
 }
 
 const isUnchanged = computed(() => {
@@ -106,7 +113,12 @@ const isUnchanged = computed(() => {
         </div>
       </div>
     </div>
-    
+    <GeneralAlertMessage
+    v-if="showConfirmModal"
+    title="Reset Password"
+    message="Please check your email for reset the password."
+    @ok="confirmed"
+  />
   </div>
 </template>
 

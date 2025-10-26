@@ -12,12 +12,16 @@ import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedExce
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
 import org.apache.coyote.BadRequestException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -28,6 +32,8 @@ public class UserService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private Validator validator;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -67,6 +73,10 @@ public class UserService {
     }
 
     public User registerBuyer(RequestUserRegisterDto userDto) {
+        Set<ConstraintViolation<RequestUserRegisterDto>> violations = validator.validate(userDto, BuyerChecks.class);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
         List<User> users = getAllUsers();
         users.forEach(user -> {
             if (user.getEmail().equals(userDto.getEmail())) {
@@ -86,6 +96,10 @@ public class UserService {
     }
 
     public User registerSeller(RequestUserRegisterDto userDto, MultipartFile frontFile, MultipartFile backFile) {
+        Set<ConstraintViolation<RequestUserRegisterDto>> violations = validator.validate(userDto, SellerChecks.class);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
         List<User> users = getAllUsers();
         users.forEach(user -> {
             if (user.getEmail().equals(userDto.getEmail())) {
@@ -125,7 +139,6 @@ public class UserService {
 
         user.setNickname(request.getNickname());
         user.setFullName(request.getFullName());
-        // role ไม่ต้องแก้ ให้ใช้ของเดิม (buyer)
 
         User saved = userRepository.save(user);
 

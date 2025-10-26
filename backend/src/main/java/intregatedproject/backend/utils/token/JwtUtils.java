@@ -71,8 +71,7 @@ public class JwtUtils {
                 .claim("role", user.getRole())
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
-                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(key)
                 .compact();
     }
@@ -84,8 +83,8 @@ public class JwtUtils {
                 .setSubject(user.getId().toString()) // ใช้ userId หรือ email ก็ได้
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
-                .setExpiration(new Date(System.currentTimeMillis() + 2 * 60 * 1000))
+               .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+              
                 .signWith(key)
                 .compact();
     }
