@@ -11,6 +11,7 @@ import intregatedproject.backend.exceptions.users.UserAlreadyExistsException;
 import intregatedproject.backend.exceptions.verifyEmail.EmailAlreadyVerifiedException;
 import intregatedproject.backend.repositories.SellerRepository;
 import intregatedproject.backend.repositories.UserRepository;
+import intregatedproject.backend.utils.PasswordUtils;
 import org.apache.coyote.BadRequestException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -43,10 +44,14 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
     private void convertToEntityBuyer(RequestUserRegisterDto userDto, User user) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
+        String hashedPass = PasswordUtils.hashPassword(userDto.getPassword());
+        user.setPassword(hashedPass);
         user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
@@ -60,7 +65,8 @@ public class UserService {
     private void convertToEntitySeller(RequestUserRegisterDto userDto, User user, Seller seller) {
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
+        String hashedPass = PasswordUtils.hashPassword(userDto.getPassword());
+        user.setPassword(hashedPass);
         user.setFullName(userDto.getFullName());
         user.setRole(userDto.getRole());
         user.setStatus(userDto.getStatus());
@@ -130,6 +136,7 @@ public class UserService {
         newSeller.setUser(savedUser);
         sellerRepository.save(newSeller);
 
+
         return savedUser;
     }
 
@@ -173,21 +180,23 @@ public class UserService {
 
     public void changePassword(Integer id, RequestChangePasswordDto request) throws BadRequestException {
         User user = getUserById(id);
-        if(user == null) {
+        if (user == null) {
             throw new UnauthorizedException("User not found.");
         }
-        if(!user.getPassword().equals(request.getOldPassword())) {
+        if (!user.getPassword().equals(request.getOldPassword())) {
             throw new BadRequestException("Current password is incorrect.");
         }
-        user.setPassword(request.getNewPassword());
+
+        user.setPassword(PasswordUtils.hashPassword(request.getNewPassword()));
         userRepository.save(user);
     }
 
 
-    public void forgotPassword(String password,String email){
+    public void forgotPassword(String password, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("User not found."));
-        user.setPassword(password);
+        String hashedPass = PasswordUtils.hashPassword(password);
+        user.setPassword(hashedPass);
         userRepository.save(user);
     }
 }
