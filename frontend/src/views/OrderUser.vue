@@ -81,12 +81,16 @@ const getAllOrderUser = async () => {
     if (
       startOrderDate.value &&
       startOrderDate.value?.trim() &&
-      startOrderDate.value !== "null" 
+      startOrderDate.value !== "null"
     ) {
       params.append("startOrderDate", startOrderDate.value);
     }
 
-    if (startOrderDate.value && endOrderDate.value?.trim() && endOrderDate.value !== "null" ) {
+    if (
+      startOrderDate.value &&
+      endOrderDate.value?.trim() &&
+      endOrderDate.value !== "null"
+    ) {
       params.append("endOrderDate", endOrderDate.value);
     }
 
@@ -176,6 +180,7 @@ const getAllOrderUser = async () => {
       sessionStorage.setItem("start-orderDate-seller", startOrderDate.value);
       sessionStorage.setItem("end-orderDate-seller", endOrderDate.value);
       orders.value = data.content;
+      console.log(orders.value);
     }
 
     totalPage.value = data.totalPages;
@@ -188,10 +193,13 @@ const getAllOrderUser = async () => {
         totalPrice += item.quantity * item.price;
       });
       totalPriceList.value.push(totalPrice);
-      if (!users.value.includes(order.seller.fullName)) {
-        if (!props.isSeller) {
+
+      if (!props.isSeller) {
+        if (!users.value.includes(order.seller.fullName)) {
           users.value.push(order.seller.fullName);
-        } else {
+        }
+      } else {
+        if (!users.value.includes(order.buyer.userName)) {
           users.value.push(order.buyer.userName);
         }
       }
