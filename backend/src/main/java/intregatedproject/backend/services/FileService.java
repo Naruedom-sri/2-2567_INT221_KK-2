@@ -54,7 +54,6 @@ public class FileService {
             extension = originalFileName.substring(dotIndex);
         }
 
-        // สร้างชื่อไฟล์สุ่ม
         String randomFileName = UUID.randomUUID().toString() + extension;
 
         try {

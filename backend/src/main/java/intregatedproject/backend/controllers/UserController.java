@@ -144,8 +144,8 @@ public class UserController {
         if ("seller".equalsIgnoreCase(user.getRole())) {
             Seller seller = userService.getUserById(id).getSeller();
             ResponseSellerDto sellerDto = new ResponseSellerDto();
-            modelMapper.map(user, sellerDto);     // map ข้อมูลจาก User
-            modelMapper.map(seller, sellerDto); // map ข้อมูลจาก Seller
+            modelMapper.map(user, sellerDto);
+            modelMapper.map(seller, sellerDto);
             return ResponseEntity.ok(sellerDto);
 
         } else {
@@ -164,12 +164,12 @@ public class UserController {
             throw new UnauthorizedException("Invalid token.");
         }
 
-        // หา user จาก DB ก่อน
+
         User user = userService.getUserById(id);
         if (user == null) {
             throw new UnauthorizedException("User not found.");
         }
-        // เช็ค role จาก DB ไม่ใช่จาก request
+
         if ("buyer".equalsIgnoreCase(user.getRole())) {
             return ResponseEntity.ok(userService.updateBuyerProfile(id, request));
         } else if ("seller".equalsIgnoreCase(user.getRole())) {
