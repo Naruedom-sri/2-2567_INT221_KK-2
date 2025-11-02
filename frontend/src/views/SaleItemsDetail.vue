@@ -40,7 +40,7 @@ const getSaleItem = async () => {
           itemId,
           img.imageViewOrder
         );
-        imageUrlList.value.push(imgUrl); 
+        imageUrlList.value.push(imgUrl);
       }
       mainImage.value = imageUrlList.value[0];
     }
@@ -189,8 +189,16 @@ async function addItemToCart(saleItem, qty = 1) {
           {{ item.price?.toLocaleString() }}
         </p>
         <div class="flex h-4 items-center gap-2">
-          <p class="w-3 h-3 rounded-full bg-green-500"></p>
-          <h1 class="my-4 text-green-500">Instock</h1>
+          <p
+            class="w-3 h-3 rounded-full bg-green-500"
+            :class="item.quantity === 0 ? 'bg-red-500' : 'bg-green-500'"
+          ></p>
+          <h1
+            class="my-4"
+            :class="item.quantity === 0 ? 'text-red-500' : 'text-green-500'"
+          >
+            {{ item.quantity === 0 ? "Sold out" : "In stock" }}
+          </h1>
           <p class="itbms-quantity text-white/80">
             / available {{ item.quantity }}
             <span class="itbms-quantity-unit">units</span>
@@ -199,7 +207,7 @@ async function addItemToCart(saleItem, qty = 1) {
       </div>
       <div class="truck-bag-shop flex justify-end gap-6 h-7 mr-20">
         <div class="flex gap-2">
-          <img src="../assets/imgs/store-solid-full.svg" alt="shop">
+          <img src="../assets/imgs/store-solid-full.svg" alt="shop" />
           <p class="self-center">{{ item.seller?.fullName }}</p>
         </div>
         <p class="self-center">|</p>
