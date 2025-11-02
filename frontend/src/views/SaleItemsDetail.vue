@@ -189,7 +189,10 @@ async function addItemToCart(saleItem, qty = 1) {
           {{ item.price?.toLocaleString() }}
         </p>
         <div class="flex h-4 items-center gap-2">
-          <p class="w-3 h-3 rounded-full bg-green-500"></p>
+          <p
+            class="w-3 h-3 rounded-full bg-green-500"
+            :class="item.quantity === 0 ? 'bg-red-500' : 'bg-green-500'"
+          ></p>
           <h1
             class="my-4"
             :class="item.quantity === 0 ? 'text-red-500' : 'text-green-500'"

@@ -12,7 +12,6 @@ const isShowError = ref(false);
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 const isShowNewPassword = ref(false);
 
-
 const form = reactive({
   password: "",
 });
@@ -67,7 +66,9 @@ const isUnchanged = computed(() => {
     <div class="w-full max-w-2xl rounded-2xl bg-white pt-10 pb-6 px-6 relative">
       <div class="text-center">
         <p class="text-3xl font-bold">Reset Password</p>
-        <span class="opacity-50">enter your new password to reset password</span>
+        <span class="opacity-50"
+          >enter your new password to reset password</span
+        >
       </div>
       <div class="p-5 text-black">
         <div
@@ -91,39 +92,42 @@ const isUnchanged = computed(() => {
           </p>
         </div>
 
-        <div class="flex flex-col items-left gap-1 ">
+        <div class="flex flex-col items-left gap-1">
           <label><strong>New Password:</strong></label>
           <div class="flex flex-col">
-          <div
-            class="flex border border-gray-800 rounded-md p-2 w-145"
-          >
-            <input
-              v-model.trim="form.password"
-              :type="isShowNewPassword ? 'text' : 'password'"
-              class="flex-1 outline-none"
-              placeholder="Enter Your New Password"
-            /> 
-            <button
-              type="button"
-              @click="isShowNewPassword = !isShowNewPassword"
-              class="px-2"
-            >
-              <img
-                v-if="isShowNewPassword"
-                src="/src/assets/imgs/eye-off.png"
-                class="w-6 opacity-50"
+            <div class="flex border border-gray-800 rounded-md p-2 w-145">
+              <input
+                @focus="
+                  isShowError === false,
+                    statusStore.clearEntityAndMethodAndStatusAndMessage()
+                "
+                v-model.trim="form.password"
+                :type="isShowNewPassword ? 'text' : 'password'"
+                maxlength="14"
+                class="flex-1 outline-none"
+                placeholder="Enter Your New Password"
               />
-              <img
-                v-else
-                src="/src/assets/imgs/eye-open.png"
-                class="w-6 opacity-50"
-              />
-            </button>
-          </div>
+              <button
+                type="button"
+                @click="isShowNewPassword = !isShowNewPassword"
+                class="px-2"
+              >
+                <img
+                  v-if="isShowNewPassword"
+                  src="/src/assets/imgs/eye-off.png"
+                  class="w-6 opacity-50"
+                />
+                <img
+                  v-else
+                  src="/src/assets/imgs/eye-open.png"
+                  class="w-6 opacity-50"
+                />
+              </button>
+            </div>
             <small class="text-xs text-gray-500 mt-1 w-110">
-            Minimum 8 chars, including upper, lower, number, and special
-            character
-          </small>
+              Minimum 8 chars, including upper, lower, number, and special
+              character
+            </small>
           </div>
         </div>
 
