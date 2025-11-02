@@ -78,8 +78,21 @@ const getAllOrderUser = async () => {
     params.append("sortDirection", isSort.value.sortDirection);
     params.append("orderStatus", orderStatus.value);
     params.append("searchContent", searchContent.value);
-    params.append("startOrderDate", startOrderDate.value);
-    params.append("endOrderDate", endOrderDate.value);
+    if (
+      startOrderDate.value &&
+      startOrderDate.value?.trim() &&
+      startOrderDate.value !== "null"
+    ) {
+      params.append("startOrderDate", startOrderDate.value);
+    }
+
+    if (
+      startOrderDate.value &&
+      endOrderDate.value?.trim() &&
+      endOrderDate.value !== "null"
+    ) {
+      params.append("endOrderDate", endOrderDate.value);
+    }
 
     brandFilterList.value.forEach((brand) =>
       params.append("filterBrands", brand)
@@ -167,6 +180,7 @@ const getAllOrderUser = async () => {
       sessionStorage.setItem("start-orderDate-seller", startOrderDate.value);
       sessionStorage.setItem("end-orderDate-seller", endOrderDate.value);
       orders.value = data.content;
+      console.log(orders.value);
     }
 
     totalPage.value = data.totalPages;
@@ -179,10 +193,13 @@ const getAllOrderUser = async () => {
         totalPrice += item.quantity * item.price;
       });
       totalPriceList.value.push(totalPrice);
-      if (!users.value.includes(order.seller.fullName)) {
-        if (!props.isSeller) {
+
+      if (!props.isSeller) {
+        if (!users.value.includes(order.seller.fullName)) {
           users.value.push(order.seller.fullName);
-        } else {
+        }
+      } else {
+        if (!users.value.includes(order.buyer.userName)) {
           users.value.push(order.buyer.userName);
         }
       }
@@ -516,11 +533,9 @@ onUnmounted(() => {
       {{ isSeller ? "Sale Orders" : "Your Orders" }}
     </h1>
     <div
-      class="filter-container flex items-center justify-between my-4 text-white"
-    >
+      class="filter-container flex items-center justify-between my-4 text-white">
       <div
-        class="brand-seller-filter-container gap-2 p-2 flex bg-gray-300 rounded"
-      >
+        class="brand-seller-filter-container gap-2 p-2 flex bg-gray-300 rounded">
         <FilterItem
           label="Filter by brand (s)"
           class="brand"
@@ -529,8 +544,7 @@ onUnmounted(() => {
           :filter-list="brandFilterList"
           @addToFilterList="addToFilterList"
           @removeFromFilterList="removeFromFilterList"
-          @toggleIsShow="toggleIsShow"
-        />
+          @toggleIsShow="toggleIsShow" />
         <FilterItem
           :label="isSeller ? 'Filter by buyer (s)' : 'Filter by seller (s)'"
           class="user"
@@ -539,13 +553,11 @@ onUnmounted(() => {
           :filter-list="userFilterList"
           @addToFilterList="addToFilterList"
           @removeFromFilterList="removeFromFilterList"
-          @toggleIsShow="toggleIsShow"
-        />
+          @toggleIsShow="toggleIsShow" />
         <div class="max-h-9 flex gap-2">
           <button
             @click="clearFilter"
-            class="itbms-brand-filter-clear px-7 h-10 text-black rounded bg-white hover:bg-[#0d47a1] hover:text-white cursor-pointer duration-200"
-          >
+            class="itbms-brand-filter-clear px-7 h-10 text-black rounded bg-white hover:bg-[#0d47a1] hover:text-white cursor-pointer duration-200">
             Clear
           </button>
         </div>
@@ -557,8 +569,7 @@ onUnmounted(() => {
           <select
             @change="(indexPage = 0), (tempIndexPage = 0), getAllOrderUser()"
             v-model="pageSize"
-            class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300"
-          >
+            class="itbms-page-size border rounded bg-[rgba(22,22,23,255)] text-gray-300">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -572,8 +583,7 @@ onUnmounted(() => {
               isSort.sortDirection === 'asc'
                 ? 'bg-[#0d47a1]'
                 : 'bg-[rgba(22,22,23,255)] '
-            "
-          >
+            ">
             ↑ A-Z
           </button>
         </div>
@@ -585,8 +595,7 @@ onUnmounted(() => {
               isSort.sortDirection === 'none'
                 ? 'bg-[#0d47a1]'
                 : 'bg-[rgba(22,22,23,255)]'
-            "
-          >
+            ">
             Default
           </button>
         </div>
@@ -598,16 +607,14 @@ onUnmounted(() => {
               isSort.sortDirection === 'desc'
                 ? 'bg-[#0d47a1]'
                 : 'bg-[rgba(22,22,23,255)]'
-            "
-          >
+            ">
             ↓ Z-A
           </button>
         </div>
       </div>
     </div>
     <div
-      class="date-nav-page-container flex justify-between items-center text-black"
-    >
+      class="date-nav-page-container flex justify-between items-center text-black">
       <div class="date flex gap-5 text-black">
         <div>
           <label class="text-white">Start Date</label>
@@ -615,8 +622,7 @@ onUnmounted(() => {
             @change="getAllOrderUser"
             v-model="startOrderDate"
             type="date"
-            class="px-2 py-2 ml-2 rounded outline-0 bg-gray-300"
-          />
+            class="px-2 py-2 ml-2 rounded outline-0 bg-gray-300" />
         </div>
         <div>
           <label class="text-white">End Date</label>
@@ -624,14 +630,12 @@ onUnmounted(() => {
             @change="getAllOrderUser"
             v-model="endOrderDate"
             type="date"
-            class="px-2 py-2 ml-2 rounded outline-0 bg-gray-300"
-          />
+            class="px-2 py-2 ml-2 rounded outline-0 bg-gray-300" />
         </div>
       </div>
       <div
         v-show="orders.length !== 0 && totalPage > 1"
-        class="nav-page gap-1 flex items-center justify-center text-white"
-      >
+        class="nav-page gap-1 flex items-center justify-center text-white">
         <button
           @click="firstPage"
           :disabled="isFirstPage"
@@ -640,8 +644,7 @@ onUnmounted(() => {
             isFirstPage
               ? 'opacity-60'
               : 'hover:cursor-pointer hover:bg-white hover:text-black'
-          "
-        >
+          ">
           First
         </button>
         <button
@@ -652,8 +655,7 @@ onUnmounted(() => {
             isFirstPage
               ? 'opacity-60'
               : 'hover:cursor-pointer hover:bg-white hover:text-black'
-          "
-        >
+          ">
           <
         </button>
         <div
@@ -668,8 +670,7 @@ onUnmounted(() => {
             indexPage === pageList.findIndex((pageNum) => pageNum === page)
               ? 'bg-white text-black rounded'
               : ''
-          "
-        >
+          ">
           <p>{{ page }}</p>
         </div>
         <button
@@ -680,8 +681,7 @@ onUnmounted(() => {
             isLastPage
               ? 'opacity-60'
               : 'hover:cursor-pointer hover:bg-white hover:text-black '
-          "
-        >
+          ">
           >
         </button>
         <button
@@ -692,8 +692,7 @@ onUnmounted(() => {
             isLastPage
               ? 'opacity-60'
               : 'hover:cursor-pointer hover:bg-white hover:text-black'
-          "
-        >
+          ">
           Last
         </button>
       </div>
@@ -704,8 +703,7 @@ onUnmounted(() => {
         v-model.trim="searchContent"
         placeholder="address, note, model"
         type="text"
-        class="w-117 px-2 py-2 rounded outline-0 bg-gray-300"
-      />
+        class="w-117 px-2 py-2 rounded outline-0 bg-gray-300" />
     </div>
     <div class="all-completed-cancel space-x-2 my-4 text-white">
       <button
@@ -718,8 +716,7 @@ onUnmounted(() => {
           orderStatus === 'completed' && isViewedTap
             ? 'text-black bg-gray-300 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
+        ]">
         New Orders
       </button>
       <button
@@ -732,8 +729,7 @@ onUnmounted(() => {
           orderStatus === 'completed'
             ? 'text-black bg-gray-300 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
+        ]">
         Completed
       </button>
       <button
@@ -745,8 +741,7 @@ onUnmounted(() => {
           orderStatus === 'cancelled'
             ? 'text-black bg-gray-300 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
+        ]">
         Cancelled
       </button>
 
@@ -760,8 +755,7 @@ onUnmounted(() => {
           orderStatus === 'completed' && !isViewedTap
             ? 'text-black bg-gray-300 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
+        ]">
         All Orders
       </button>
       <button
@@ -772,8 +766,7 @@ onUnmounted(() => {
           orderStatus === 'all'
             ? 'text-black bg-gray-300 rounded'
             : 'hover:text-blue-500 cursor-pointer duration-200',
-        ]"
-      >
+        ]">
         All Orders
       </button>
     </div>
@@ -783,8 +776,7 @@ onUnmounted(() => {
       :image-url-list="imageUrlList"
       :brand-list="brandList"
       :is-seller="isSeller"
-      @mark-as-viewed="updateMarkAsViewed"
-    />
+      @mark-as-viewed="updateMarkAsViewed" />
   </div>
   <Footer />
 </template>

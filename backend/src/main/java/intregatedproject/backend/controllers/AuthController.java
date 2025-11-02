@@ -21,12 +21,12 @@ import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/itb-mshop")
@@ -113,13 +113,13 @@ public class AuthController {
 
                 responseToken.setAccess_token(access_token);
 
-                // refresh token อยู่ใน HttpOnly cookie
+
                 ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
-                        .httpOnly(true)       // JS อ่านไม่ได้
-                        .secure(false)         // เฉพาะ HTTPS (true)
-                        .path("/") // จะส่ง cookie เฉพาะตอนเรียก refresh endpoint
-                        .maxAge(30 * 24 * 60 * 60) // อายุ 30 วัน
-                        .sameSite("Strict")    // ป้องกัน CSRF
+                        .httpOnly(true)
+                        .secure(false)
+                        .path("/")
+                        .maxAge(30 * 24 * 60 * 60)
+                        .sameSite("Strict")
                         .build();
 
                 return ResponseEntity.ok()
@@ -146,16 +146,15 @@ public class AuthController {
         if (user.getStatus().equals("INACTIVE")) {
             throw new ForbiddenException("Account is not active.");
         }
-        // ใช้การตั้งค่าเดียวกับตอน login
+
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(false)        // ต้องเหมือนกับตอน login
-                .path("/")           // ต้องเหมือนกับตอน login
-                .maxAge(0)           // delete immediately
-                .sameSite("Strict")     // ต้องเหมือนกับตอน login
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
                 .build();
 
-        // ใช้วิธีเดียวกับตอน login
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .build();
@@ -201,7 +200,7 @@ public class AuthController {
     @PostMapping("/v2/auth/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         userRepository.findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("Email not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Email not found."));
         String token = jwtUtil.generateTokenForResetPW(email);
         emailService.sendResetPWEmail(email, token);
         return ResponseEntity.ok("send email success");
