@@ -79,6 +79,10 @@ const isUnchanged = computed(() => {
             class="flex items-center border border-gray-800 rounded-md p-2 w-145"
           >
             <input
+              @focus="
+                (isShowError = false),
+                  statusStore.clearEntityAndMethodAndStatusAndMessage()
+              "
               v-model="form.email"
               type="email"
               class="flex-1 outline-none"
@@ -86,8 +90,10 @@ const isUnchanged = computed(() => {
             />
           </div>
           <div>
-          <small class="opacity-50">Please check your email for a link to reset your password.</small>
-        </div>
+            <small class="opacity-50"
+              >Please check your email for a link to reset your password.</small
+            >
+          </div>
         </div>
 
         <div class="mt-4 flex gap-4 justify-center">
@@ -114,11 +120,11 @@ const isUnchanged = computed(() => {
       </div>
     </div>
     <GeneralAlertMessage
-    v-if="showConfirmModal"
-    title="Reset Password"
-    message="Please check your email for reset the password."
-    @ok="confirmed"
-  />
+      v-if="showConfirmModal"
+      title="Reset Password"
+      message="Please check your email for reset the password."
+      @ok="confirmed"
+    />
   </div>
 </template>
 

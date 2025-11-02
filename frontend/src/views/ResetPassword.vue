@@ -98,7 +98,7 @@ const isUnchanged = computed(() => {
             class="flex border border-gray-800 rounded-md p-2 w-145"
           >
             <input
-              v-model="form.password"
+              v-model.trim="form.password"
               :type="isShowNewPassword ? 'text' : 'password'"
               class="flex-1 outline-none"
               placeholder="Enter Your New Password"
