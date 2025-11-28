@@ -1,31 +1,29 @@
 <h1>Integrated Information Technology ( KK-2 )</h1>
 <h1>IT Bangmod mobile shop</h1>
 <h2>Link: https://intproj24.sit.kmutt.ac.th/kk2/</h2>
+<h2>Test Data</h3>
+<ul>
+  <li>Buyer: itbkk.somchai@ad.sit.kmutt.ac.th | Password: itProj24*SOM</li>
+  <li>Seller: itbkk.somsuk@ad.sit.kmutt.ac.th | Password: itProj24*SOM</li>
+</ul>
+
 <h2>Members</h2>
 <table>
   <tr>
     <th>Student Id</th>
     <th>Name</th>
-    <th>Task</th>
-    <th>Percent</th>
   </tr>
   <tr>
     <td>66130500040</td>
     <td>Thanarat Pudpoh</td>
-    <td>-</td>
-    <td>-</td>
   </tr>
     <tr>
     <td>66130500051</td>
     <td>Naruedom Srirukkaew</td>
-    <td>-</td>
-    <td>-</td>
   </tr>
     <tr>
     <td>66130500114</td>
     <td>Noppawut Phomchana</td>
-    <td>-</td>
-    <td>-</td>
   </tr>
 </table>
 <h2>Tools</h2>
